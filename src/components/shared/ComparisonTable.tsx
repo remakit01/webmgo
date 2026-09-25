@@ -3,6 +3,11 @@ import { CheckCircle2, XCircle, ShieldCheck, Flame, Scale, Droplet } from 'lucid
 import { MATERIAL_COMPARISONS } from '@/data/products';
 import SectionHeading from '@/components/ui/SectionHeading';
 
+interface ComparisonTableProps {
+  id?: string;
+  showHeading?: boolean;
+}
+
 const SUMMARY_METRICS = [
   {
     icon: Scale,
@@ -26,18 +31,23 @@ const SUMMARY_METRICS = [
   },
 ];
 
-export default function ComparisonTable() {
+export default function ComparisonTable({
+  id = 'so-sanh-vat-lieu',
+  showHeading = true,
+}: ComparisonTableProps) {
   return (
     <section 
-      id="so-sanh-vat-lieu"
+      id={id}
       aria-label="So Sánh Tấm MGO Với Vật Liệu Truyền Thống"
       className="max-w-[1440px] mx-auto px-4 lg:px-8"
     >
-      <SectionHeading 
-        badge="ĐỐI CHUẨN KỸ THUẬT"
-        badgeColor="green"
-        title="So Sánh MGO Với Vật Liệu Khác"
-      />
+      {showHeading && (
+        <SectionHeading 
+          badge="ĐỐI CHUẨN KỸ THUẬT"
+          badgeColor="green"
+          title="So Sánh MGO Với Vật Liệu Khác"
+        />
+      )}
 
       {/* 4 THẺ TÓM TẮT GIÁ TRỊ VƯỢT TRỘI */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

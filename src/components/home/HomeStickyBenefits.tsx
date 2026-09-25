@@ -95,11 +95,11 @@ const BENEFITS: BenefitItem[] = [
 ];
 
 /**
- * Section "Interactive Tab Showcase" (Không cần scroll mỏi tay)
+ * Component HomeStickyBenefits:
  * - Cột trái: 4 Tab bấm chọn đặc tính vượt trội
  * - Cột phải: Hiển thị duy nhất 1 card chi tiết của đặc tính được chọn, đổi nội dung + ảnh thực tế mượt mà
  */
-export default function StickyBenefitsSection() {
+export default function HomeStickyBenefits() {
   const [activeId, setActiveId] = useState<string>('insect');
 
   const activeBenefit = BENEFITS.find((b) => b.id === activeId) || BENEFITS[0];

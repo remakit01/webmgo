@@ -1,15 +1,19 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import SwiperContainer from '@/components/home/SwiperContainer';
-import HeroSection from '@/components/home/HeroSection';
-import ApplicationGrid from '@/components/home/ApplicationGrid';
-import SpecMatrix from '@/components/home/SpecMatrix';
-import MaterialCalculator from '@/components/home/MaterialCalculator';
-import ComparisonTable from '@/components/home/ComparisonTable';
-import StickyBenefitsSection from '@/components/home/StickyBenefitsSection';
-import SampleRequestForm from '@/components/home/SampleRequestForm';
-import FaqAccordion from '@/components/home/FaqAccordion';
-import FeaturedProjects from '@/components/home/FeaturedProjects';
+import {
+  HomeBannerSwiper,
+  HomeHeroSection,
+  HomeStickyBenefits,
+  HomeSpecMatrix,
+  HomeApplicationGrid,
+} from '@/components/home';
+import {
+  ComparisonTable,
+  FeaturedProjects,
+  MaterialCalculator,
+  SampleRequestForm,
+  FaqAccordion,
+} from '@/components/shared';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { FAQ_LIST } from '@/data/products';
 
@@ -64,17 +68,17 @@ export default function HomePage() {
 
       <div className="space-y-16 pb-20">
         {/* 1. AUTO BANNER SWIPER (TỰ ĐỘNG CHẠY, KHÔNG ACTION TRÁI PHẢI, KHÔNG PROGRESS BAR) */}
-        <SwiperContainer />
+        <HomeBannerSwiper />
 
         {/* 2. HERO INTRO & TRUST BADGES (SERVER COMPONENT) */}
-        <HeroSection />
+        <HomeHeroSection />
 
         {/* 3. MGO BENEFITS - 4 ĐẶC TÍNH VƯỢT TRỘI (INTERACTIVE TAB SWITCHER) */}
-        <StickyBenefitsSection />
+        <HomeStickyBenefits />
 
         {/* 4. BẢNG THÔNG SỐ KỸ THUẬT TẤM MGO REMAK (ĐẨY LÊN CAO THEO YÊU CẦU LEADER) */}
         <ScrollReveal direction="up" delay={50}>
-          <SpecMatrix />
+          <HomeSpecMatrix />
         </ScrollReveal>
 
         {/* 5. BẢNG ĐỐI CHUẨN KỸ THUẬT VẬT LIỆU (MGO VS CEMBOARD VS THẠCH CAO VS VÁN ÉP) */}
@@ -84,7 +88,7 @@ export default function HomePage() {
 
         {/* 6. 4 ỨNG DỤNG THỰC TẾ HÀNG ĐẦU (ỐNG GIÓ, VÁCH NGĂN, LÓT SÀN, CỬA CHỐNG CHÁY) */}
         <ScrollReveal direction="up" delay={50}>
-          <ApplicationGrid />
+          <HomeApplicationGrid />
         </ScrollReveal>
 
         {/* 7. DỰ ÁN TIÊU BIỂU ĐÃ NGHIỆM THU PCCC (SAMSUNG, LOTTE MALL, VIETTEL IDC) */}

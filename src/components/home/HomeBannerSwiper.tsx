@@ -36,24 +36,24 @@ export const defaultBanners: BannerSlide[] = [
   },
 ];
 
-interface SwiperContainerProps {
+interface HomeBannerSwiperProps {
   banners?: BannerSlide[];
   autoPlayInterval?: number; // Thời gian tự động chuyển (ms), mặc định 3500ms
   showDots?: boolean;
 }
 
 /**
- * Component Swiper Container:
+ * Component HomeBannerSwiper:
  * - Tự động trượt (Auto Sliding / Infinite Loop)
  * - KHÔNG CÓ nút bấm trái/phải (No left/right action buttons)
  * - KHÔNG CÓ thanh tiến trình (No progress bar)
  * - Tương thích mượt mà kéo/vuốt trên điện thoại (Touch Swipe)
  */
-export default function SwiperContainer({
+export default function HomeBannerSwiper({
   banners = defaultBanners,
   autoPlayInterval = 3500,
   showDots = false,
-}: SwiperContainerProps) {
+}: HomeBannerSwiperProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 

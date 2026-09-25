@@ -38,7 +38,7 @@ const APPLICATIONS = [
   },
 ];
 
-export default function ApplicationGrid() {
+export default function HomeApplicationGrid() {
   return (
     <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
       <SectionHeading 

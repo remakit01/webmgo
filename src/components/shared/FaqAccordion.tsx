@@ -3,21 +3,32 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { FAQ_LIST } from '@/data/products';
+import { FaqItem } from '@/types';
 import SectionHeading from '@/components/ui/SectionHeading';
 
-export default function FaqAccordion() {
+interface FaqAccordionProps {
+  items?: FaqItem[];
+  showHeading?: boolean;
+}
+
+export default function FaqAccordion({
+  items = FAQ_LIST,
+  showHeading = true,
+}: FaqAccordionProps) {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   return (
     <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
-      <SectionHeading 
-        badge="HỎI ĐÁP PCCC"
-        badgeColor="green"
-        title="Giải Đáp Kỹ Thuật Thường Gặp"
-      />
+      {showHeading && (
+        <SectionHeading 
+          badge="HỎI ĐÁP PCCC"
+          badgeColor="green"
+          title="Giải Đáp Kỹ Thuật Thường Gặp"
+        />
+      )}
 
       <div className="max-w-3xl mx-auto space-y-4">
-        {FAQ_LIST.map((faq, idx) => (
+        {items.map((faq, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
             <button 
               onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
