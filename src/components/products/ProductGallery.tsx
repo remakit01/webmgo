@@ -189,7 +189,7 @@ export default function ProductGallery({
             </div>
           </div>
           <div className="text-right">
-            <div className="font-mono font-bold text-[#A0D911] text-xs sm:text-sm">{density}</div>
+            <div className="font-extrabold text-[#A0D911] text-xs sm:text-sm">{density}</div>
             <div className="text-[11px] text-slate-300">Độ bền uốn {flexuralStrength}</div>
           </div>
         </div>

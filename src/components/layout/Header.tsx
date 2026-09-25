@@ -140,11 +140,11 @@ export default function Header() {
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
               
-              {/* Dropdown Mega-Menu */}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-[580px] bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 grid grid-cols-2 gap-2 z-50">
-                <div className="col-span-2 flex items-center justify-between pb-2.5 border-b border-slate-100">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Dòng sản phẩm Remak® FireOFF (Chuẩn QCVN 06:2022)
+              {/* Dropdown Menu 1 Cột Thẳng Hàng Tuyệt Đối */}
+              <div className="absolute top-[calc(100%-8px)] left-0 w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-50">
+                <div className="flex items-center justify-between pb-2 px-1 border-b border-slate-100 mb-0.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                    Dòng sản phẩm Remak® FireOFF
                   </span>
                   <Link href="/san-pham" className="text-xs font-semibold text-[#5F8A03] hover:underline flex items-center gap-1">
                     Xem tất cả ({'>'})
@@ -152,78 +152,64 @@ export default function Header() {
                 </div>
                 
                 {/* 1. MGO Bọc Ống Gió PCCC */}
-                <Link href="/san-pham/tam-mgo-boc-ong-gio-pccc" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#FEF3EC] transition-all group/item border border-transparent hover:border-[#F26522]/20">
-                  <div className="w-10 h-10 rounded-xl bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                    <Wind size={20} />
-                  </div>
-                  <div>
-                    <div className="text-[13.5px] font-bold text-slate-900 group-hover/item:text-[#D95314] transition-colors flex items-center gap-1.5">
-                      <span>MGO Bọc Ống Gió</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F26522]/10 text-[#F26522] font-semibold">EI 30-120</span>
+                <Link href="/san-pham/tam-mgo-boc-ong-gio-pccc" className="flex items-center justify-between p-2 rounded-xl hover:bg-[#FEF3EC] transition-all group/item border border-transparent hover:border-[#F26522]/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
+                      <Wind size={16} />
                     </div>
-                    <div className="text-xs text-slate-500 line-clamp-1 mt-0.5">Ống khói sự cố, kiểm định IBST</div>
+                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#D95314] transition-colors">
+                      MGO Bọc Ống Gió PCCC
+                    </span>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#F26522]/10 text-[#F26522] font-semibold whitespace-nowrap">
+                    EI 30 - 120
+                  </span>
                 </Link>
 
                 {/* 2. MGO Tiêu Chuẩn Chống Cháy */}
-                <Link href="/san-pham/tam-mgo-tieu-chuan-chong-chay" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#F4F9E8] transition-all group/item border border-transparent hover:border-[#7CB305]/20">
-                  <div className="w-10 h-10 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                    <Flame size={20} />
-                  </div>
-                  <div>
-                    <div className="text-[13.5px] font-bold text-slate-900 group-hover/item:text-[#5F8A03] transition-colors flex items-center gap-1.5">
-                      <span>MGO Tiêu Chuẩn</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#7CB305]/10 text-[#5F8A03] font-semibold">Class A1</span>
+                <Link href="/san-pham/tam-mgo-tieu-chuan-chong-chay" className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F4F9E8] transition-all group/item border border-transparent hover:border-[#7CB305]/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
+                      <Flame size={16} />
                     </div>
-                    <div className="text-xs text-slate-500 line-clamp-1 mt-0.5">Vách, trần, lõi cửa chống cháy</div>
+                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#5F8A03] transition-colors">
+                      MGO Tiêu Chuẩn Chống Cháy
+                    </span>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#7CB305]/10 text-[#5F8A03] font-semibold whitespace-nowrap">
+                    Class A1
+                  </span>
                 </Link>
 
                 {/* 3. MGO Lót Sàn Chịu Tải */}
-                <Link href="/san-pham/tam-mgo-lot-san-chiu-luc" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all group/item border border-transparent hover:border-slate-200">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                    <Layers size={20} />
-                  </div>
-                  <div>
-                    <div className="text-[13.5px] font-bold text-slate-900 group-hover/item:text-[#5F8A03] transition-colors flex items-center gap-1.5">
-                      <span>MGO Lót Sàn Chịu Tải</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold">15-18mm</span>
+                <Link href="/san-pham/tam-mgo-lot-san-chiu-luc" className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-all group/item border border-transparent hover:border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
+                      <Layers size={16} />
                     </div>
-                    <div className="text-xs text-slate-500 line-clamp-1 mt-0.5">Sàn gác lửng, Data Center {'>'}800kg/m²</div>
+                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#5F8A03] transition-colors">
+                      MGO Lót Sàn Chịu Tải
+                    </span>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold whitespace-nowrap">
+                    15 - 18mm
+                  </span>
                 </Link>
 
                 {/* 4. MGO Tiêu Âm & Trang Trí */}
-                <Link href="/san-pham/tam-mgo-trang-tri-tieu-am" className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all group/item border border-transparent hover:border-slate-200">
-                  <div className="w-10 h-10 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                    <Music size={20} />
-                  </div>
-                  <div>
-                    <div className="text-[13.5px] font-bold text-slate-900 group-hover/item:text-[#5F8A03] transition-colors flex items-center gap-1.5">
-                      <span>MGO Tiêu Âm / Trang Trí</span>
+                <Link href="/san-pham/tam-mgo-trang-tri-tieu-am" className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F4F9E8] transition-all group/item border border-transparent hover:border-[#7CB305]/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
+                      <Music size={16} />
                     </div>
-                    <div className="text-xs text-slate-500 line-clamp-1 mt-0.5">Melamine, xẻ rãnh Karaoke & Bar</div>
+                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#5F8A03] transition-colors">
+                      MGO Tiêu Âm & Trang Trí
+                    </span>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#7CB305]/10 text-[#5F8A03] font-semibold whitespace-nowrap">
+                    Tiêu Âm
+                  </span>
                 </Link>
-
-                {/* 5. Tấm MGO Gốc Sulfate MOS */}
-                <div className="col-span-2 pt-1">
-                  <Link href="/san-pham/tam-mgo-chong-an-mon-mos" className="flex items-center justify-between p-2.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/60 hover:border-emerald-300 text-slate-800 transition-colors">
-                    <div className="flex items-center gap-2.5">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white uppercase">Mới</span>
-                      <span className="text-xs font-bold text-slate-800">Tấm MGO Gốc Sulfate (MOS): Zero-Chloride 0% rỉ sét ốc vít</span>
-                    </div>
-                    <span className="text-xs font-semibold text-emerald-700">Tìm hiểu →</span>
-                  </Link>
-                </div>
-
-                {/* Phụ kiện đồng bộ */}
-                <div className="col-span-2 pt-2 border-t border-slate-100 flex items-center justify-between">
-                  <Link href="/san-pham#phu-kien-dong-bo" className="flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-[#F26522] transition-colors">
-                    <Package size={15} className="text-[#F26522]" />
-                    <span>Phụ kiện: Vít Dacromet chống rỉ, Keo chống cháy nở phồng Remak, Băng lưới thủy tinh</span>
-                  </Link>
-                </div>
               </div>
             </div>
 
@@ -467,8 +453,6 @@ export default function Header() {
                       <Link href="/san-pham/tam-mgo-tieu-chuan-chong-chay" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• MGO Tiêu Chuẩn Chống Cháy (A1)</Link>
                       <Link href="/san-pham/tam-mgo-lot-san-chiu-luc" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• MGO Lót Sàn Chịu Tải (15-18mm)</Link>
                       <Link href="/san-pham/tam-mgo-trang-tri-tieu-am" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• MGO Tiêu Âm & Trang Trí</Link>
-                      <Link href="/san-pham/tam-mgo-chong-an-mon-mos" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100 font-medium text-emerald-700">• MGO Sulfate (MOS) Không Ăn Mòn</Link>
-                      <Link href="/san-pham#phu-kien-dong-bo" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Phụ kiện đồng bộ</Link>
                     </div>
                   )}
                 </div>

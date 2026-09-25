@@ -74,6 +74,14 @@ export interface ProductItem {
   certifiedBy: string[];
   isPopular?: boolean;
   badge?: string;
+  basePrice?: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  isBestSeller?: boolean;
+  isFeatured?: boolean;
+  isNew?: boolean;
+  ratingScore?: number;
+  reviewsCount?: number;
 }
 
 export interface AccessoryItem {
@@ -81,9 +89,15 @@ export interface AccessoryItem {
   slug: string;
   name: string;
   role: string;
+  category?: 'fastener' | 'adhesive' | 'joint' | 'duct' | 'insulation';
+  categoryLabel?: string;
   spec: string;
+  consumptionNorm?: string; // Định mức thi công tiêu chuẩn
+  estimatedPrice?: string;  // Đơn giá tham khảo
+  features?: string[];      // Các tính năng kỹ thuật nổi bật
   description: string;
   image: string;
   packaging: string;
   compatibleProducts: string[];
 }
+

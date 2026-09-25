@@ -8,7 +8,7 @@ import {
   Package,
   ChevronRight,
 } from 'lucide-react';
-import { PRODUCTS, PRODUCT_ACCESSORIES } from '@/data/products';
+import { PRODUCTS } from '@/data/products';
 import { 
   ProductGallery, 
   ProductQuickInfo, 
@@ -52,11 +52,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   // Related products
   const relatedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
-
-  // Compatible accessories
-  const compatibleAccessories = PRODUCT_ACCESSORIES.filter((acc) =>
-    acc.compatibleProducts.includes(product.slug)
-  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
@@ -163,40 +158,43 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            {/* COMPATIBLE ACCESSORIES BOX */}
-            {compatibleAccessories.length > 0 && (
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-                <div className="text-xs font-bold text-[#F26522] uppercase tracking-wider mb-1">
-                  Vật Tư Đồng Bộ
-                </div>
-                <h3 className="text-sm font-bold text-slate-900 mb-4">
-                  Phụ Kiện Khuyên Dùng Cùng Tấm
-                </h3>
-
-                <div className="space-y-3">
-                  {compatibleAccessories.map((acc) => (
-                    <div key={acc.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0">
-                        <Package size={16} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-xs font-bold text-slate-800">{acc.name}</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{acc.spec}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-100 text-center">
-                  <a
-                    href="tel:0902441981"
-                    className="text-xs font-bold text-[#5F8A03] hover:underline"
-                  >
-                    Báo giá combo Tấm + Phụ Kiện ({'>'})
-                  </a>
-                </div>
+            {/* MGO THICKNESS SPECIFICATIONS BOX */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+              <div className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider mb-1">
+                Quy Cách Sản Phẩm
               </div>
-            )}
+              <h3 className="text-sm font-bold text-slate-900 mb-4">
+                Các Độ Dày Tiêu Chuẩn Sẵn Kho
+              </h3>
+
+              <div className="space-y-2.5">
+                {product.thicknessList.map((th) => (
+                  <div key={th} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold text-xs">
+                        {th}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-800">Tấm MGO 1.22x2.44m</span>
+                    </div>
+                    <Link
+                      href="/bao-gia"
+                      className="text-xs font-bold text-[#F26522] hover:underline"
+                    >
+                      Báo giá →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 text-center">
+                <Link
+                  href="/bao-gia"
+                  className="text-xs font-bold text-[#5F8A03] hover:underline"
+                >
+                  Nhận cắt quy cách theo bản vẽ ({'>'})
+                </Link>
+              </div>
+            </div>
 
             {/* QUICK CONSULTANT CARD */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs text-center">
