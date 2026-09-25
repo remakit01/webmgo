@@ -73,8 +73,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/san-pham#phu-kien-dong-bo" className="hover:text-white flex items-center gap-1.5 transition-colors">
-                  <ChevronRight size={14} className="text-[#7CB305]" /> Phụ kiện vít & keo chống cháy
+                <Link href="/san-pham/tam-mgo-chong-an-mon-mos" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                  <ChevronRight size={14} className="text-[#7CB305]" /> Tấm MGO Sulfate (MOS) Không Ăn Mòn
                 </Link>
               </li>
             </ul>

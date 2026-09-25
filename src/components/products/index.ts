@@ -3,3 +3,8 @@ export { default as ProductQuickInfo } from './ProductQuickInfo';
 export { default as ProductSystemAssemblies } from './ProductSystemAssemblies';
 export { default as ProductSpecsTable } from './ProductSpecsTable';
 export { default as ProductCard } from './ProductCard';
+export { default as ProductTabsFilter } from './ProductTabsFilter';
+export { default as ProductFireTestProof } from './ProductFireTestProof';
+export { default as ProductSolutionFinder } from './ProductSolutionFinder';
+export { default as ProductCompareBar } from './ProductCompareBar';
+export { default as ProductCompareModal } from './ProductCompareModal';
