@@ -112,19 +112,25 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {/* ƯU ĐIỂM VƯỢT TRỘI */}
             <div>
               <div className="border-b border-slate-200 pb-3 mb-6">
-                <h2 className="text-xl font-bold text-slate-900">
+                <span className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider bg-[#F4F9E8] px-3 py-1 rounded-full">
+                  Hiệu Quả Dự Án
+                </span>
+                <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
                   Ưu Điểm Vượt Trội Cho Công Trình
                 </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  Đem lại độ bền cơ học cao, tiết kiệm chi phí thi công và tối ưu hoá trọng lượng kết cấu
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {product.advantages.map((adv, idx) => (
-                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-[#7CB305]/40 transition-colors">
                     <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold text-xs mb-3">
                       0{idx + 1}
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900">{adv.title}</h3>
-                    <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{adv.desc}</p>
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900">{adv.title}</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">{adv.desc}</p>
                   </div>
                 ))}
               </div>
@@ -140,19 +146,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#A0D911] mb-3">
                 <FileText size={20} />
               </div>
-              <h3 className="text-base font-bold text-white">Hồ Sơ Nghiệm Thu PCCC</h3>
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              <h3 className="text-lg font-bold text-white">Hồ Sơ Nghiệm Thu PCCC</h3>
+              <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
                 Tải về bản sao công chứng kết quả thử nghiệm đốt mẫu lò của Viện IBST và chứng nhận vật liệu không cháy nhóm A1.
               </p>
-              <div className="mt-5 space-y-2">
+              <div className="mt-5 space-y-2.5">
                 <Link
                   href="/bao-gia"
-                  className="w-full py-2.5 px-4 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <Download size={14} />
+                  <Download size={16} />
                   <span>Tải Bộ Hồ Sơ Kiểm Định</span>
                 </Link>
-                <div className="text-[11px] text-center text-slate-400">
+                <div className="text-[11px] sm:text-xs text-center text-slate-400">
                   Định dạng PDF • Dung lượng 4.2 MB
                 </div>
               </div>
@@ -163,7 +169,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <div className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider mb-1">
                 Quy Cách Sản Phẩm
               </div>
-              <h3 className="text-sm font-bold text-slate-900 mb-4">
+              <h3 className="text-base font-bold text-slate-900 mb-4">
                 Các Độ Dày Tiêu Chuẩn Sẵn Kho
               </h3>
 
@@ -174,11 +180,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       <span className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold text-xs">
                         {th}
                       </span>
-                      <span className="text-xs font-semibold text-slate-800">Tấm MGO 1.22x2.44m</span>
+                      <span className="text-xs sm:text-sm font-semibold text-slate-800">Tấm MGO 1.22x2.44m</span>
                     </div>
                     <Link
                       href="/bao-gia"
-                      className="text-xs font-bold text-[#F26522] hover:underline"
+                      className="text-xs sm:text-sm font-bold text-[#F26522] hover:underline"
                     >
                       Báo giá →
                     </Link>
@@ -189,9 +195,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <div className="mt-4 pt-3 border-t border-slate-100 text-center">
                 <Link
                   href="/bao-gia"
-                  className="text-xs font-bold text-[#5F8A03] hover:underline"
+                  className="text-xs sm:text-sm font-bold text-[#5F8A03] hover:underline inline-flex items-center gap-1"
                 >
-                  Nhận cắt quy cách theo bản vẽ ({'>'})
+                  <span>Nhận gia công cắt theo bản vẽ thiết kế</span>
+                  <span>→</span>
                 </Link>
               </div>
             </div>
@@ -201,13 +208,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <div className="w-12 h-12 rounded-full bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center mx-auto mb-3">
                 <PhoneCall size={20} />
               </div>
-              <h3 className="text-sm font-bold text-slate-900">Tư Vấn Kỹ Thuật 24/7</h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <h3 className="text-base font-bold text-slate-900">Tư Vấn Kỹ Thuật 24/7</h3>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
                 Kỹ sư PCCC Remak sẵn sàng hỗ trợ bóc tách khối lượng và giải pháp tối ưu cho công trình của bạn.
               </p>
               <a
                 href="tel:0902441981"
-                className="mt-4 block py-2.5 px-4 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-xs transition-colors"
+                className="mt-4 block py-3 px-4 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-xs sm:text-sm transition-colors shadow-sm"
               >
                 Hotline: 0902.441.981
               </a>
@@ -221,21 +228,24 @@ export default async function ProductDetailPage({ params }: PageProps) {
       {/* 4. RELATED PRODUCTS SECTION */}
       <section className="py-14 bg-white border-t border-slate-200">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <span className="text-xs font-bold text-[#F26522] uppercase tracking-wider bg-[#FEF3EC] px-3 py-1 rounded-full">
+                Sản Phẩm Tương Thích
+              </span>
+              <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
                 Các Dòng Tấm Chống Cháy Khác
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
                 Khám phá hệ sinh thái vật liệu vô cơ chịu lửa Remak® FireOFF
               </p>
             </div>
             <Link 
               href="/san-pham"
-              className="text-xs font-bold text-[#5F8A03] hover:underline flex items-center gap-1"
+              className="text-xs sm:text-sm font-bold text-[#5F8A03] hover:underline flex items-center gap-1 self-start sm:self-auto"
             >
               <span>Xem tất cả sản phẩm</span>
-              <ChevronRight size={14} />
+              <ChevronRight size={16} />
             </Link>
           </div>
 
@@ -243,24 +253,24 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {relatedProducts.map((rel) => (
               <div 
                 key={rel.id}
-                className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-[#7CB305] transition-all flex flex-col justify-between group"
+                className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-[#7CB305] transition-all flex flex-col justify-between group shadow-2xs"
               >
                 <div>
-                  <div className="h-40 rounded-xl overflow-hidden mb-3 bg-slate-200">
-                    <img src={rel.image} alt={rel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <div className="h-44 rounded-xl overflow-hidden mb-3 bg-slate-200">
+                    <img src={rel.image} alt={rel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>
-                  <span className="text-[11px] font-bold text-[#F26522]">{rel.categoryLabel}</span>
-                  <h3 className="text-sm font-bold text-slate-900 mt-1 line-clamp-1 group-hover:text-[#5F8A03] transition-colors">
+                  <span className="text-[11px] font-bold text-[#F26522] uppercase tracking-wider">{rel.categoryLabel}</span>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 mt-1 line-clamp-1 group-hover:text-[#5F8A03] transition-colors">
                     {rel.name}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">{rel.tagline}</p>
+                  <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-2 leading-relaxed">{rel.tagline}</p>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700">{rel.fireRating}</span>
+                  <span className="text-xs font-bold text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200">{rel.fireRating}</span>
                   <Link
                     href={`/san-pham/${rel.slug}`}
-                    className="text-xs font-bold text-[#5F8A03] hover:underline"
+                    className="text-xs sm:text-sm font-bold text-[#5F8A03] hover:underline"
                   >
                     Chi tiết →
                   </Link>
