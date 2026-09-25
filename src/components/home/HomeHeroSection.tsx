@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Flame, Droplets, Feather, ShieldCheck, Sparkles, Package, Calculator, CheckCircle2 } from 'lucide-react';
 
-export default function HeroSection() {
+export default function HomeHeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-[#F8FAFC] pt-6 pb-16">
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8">

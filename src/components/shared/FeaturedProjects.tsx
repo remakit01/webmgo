@@ -1,24 +1,37 @@
 import React from 'react';
 import Link from 'next/link';
-import { Building2, MapPin, Layers, ShieldCheck, ArrowRight } from 'lucide-react';
+import { MapPin, ShieldCheck, ArrowRight } from 'lucide-react';
 import { FEATURED_PROJECTS } from '@/data/products';
+import { FeaturedProject } from '@/types';
 import SectionHeading from '@/components/ui/SectionHeading';
 
-export default function FeaturedProjects() {
+interface FeaturedProjectsProps {
+  id?: string;
+  projects?: FeaturedProject[];
+  showHeading?: boolean;
+}
+
+export default function FeaturedProjects({
+  id = 'du-an-tieu-bieu',
+  projects = FEATURED_PROJECTS,
+  showHeading = true,
+}: FeaturedProjectsProps) {
   return (
     <section 
-      id="du-an-tieu-bieu"
+      id={id}
       aria-label="Dự Án Tiêu Biểu Sử Dụng Tấm MGO Remak"
       className="max-w-[1440px] mx-auto px-4 lg:px-8"
     >
-      <SectionHeading 
-        badge="DỰ ÁN TIÊU BIỂU"
-        badgeColor="orange"
-        title="Công Trình Đã Nghiệm Thu PCCC"
-      />
+      {showHeading && (
+        <SectionHeading 
+          badge="DỰ ÁN TIÊU BIỂU"
+          badgeColor="orange"
+          title="Công Trình Đã Nghiệm Thu PCCC"
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {FEATURED_PROJECTS.map((project) => (
+        {projects.map((project) => (
           <div 
             key={project.id}
             className="group bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between"

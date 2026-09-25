@@ -15,7 +15,7 @@ const FILTER_TABS: { id: FilterCategory; label: string; count: string }[] = [
   { id: 'floor', label: 'Lót sàn', count: '15 & 18mm' },
 ];
 
-export default function SpecMatrix() {
+export default function HomeSpecMatrix() {
   const [activeCategory, setActiveCategory] = useState<FilterCategory>('all');
 
   const filteredSpecs = activeCategory === 'all' 
