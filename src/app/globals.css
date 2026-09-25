@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* Brand Identity Colors */
+  --remak-green: #7CB305;
+  --remak-green-dark: #5F8A03;
+  --remak-green-light: #F4F9E8;
+  
+  --remak-orange: #F26522;
+  --remak-orange-dark: #D95314;
+  --remak-orange-light: #FEF3EC;
+
+  /* Force Pure Light Theme */
+  --background: #F8FAFC;
+  --foreground: #1E293B;
+  --surface: #FFFFFF;
+  --muted: #F1F5F9;
+
+  --border-color: #E2E8F0;
+  --border-hover: #CBD5E1;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-remak-green: var(--remak-green);
+  --color-remak-green-dark: var(--remak-green-dark);
+  --color-remak-green-light: var(--remak-green-light);
+  --color-remak-orange: var(--remak-orange);
+  --color-remak-orange-dark: var(--remak-orange-dark);
+  --color-remak-orange-light: var(--remak-orange-light);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: clip;
+}
+
+/* Custom Utilities for Navigation */
+.nav-link-item {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+/* ==========================================================================
+   ENTRANCE & SCROLL REVEAL ANIMATIONS (CHUYỂN ĐỘNG XUẤT HIỆN SANG TRỌNG)
+   ========================================================================== */
+@keyframes heroFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.93) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes heroBadgePop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.85);
+  }
+  70% {
+    transform: translateY(2px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-hero-fade-up {
+  animation: heroFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-hero-scale-in {
+  animation: heroScaleIn 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-hero-badge-pop {
+  animation: heroBadgePop 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-gentle-float {
+  animation: gentleFloat 4s ease-in-out infinite;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+.delay-600 { animation-delay: 600ms; }
+.delay-700 { animation-delay: 700ms; }
+
+/* Tab content switch animation */
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-tab-content {
+  animation: tabFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
