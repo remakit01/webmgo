@@ -8,7 +8,8 @@ import {
   ShieldCheck, 
   Maximize2, 
   Play, 
-  Pause 
+  Pause,
+  CheckCircle2 
 } from 'lucide-react';
 
 interface ProductGalleryProps {
@@ -228,19 +229,20 @@ export default function ProductGallery({
       )}
 
       {/* 3. KHỐI CHỨNG NHẬN & TIÊU CHUẨN THỬ NGHIỆM ĐÃ ĐẠT */}
-      <div className="p-4 rounded-2xl bg-[#F4F9E8] border border-[#7CB305]/30">
-        <div className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+      <div className="p-4 rounded-2xl bg-[#F4F9E8] border border-[#7CB305]/30 space-y-2.5">
+        <div className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider flex items-center gap-1.5 pb-2 border-b border-[#7CB305]/20">
           <ShieldCheck size={16} />
           <span>Chứng nhận & Tiêu chuẩn thử nghiệm đã đạt:</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="space-y-2">
           {testedStandards.map((std, idx) => (
-            <span 
+            <div 
               key={idx} 
-              className="px-2.5 py-1 rounded-md bg-white border border-[#7CB305]/30 text-xs font-semibold text-slate-700 shadow-2xs"
+              className="px-3 py-2 rounded-xl bg-white border border-[#7CB305]/30 text-xs sm:text-sm font-semibold text-slate-800 shadow-2xs flex items-center gap-2.5"
             >
-              ✓ {std}
-            </span>
+              <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0" />
+              <span>{std}</span>
+            </div>
           ))}
         </div>
       </div>
