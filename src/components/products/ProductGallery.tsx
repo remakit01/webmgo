@@ -1,15 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Flame, 
-  ChevronLeft, 
-  ChevronRight, 
-  ShieldCheck, 
-  Maximize2, 
-  Play, 
-  Pause,
-  CheckCircle2 
+import {
+  Flame,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
 
 interface ProductGalleryProps {
@@ -111,6 +108,8 @@ export default function ProductGallery({
         className="group relative rounded-3xl overflow-hidden bg-slate-900 border border-slate-200 shadow-lg aspect-4/3 cursor-pointer"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={() => setIsPaused(false)}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -234,14 +233,16 @@ export default function ProductGallery({
           <ShieldCheck size={16} />
           <span>Chứng nhận & Tiêu chuẩn thử nghiệm đã đạt:</span>
         </div>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           {testedStandards.map((std, idx) => (
-            <div 
-              key={idx} 
-              className="px-3 py-2 rounded-xl bg-white border border-[#7CB305]/30 text-xs sm:text-sm font-semibold text-slate-800 shadow-2xs flex items-center gap-2.5"
+            <div
+              key={idx}
+              className={`px-2.5 py-2 rounded-xl bg-white border border-[#7CB305]/25 text-xs sm:text-sm font-semibold text-slate-800 shadow-2xs flex items-start gap-2 hover:border-[#7CB305]/70 hover:shadow-xs transition-all ${
+                std.length > 18 ? 'col-span-2' : 'col-span-1'
+              }`}
             >
-              <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0" />
-              <span>{std}</span>
+              <CheckCircle2 size={14} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
+              <span className="leading-snug">{std}</span>
             </div>
           ))}
         </div>

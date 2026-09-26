@@ -2,18 +2,15 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { 
-  ShieldCheck, 
-  Flame, 
-  FileCheck, 
-  Download, 
-  PhoneCall, 
-  Building2, 
+import {
+  ShieldCheck,
+  Flame,
+  FileCheck,
+  Download,
+  PhoneCall,
   Award,
-  ExternalLink,
   CheckCircle2
 } from 'lucide-react';
-import SectionHeading from '@/components/ui/SectionHeading';
 
 const TEST_REPORTS = [
   {
@@ -70,10 +67,6 @@ export default function ProductFireTestProof() {
         
         {/* HEADING */}
         <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FEF3EC] text-[#F26522] text-xs font-bold uppercase tracking-wider mb-3">
-            <Flame size={14} />
-            <span>Pháp Lý & Kiểm Định Thực Tế</span>
-          </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
             Đốt Mẫu Thực Tế Tại Viện IBST <br className="hidden sm:block" />
             <span className="text-[#5F8A03]">Đạt Nghiệm Thu 100% Theo QCVN 06:2022</span>
@@ -88,38 +81,46 @@ export default function ProductFireTestProof() {
         {/* 4 CON SỐ BẢO CHỨNG NIỀM TIN */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#7CB305]/40 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold mb-3">
-              <Flame size={20} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold flex-shrink-0">
+                <Flame size={20} />
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">1.200°C</div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900">1.200°C</div>
-            <div className="text-xs font-bold text-slate-700 mt-1">Chịu Lửa Trực Tiếp</div>
+            <div className="text-xs font-bold text-slate-700 mt-3">Chịu Lửa Trực Tiếp</div>
             <p className="text-[11px] text-slate-500 mt-0.5">Không bắt lửa, không biến dạng ở nhiệt độ cực hạn</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#F26522]/40 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-[#FEF3EC] text-[#F26522] flex items-center justify-center font-bold mb-3">
-              <Award size={20} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#FEF3EC] text-[#F26522] flex items-center justify-center font-bold flex-shrink-0">
+                <Award size={20} />
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">EI 180</div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900">EI 180</div>
-            <div className="text-xs font-bold text-slate-700 mt-1">Giới Hạn Chịu Lửa Tối Đa</div>
+            <div className="text-xs font-bold text-slate-700 mt-3">Giới Hạn Chịu Lửa Tối Đa</div>
             <p className="text-[11px] text-slate-500 mt-0.5">Thời gian toàn vẹn và cách nhiệt lên tới 3 giờ liên tục</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-emerald-500/40 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold mb-3">
-              <ShieldCheck size={20} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
+                <ShieldCheck size={20} />
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">0% Clo</div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900">0% Clo</div>
-            <div className="text-xs font-bold text-slate-700 mt-1">Zero-Chloride (MOS)</div>
+            <div className="text-xs font-bold text-slate-700 mt-3">Zero-Chloride (MOS)</div>
             <p className="text-[11px] text-slate-500 mt-0.5">Không ăn mòn tôn kẽm và đinh vít, tuổi thọ trên 50 năm</p>
           </div>
 
           <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500/40 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold mb-3">
-              <FileCheck size={20} />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
+                <FileCheck size={20} />
+              </div>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900">100%</div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900">100%</div>
-            <div className="text-xs font-bold text-slate-700 mt-1">Hồ Sơ Nghiệm Thu</div>
+            <div className="text-xs font-bold text-slate-700 mt-3">Hồ Sơ Nghiệm Thu</div>
             <p className="text-[11px] text-slate-500 mt-0.5">Cung cấp bản sao công chứng và chứng chỉ xuất xưởng CO/CQ</p>
           </div>
         </div>
@@ -128,9 +129,6 @@ export default function ProductFireTestProof() {
         <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm mb-10">
           <div className="p-5 sm:p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-[#A0D911]">
-                Bản Quyền Thử Nghiệm Remak® FireOFF
-              </div>
               <h3 className="text-lg sm:text-xl font-bold mt-1 text-white">
                 Bảng Đối Chiếu Các Cấu Kiện Đã Đốt Thử Nghiệm Thành Công
               </h3>
@@ -144,25 +142,29 @@ export default function ProductFireTestProof() {
             </Link>
           </div>
 
+          <div className="relative">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
-                  <th className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Hạng Mục Cấu Kiện</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Chỉ Số Chịu Lửa</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Tiêu Chuẩn Áp Dụng</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Độ Dày Tấm MGO</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Đơn Vị Đo Kiểm</th>
-                  <th className="py-3.5 px-4 sm:px-6">Đánh Giá Thực Tế</th>
+                  <th scope="col" className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Hạng Mục Cấu Kiện</th>
+                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Chỉ Số Chịu Lửa</th>
+                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Tiêu Chuẩn Áp Dụng</th>
+                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Độ Dày Tấm MGO</th>
+                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Đơn Vị Đo Kiểm</th>
+                  <th scope="col" className="py-3.5 px-4 sm:px-6">Đánh Giá Thực Tế</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {TEST_REPORTS.map((item, idx) => (
                   <tr key={idx} className="hover:bg-[#F4F9E8]/30 transition-colors">
                     <td className="py-4 px-4 sm:px-6 font-bold text-slate-900">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0" />
-                        <span>{item.assembly}</span>
+                      <div className="flex items-start gap-2">
+                        <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <div>{item.assembly}</div>
+                          <div className="text-[10px] font-semibold text-[#5F8A03] mt-0.5">{item.status}</div>
+                        </div>
                       </div>
                     </td>
                     <td className="py-4 px-4 whitespace-nowrap">
@@ -187,14 +189,13 @@ export default function ProductFireTestProof() {
               </tbody>
             </table>
           </div>
+          <div className="hidden md:block absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent pointer-events-none" aria-hidden="true" />
+          </div>
         </div>
 
         {/* BANNER HỖ TRỢ LÀM HỒ SƠ THẦU */}
         <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-emerald-500/20">
           <div className="space-y-2 text-center md:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#A0D911]">
-              Dành Riêng Cho Tổng Thầu & Tư Vấn Giám Sát
-            </span>
             <h4 className="text-xl sm:text-2xl font-bold text-white">
               Cần Bản Sao Biên Bản Đốt Mẫu & Thuyết Minh Kỹ Thuật Đệ Trình?
             </h4>

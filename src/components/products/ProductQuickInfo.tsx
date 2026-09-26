@@ -2,17 +2,16 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { 
-  FileText, 
-  PhoneCall, 
-  CheckCircle2, 
-  Info, 
-  Weight, 
-  Sparkles,
+import {
+  FileText,
+  PhoneCall,
+  CheckCircle2,
+  Info,
   Layers
 } from 'lucide-react';
 import { ProductItem } from '@/types';
-import { MGO_SPECS } from '@/data/products';
+import { MGO_SPECS, getThicknessData } from '@/data/products';
+import { formatNumber } from '@/lib/utils';
 
 interface ProductQuickInfoProps {
   product: ProductItem;
@@ -30,6 +29,8 @@ export default function ProductQuickInfo({ product }: ProductQuickInfoProps) {
     fireRating: product.fireRating,
     standardApplication: product.tagline,
   };
+
+  const currentPrice = getThicknessData(selectedThickness, product);
 
   // Tách các ý khuyến nghị ứng dụng nếu có dấu bullet • để hiển thị từng dòng ngay ngắn
   const recommendations = currentSpec.standardApplication
@@ -82,13 +83,14 @@ export default function ProductQuickInfo({ product }: ProductQuickInfoProps) {
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Chọn độ dày quy chuẩn">
           {product.thicknessList.map((th) => {
             const isSelected = selectedThickness === th;
             return (
               <button
                 key={th}
                 type="button"
+                aria-pressed={isSelected}
                 onClick={() => setSelectedThickness(th)}
                 className={`px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer ${
                   isSelected
@@ -105,6 +107,12 @@ export default function ProductQuickInfo({ product }: ProductQuickInfoProps) {
 
         {/* Dynamic Detail for Selected Thickness */}
         <div className="pt-3 border-t border-slate-100 bg-slate-50 p-3.5 rounded-xl space-y-2.5 text-xs sm:text-sm">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/70">
+            <span className="font-bold text-slate-900">Giá nhà máy:</span>
+            <span className="font-extrabold text-[#F26522] bg-[#FEF3EC] px-2.5 py-0.5 rounded-md border border-[#F26522]/30">
+              {formatNumber(currentPrice.price)} đ/tấm
+            </span>
+          </div>
           <div className="flex items-center justify-between pb-2 border-b border-slate-200/70">
             <span className="font-bold text-slate-900">Trọng lượng tấm:</span>
             <span className="font-bold text-[#5F8A03] bg-[#F4F9E8] px-2.5 py-0.5 rounded-md border border-[#7CB305]/30">

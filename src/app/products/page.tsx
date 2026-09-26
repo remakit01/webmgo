@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { 
-  Flame, 
-  Wind, 
-  Layers, 
-  Music, 
-  ShieldCheck, 
-  Award, 
-  FileText, 
-  ArrowRight, 
-  CheckCircle2, 
-  Package, 
-  PhoneCall, 
+import {
+  Flame,
+  Wind,
+  Layers,
+  Music,
+  ShieldCheck,
+  Award,
+  FileText,
+  ArrowRight,
+  CheckCircle2,
+  PhoneCall,
   Download,
   Filter,
 } from 'lucide-react';
@@ -103,13 +102,13 @@ export default function ProductsPage() {
   };
 
   // Filtered and sorted products
-  const filteredProducts = PRODUCTS.filter((product) => {
+  const filteredProducts = useMemo(() => PRODUCTS.filter((product) => {
     const matchesCategory = filters.category === 'all' || product.category === filters.category;
     const matchesThickness = filters.thickness === 'all' || product.thicknessList.includes(filters.thickness);
     const matchesFireRating = filters.fireRating === 'all' || product.fireRating.includes(filters.fireRating);
-    
+
     const query = filters.search.trim().toLowerCase();
-    const matchesSearch = query === '' || 
+    const matchesSearch = query === '' ||
       product.name.toLowerCase().includes(query) ||
       product.tagline.toLowerCase().includes(query) ||
       product.categoryLabel.toLowerCase().includes(query) ||
@@ -136,15 +135,15 @@ export default function ProductsPage() {
       return (b.basePrice || 0) - (a.basePrice || 0);
     }
     return (b.isPopular ? 1 : 0) - (a.isPopular ? 1 : 0);
-  });
+  }), [filters]);
 
-  const counts = {
+  const counts = useMemo(() => ({
     all: PRODUCTS.length,
     duct: PRODUCTS.filter((p) => p.category === 'duct').length,
     wall: PRODUCTS.filter((p) => p.category === 'wall').length,
     floor: PRODUCTS.filter((p) => p.category === 'floor').length,
     acoustic: PRODUCTS.filter((p) => p.category === 'acoustic').length,
-  };
+  }), []);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
@@ -165,12 +164,7 @@ export default function ProductsPage() {
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#F26522]/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative max-w-[1440px] mx-auto px-4 lg:px-8">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[#A0D911] text-xs font-bold uppercase tracking-wider mb-4">
-              <ShieldCheck size={16} />
-              <span>Sản phẩm đạt chuẩn kiểm định PCCC QCVN 06:2022/BXD</span>
-            </div>
-            
+          <div className="max-w-3xl">   
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-5 leading-tight">
               Hệ Thống Tấm Magie Oxit (MGO) <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A0D911] via-lime-300 to-[#F26522]">
@@ -283,9 +277,6 @@ export default function ProductsPage() {
             <div className="mt-12 bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-8 shadow-sm animate-in fade-in duration-300">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
                 <div>
-                  <span className="text-[11px] font-black uppercase tracking-wider text-[#5F8A03] bg-[#F4F9E8] px-3 py-1 rounded-full">
-                    Đối chiếu nhanh bên dưới
-                  </span>
                   <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 mt-2">
                     Bảng So Sánh Kỹ Thuật {selectedCompareProducts.length} Dòng Tấm MGO Bạn Đã Chọn
                   </h3>
@@ -438,9 +429,6 @@ export default function ProductsPage() {
       <section className="py-14 bg-white border-b border-slate-200">
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider bg-[#F4F9E8] px-3 py-1 rounded-full">
-              Kỹ Sư & Nhà Thầu Tra Cứu Nhanh
-            </span>
             <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 mt-3">
               Bảng Thông Số Độ Dày & Khối Lượng Tiêu Chuẩn
             </h2>
@@ -519,9 +507,6 @@ export default function ProductsPage() {
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
           <div className="rounded-3xl bg-white/5 border border-white/10 p-8 lg:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 backdrop-blur-md">
             <div className="max-w-2xl">
-              <span className="px-3 py-1 rounded-full bg-[#7CB305]/20 text-[#A0D911] text-xs font-bold uppercase tracking-wider">
-                Hồ Sơ Pháp Lý Đầy Đủ
-              </span>
               <h2 className="text-2xl lg:text-4xl font-extrabold text-white mt-3">
                 Cần Tải Trọn Bộ Kết Quả Thử Nghiệm PCCC & Catalogue 2026?
               </h2>

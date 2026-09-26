@@ -10,9 +10,7 @@ export default function ProductSpecsTable({ specsTable }: ProductSpecsTableProps
   return (
     <div>
       <div className="border-b border-slate-200 pb-3 mb-6">
-        <span className="text-xs font-bold text-[#F26522] uppercase tracking-wider bg-[#FEF3EC] px-3 py-1 rounded-full">
-          Chỉ Tiêu Cơ Lý
-        </span>
+
         <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
           Bảng Thông Số Kỹ Thuật Chi Tiết
         </h2>

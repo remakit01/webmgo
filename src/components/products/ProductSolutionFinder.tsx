@@ -2,17 +2,15 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Wind, 
-  Flame, 
-  Layers, 
-  ShieldAlert, 
-  Music, 
-  ArrowRight, 
-  CheckCircle2, 
-  Sparkles,
-  Calculator,
-  ChevronRight
+import {
+  Wind,
+  Flame,
+  Layers,
+  ShieldAlert,
+  Music,
+  ArrowRight,
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 
 interface SolutionOption {
@@ -115,7 +113,7 @@ export default function ProductSolutionFinder() {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#7CB305] animate-pulse" />
             <h3 className="text-sm sm:text-base font-extrabold text-slate-900 uppercase tracking-wide">
-              Bộ Tìm Giải Pháp Tấm MGO Nhanh (Solution Finder 3s)
+              Bộ Tìm Giải Pháp Tấm MGO Nhanh
             </h3>
           </div>
           <span className="text-xs text-slate-500 font-medium">
@@ -131,7 +129,7 @@ export default function ProductSolutionFinder() {
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               1. Bạn Cần Chống Cháy Cho Hạng Mục Nào?
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2" role="group" aria-label="Hạng mục chống cháy">
               {SOLUTIONS.map((sol) => {
                 const IconComponent = sol.icon;
                 const isSelected = selectedApp === sol.id;
@@ -139,6 +137,7 @@ export default function ProductSolutionFinder() {
                   <button
                     key={sol.id}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => setSelectedApp(sol.id)}
                     className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer border ${
                       isSelected
@@ -163,13 +162,14 @@ export default function ProductSolutionFinder() {
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
               2. Giới Hạn Chịu Lửa Yêu Cầu?
             </label>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2" role="group" aria-label="Giới hạn chịu lửa yêu cầu">
               {RATINGS.map((rat) => {
                 const isSelected = selectedRating === rat.id;
                 return (
                   <button
                     key={rat.id}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => setSelectedRating(rat.id)}
                     className={`p-3 rounded-xl text-left transition-all cursor-pointer border ${
                       isSelected
@@ -186,7 +186,10 @@ export default function ProductSolutionFinder() {
           </div>
 
           {/* BƯỚC 3: KẾT QUẢ ĐỀ XUẤT */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 flex flex-col justify-between border border-slate-700 shadow-md">
+          <div
+            className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-5 flex flex-col justify-between border border-slate-700 shadow-md"
+            aria-live="polite"
+          >
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="px-2.5 py-0.5 rounded-full bg-[#7CB305]/20 text-[#A0D911] text-[11px] font-bold uppercase tracking-wider flex items-center gap-1">

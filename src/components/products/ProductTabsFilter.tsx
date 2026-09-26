@@ -89,7 +89,8 @@ export default function ProductTabsFilter({
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3.5 space-y-3">
         
         {/* ROW 1: TABS DANH MỤC LỚN (THEO CHUẨN THẾ GIỚI DI ĐỘNG) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="relative">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" role="group" aria-label="Danh mục sản phẩm">
           {CATEGORIES.map((cat) => {
             const IconComponent = cat.icon;
             const isActive = filters.category === cat.id;
@@ -99,8 +100,9 @@ export default function ProductTabsFilter({
               <button
                 key={cat.id}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() => handleCategoryClick(cat.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer flex-shrink-0 border ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer flex-shrink-0 border ${
                   isActive
                     ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20 scale-[1.02]'
                     : 'bg-slate-100 text-slate-700 border-transparent hover:bg-slate-200 hover:text-slate-900'
@@ -121,6 +123,8 @@ export default function ProductTabsFilter({
             );
           })}
         </div>
+        <div className="absolute top-0 right-0 bottom-1 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" aria-hidden="true" />
+        </div>
 
         {/* ROW 2: SEARCH BOX + QUICK THICKNESS FILTER PILLS */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-1 border-t border-slate-100">
@@ -133,12 +137,13 @@ export default function ProductTabsFilter({
               value={filters.search}
               onChange={(e) => onFilterChange('search', e.target.value)}
               placeholder="Tìm theo độ dày hoặc ứng dụng (vd: 8mm, ống gió, vách, dầm thép)..."
-              className="w-full pl-9 pr-8 py-2 bg-slate-100 hover:bg-slate-150 focus:bg-white border border-transparent focus:border-[#7CB305] rounded-xl text-xs text-slate-800 placeholder-slate-400 transition-all outline-none"
+              className="w-full pl-9 pr-8 py-2 bg-slate-100 hover:bg-slate-150 focus:bg-white border border-slate-200 focus:border-[#7CB305] rounded-xl text-xs text-slate-800 placeholder-slate-400 transition-all outline-none"
             />
             {filters.search && (
               <button
                 type="button"
                 onClick={() => onFilterChange('search', '')}
+                aria-label="Xoá từ khoá tìm kiếm"
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
               >
                 <X size={14} />
@@ -147,7 +152,8 @@ export default function ProductTabsFilter({
           </div>
 
           {/* Quick Filter Pills (Độ dày) */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none text-xs">
+          <div className="relative flex-1 lg:flex-initial">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none text-xs" role="group" aria-label="Lọc độ dày">
             <span className="text-slate-400 font-bold mr-1 hidden sm:inline whitespace-nowrap">Lọc độ dày:</span>
             {THICKNESS_OPTIONS.map((item) => {
               const isSelected = filters.thickness === item.id;
@@ -155,8 +161,9 @@ export default function ProductTabsFilter({
                 <button
                   key={item.id}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => onFilterChange('thickness', item.id)}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border ${
+                  className={`px-2.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border ${
                     isSelected
                       ? 'bg-[#F26522] text-white border-[#F26522] shadow-xs font-bold'
                       : 'bg-slate-100 text-slate-600 border-slate-200/60 hover:bg-slate-200 hover:text-slate-800'
@@ -167,13 +174,15 @@ export default function ProductTabsFilter({
               );
             })}
           </div>
+          <div className="absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" aria-hidden="true" />
+          </div>
 
         </div>
 
         {/* ROW 3: THANH SẮP XẾP BÁN HÀNG CHUYÊN NGHIỆP (NỔI BẬT, BÁN CHẠY, GIẢM GIÁ, MỚI, GIÁ) */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
           
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Sắp xếp theo">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mr-1">
               <ArrowUpDown size={13} className="text-[#F26522]" />
               <span>Sắp xếp theo:</span>
@@ -187,8 +196,9 @@ export default function ProductTabsFilter({
                 <button
                   key={btn.id}
                   type="button"
+                  aria-pressed={isActive}
                   onClick={() => onFilterChange('sortBy', btn.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
                     isActive
                       ? 'bg-[#5F8A03] text-white border-[#5F8A03] shadow-xs shadow-[#5F8A03]/30 scale-[1.03]'
                       : 'bg-slate-100 text-slate-600 border-slate-200/70 hover:bg-slate-200 hover:text-slate-900'
@@ -216,7 +226,7 @@ export default function ProductTabsFilter({
               {filters.category !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30 font-bold">
                   <span>{CATEGORIES.find(c => c.id === filters.category)?.label}</span>
-                  <button type="button" onClick={() => onFilterChange('category', 'all')} className="hover:text-red-500 cursor-pointer">
+                  <button type="button" onClick={() => onFilterChange('category', 'all')} aria-label="Xoá lọc danh mục" className="hover:text-red-500 cursor-pointer">
                     <X size={12} />
                   </button>
                 </span>
@@ -225,7 +235,7 @@ export default function ProductTabsFilter({
               {filters.thickness !== 'all' && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#FEF3EC] text-[#F26522] border border-[#F26522]/30 font-bold">
                   <span>Dày: {filters.thickness}</span>
-                  <button type="button" onClick={() => onFilterChange('thickness', 'all')} className="hover:text-red-500 cursor-pointer">
+                  <button type="button" onClick={() => onFilterChange('thickness', 'all')} aria-label="Xoá lọc độ dày" className="hover:text-red-500 cursor-pointer">
                     <X size={12} />
                   </button>
                 </span>
@@ -234,7 +244,7 @@ export default function ProductTabsFilter({
               {filters.search && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-200 text-slate-800 font-semibold">
                   <span>Từ khóa: "{filters.search}"</span>
-                  <button type="button" onClick={() => onFilterChange('search', '')} className="hover:text-red-500 cursor-pointer">
+                  <button type="button" onClick={() => onFilterChange('search', '')} aria-label="Xoá từ khoá tìm kiếm" className="hover:text-red-500 cursor-pointer">
                     <X size={12} />
                   </button>
                 </span>
