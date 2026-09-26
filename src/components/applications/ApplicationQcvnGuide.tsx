@@ -153,7 +153,7 @@ export default function ApplicationQcvnGuide() {
                     </td>
                     <td className="py-4 px-5 text-right">
                       <Link
-                        href={`/ung-dung/${item.slug}`}
+                        href={`/giai-phap-ung-dung/${item.slug}`}
                         className="inline-flex items-center gap-1 font-bold text-[#5F8A03] hover:underline whitespace-nowrap"
                       >
                         <span>Chi tiết</span>

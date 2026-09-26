@@ -1,14 +1,10 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { 
-  CheckCircle2, 
-  FileCheck2, 
-  Layers, 
-  Wrench, 
-  ShieldCheck, 
-  PhoneCall 
+import {
+  CheckCircle2,
+  ChevronRight,
+  PhoneCall
 } from 'lucide-react';
 
 const PROCESS_STEPS = [
@@ -16,29 +12,45 @@ const PROCESS_STEPS = [
     step: '01',
     title: 'Xác Định Cấp EI',
     desc: 'Tư vấn chọn đúng độ dày 5 - 18mm theo chuẩn QCVN 06:2022, tối ưu chi phí vật tư.',
-    icon: Layers,
     badge: 'Đúng quy chuẩn',
   },
   {
     step: '02',
     title: 'Lắp Khung & Bông',
     desc: 'Thi công khung xương thép khẩu độ 400 - 600mm, chèn bông Rockwool tỷ trọng chuẩn.',
-    icon: Wrench,
     badge: 'Đúng kỹ thuật',
   },
   {
     step: '03',
     title: 'Bắn Vít & Trét Keo',
     desc: 'Bắn so le mạch, trét keo chống cháy Remak® FireSeal ngăn 100% khói độc xâm nhập.',
-    icon: ShieldCheck,
     badge: 'Kín khít tuyệt đối',
   },
   {
     step: '04',
     title: 'Nghiệm Thu PCCC',
     desc: 'Cung cấp trọn bộ biên bản thử nghiệm đốt lò IBST công chứng và CO/CQ xuất xưởng.',
-    icon: FileCheck2,
     badge: 'Nghiệm thu 100%',
+  },
+];
+
+// Xen kẽ 2 tông màu thương hiệu để phân biệt từng bước, tránh cả 4 thẻ trùng 1 màu
+const ACCENTS = [
+  {
+    bar: 'bg-gradient-to-r from-[#7CB305] to-[#5F8A03]',
+    badge: 'bg-[#5F8A03]',
+    tag: 'bg-[#F4F9E8] text-[#5F8A03] border-[#7CB305]/20',
+    title: 'text-[#5F8A03] group-hover:text-[#7CB305]',
+    cardHover: 'hover:border-[#7CB305]/60',
+    connector: 'bg-[#5F8A03]',
+  },
+  {
+    bar: 'bg-gradient-to-r from-[#F26522] to-[#D95314]',
+    badge: 'bg-[#D95314]',
+    tag: 'bg-[#FEF3EC] text-[#D95314] border-[#F26522]/20',
+    title: 'text-[#D95314] group-hover:text-[#F26522]',
+    cardHover: 'hover:border-[#F26522]/60',
+    connector: 'bg-[#D95314]',
   },
 ];
 
@@ -52,47 +64,51 @@ export default function ApplicationProcess() {
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             Quy Trình 4 Bước Đạt Chuẩn Nghiệm Thu PCCC
           </h2>
+
         </div>
 
-        {/* 4 Process Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 4 Process Cards Grid (nối bước bằng mũi tên trên desktop) */}
+        <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 list-none">
           {PROCESS_STEPS.map((item, idx) => {
-            const Icon = item.icon;
+            const isLast = idx === PROCESS_STEPS.length - 1;
+            const accent = ACCENTS[idx % ACCENTS.length];
             return (
-              <div
-                key={idx}
-                className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-[#7CB305] transition-all relative flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-3xl font-black text-slate-200">
-                      {item.step}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-[#F4F9E8] text-[#5F8A03] text-[11px] font-bold">
-                      {item.badge}
-                    </span>
-                  </div>
+              <li key={idx} className="relative">
+                <div className={`group h-full bg-white rounded-3xl border border-slate-200 shadow-xs ${accent.cardHover} hover:shadow-lg transition-all duration-300 overflow-hidden`}>
+                  {/* Thanh nhấn màu thương hiệu trên đỉnh thẻ (xen kẽ theo bước) */}
+                  <div className={`h-1.5 ${accent.bar}`} />
 
-                  <div className="w-12 h-12 rounded-2xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center mb-4">
-                    <Icon size={22} />
-                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center justify-between mb-5">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-lg ${accent.badge} text-white text-[11px] font-black tracking-wider`}>
+                        BƯỚC {item.step}
+                      </span>
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${accent.tag}`}>
+                        {item.badge}
+                      </span>
+                    </div>
 
-                  <h3 className="text-base font-bold text-slate-900 mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    {item.desc}
-                  </p>
+                    <h3 className={`text-lg font-extrabold transition-colors duration-300 mb-2 ${accent.title}`}>
+                      {item.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs font-semibold text-[#5F8A03]">
-                  <CheckCircle2 size={14} />
-                  <span>Cam kết đúng tiêu chuẩn</span>
-                </div>
-              </div>
+                {!isLast && (
+                  <div
+                    aria-hidden="true"
+                    className={`hidden lg:flex absolute top-1/2 -right-3 -translate-y-1/2 z-10 w-7 h-7 rounded-full ${accent.connector} items-center justify-center shadow-md ring-4 ring-slate-50`}
+                  >
+                    <ChevronRight size={14} className="text-white" />
+                  </div>
+                )}
+              </li>
             );
           })}
-        </div>
+        </ol>
 
         {/* Direct Engineer Hotline Support Banner */}
         <div className="mt-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">

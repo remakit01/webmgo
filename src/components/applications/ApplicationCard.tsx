@@ -60,7 +60,7 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
         
         {/* Title & Tagline */}
         <div>
-          <Link href={`/ung-dung/${application.slug}`} className="group/title block">
+          <Link href={`/giai-phap-ung-dung/${application.slug}`} className="group/title block">
             <h3 className="text-lg sm:text-xl font-bold text-slate-900 group-hover/title:text-[#5F8A03] transition-colors leading-snug">
               {application.title}
             </h3>
@@ -102,7 +102,7 @@ export default function ApplicationCard({ application }: ApplicationCardProps) {
       {/* 3. CARD ACTION FOOTER */}
       <div className="p-5 pt-0 flex items-center gap-2.5">
         <Link
-          href={`/ung-dung/${application.slug}`}
+          href={`/giai-phap-ung-dung/${application.slug}`}
           className="flex-1 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-[#F4F9E8] text-slate-800 hover:text-[#5F8A03] font-bold text-xs transition-colors border border-slate-200 flex items-center justify-center gap-1.5"
         >
           <span>Xem Giải Pháp</span>

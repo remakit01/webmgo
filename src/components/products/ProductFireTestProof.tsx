@@ -80,48 +80,60 @@ export default function ProductFireTestProof() {
 
         {/* 4 CON SỐ BẢO CHỨNG NIỀM TIN */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#7CB305]/40 transition-all">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold flex-shrink-0">
-                <Flame size={20} />
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-[#7CB305]/50 hover:-translate-y-0.5 transition-all overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-[#7CB305] to-[#5F8A03]" />
+            <div className="p-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7CB305] to-[#5F8A03] text-white flex items-center justify-center shadow-sm shadow-[#5F8A03]/25 flex-shrink-0">
+                  <Flame size={22} />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-slate-900">1.200°C</div>
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-slate-900">1.200°C</div>
+              <div className="text-xs font-bold text-slate-700 mt-3">Chịu Lửa Trực Tiếp</div>
+              <p className="text-[11px] text-slate-500 mt-0.5">Không bắt lửa, không biến dạng ở nhiệt độ cực hạn</p>
             </div>
-            <div className="text-xs font-bold text-slate-700 mt-3">Chịu Lửa Trực Tiếp</div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Không bắt lửa, không biến dạng ở nhiệt độ cực hạn</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#F26522]/40 transition-all">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#FEF3EC] text-[#F26522] flex items-center justify-center font-bold flex-shrink-0">
-                <Award size={20} />
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-[#F26522]/50 hover:-translate-y-0.5 transition-all overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-[#F26522] to-[#D95314]" />
+            <div className="p-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F26522] to-[#D95314] text-white flex items-center justify-center shadow-sm shadow-[#D95314]/25 flex-shrink-0">
+                  <Award size={22} />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-slate-900">EI 180</div>
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-slate-900">EI 180</div>
+              <div className="text-xs font-bold text-slate-700 mt-3">Giới Hạn Chịu Lửa Tối Đa</div>
+              <p className="text-[11px] text-slate-500 mt-0.5">Thời gian toàn vẹn và cách nhiệt lên tới 3 giờ liên tục</p>
             </div>
-            <div className="text-xs font-bold text-slate-700 mt-3">Giới Hạn Chịu Lửa Tối Đa</div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Thời gian toàn vẹn và cách nhiệt lên tới 3 giờ liên tục</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-emerald-500/40 transition-all">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
-                <ShieldCheck size={20} />
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-[#7CB305]/50 hover:-translate-y-0.5 transition-all overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-[#7CB305] to-[#5F8A03]" />
+            <div className="p-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7CB305] to-[#5F8A03] text-white flex items-center justify-center shadow-sm shadow-[#5F8A03]/25 flex-shrink-0">
+                  <ShieldCheck size={22} />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-slate-900">0% Clo</div>
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-slate-900">0% Clo</div>
+              <div className="text-xs font-bold text-slate-700 mt-3">Zero-Chloride (MOS)</div>
+              <p className="text-[11px] text-slate-500 mt-0.5">Không ăn mòn tôn kẽm và đinh vít, tuổi thọ trên 50 năm</p>
             </div>
-            <div className="text-xs font-bold text-slate-700 mt-3">Zero-Chloride (MOS)</div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Không ăn mòn tôn kẽm và đinh vít, tuổi thọ trên 50 năm</p>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-blue-500/40 transition-all">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold flex-shrink-0">
-                <FileCheck size={20} />
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-xs hover:shadow-md hover:border-[#F26522]/50 hover:-translate-y-0.5 transition-all overflow-hidden">
+            <div className="h-1.5 bg-gradient-to-r from-[#F26522] to-[#D95314]" />
+            <div className="p-5">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#F26522] to-[#D95314] text-white flex items-center justify-center shadow-sm shadow-[#D95314]/25 flex-shrink-0">
+                  <FileCheck size={22} />
+                </div>
+                <div className="text-2xl sm:text-3xl font-black text-slate-900">100%</div>
               </div>
-              <div className="text-2xl sm:text-3xl font-black text-slate-900">100%</div>
+              <div className="text-xs font-bold text-slate-700 mt-3">Hồ Sơ Nghiệm Thu</div>
+              <p className="text-[11px] text-slate-500 mt-0.5">Cung cấp bản sao công chứng và chứng chỉ xuất xưởng CO/CQ</p>
             </div>
-            <div className="text-xs font-bold text-slate-700 mt-3">Hồ Sơ Nghiệm Thu</div>
-            <p className="text-[11px] text-slate-500 mt-0.5">Cung cấp bản sao công chứng và chứng chỉ xuất xưởng CO/CQ</p>
           </div>
         </div>
 
