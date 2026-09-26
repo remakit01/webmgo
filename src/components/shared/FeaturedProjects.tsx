@@ -24,8 +24,6 @@ export default function FeaturedProjects({
     >
       {showHeading && (
         <SectionHeading 
-          badge="DỰ ÁN TIÊU BIỂU"
-          badgeColor="orange"
           title="Công Trình Đã Nghiệm Thu PCCC"
         />
       )}

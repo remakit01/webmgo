@@ -26,8 +26,6 @@ export default function MaterialCalculator({
       <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl">
         {showHeading && (
           <SectionHeading 
-            badge="BÓC TÁCH KHỐI LƯỢNG"
-            badgeColor="green"
             title="Dự Toán Vật Tư Online"
           />
         )}

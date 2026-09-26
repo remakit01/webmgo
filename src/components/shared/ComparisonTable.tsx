@@ -43,8 +43,6 @@ export default function ComparisonTable({
     >
       {showHeading && (
         <SectionHeading 
-          badge="ĐỐI CHUẨN KỸ THUẬT"
-          badgeColor="green"
           title="So Sánh MGO Với Vật Liệu Khác"
         />
       )}

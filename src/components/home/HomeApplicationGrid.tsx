@@ -42,8 +42,6 @@ export default function HomeApplicationGrid() {
   return (
     <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
       <SectionHeading 
-        badge="ỨNG DỤNG THỰC TẾ"
-        badgeColor="green"
         title="Ứng Dụng Tiêu Biểu Tấm MGO"
       />
 

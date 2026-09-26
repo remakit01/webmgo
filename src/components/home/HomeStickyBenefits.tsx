@@ -118,13 +118,6 @@ export default function HomeStickyBenefits() {
               CỘT TRÁI: TIÊU ĐỀ & 4 TAB ĐIỀU HƯỚNG BẤM CHỌN ĐẶC TÍNH
              ========================================================================= */}
           <div className="lg:col-span-5 space-y-6">
-            
-            {/* Eyebrow badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F4F9E8] border border-[#7CB305]/30 text-xs font-bold tracking-wide text-[#5F8A03]">
-              <Sparkles size={14} className="text-[#F26522]" />
-              <span>ĐẶC TÍNH KỸ THUẬT CỐT LÕI</span>
-            </div>
-
             {/* Tiêu đề chính */}
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 leading-[1.22] tracking-tight">
               Hiệu Năng Vượt Trội <br className="hidden sm:inline" />
@@ -137,10 +130,6 @@ export default function HomeStickyBenefits() {
 
             {/* BỘ 4 TAB BẤM CHỌN ĐẶC TÍNH (CLICK ĐỂ CHỌN - KHÔNG HOVER TỰ ĐỔI) */}
             <div className="space-y-2.5 pt-2">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                <span>CHỌN ĐẶC TÍNH KỸ THUẬT:</span>
-                <span className="text-[11px] font-medium text-slate-400 lowercase">bấm để chuyển</span>
-              </div>
               <div className="flex flex-col gap-2.5">
                 {BENEFITS.map((item) => {
                   const isCurrent = activeId === item.id;
