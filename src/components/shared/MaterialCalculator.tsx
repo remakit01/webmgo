@@ -16,10 +16,18 @@ export default function MaterialCalculator({
   showHeading = true,
 }: MaterialCalculatorProps) {
   const [area, setArea] = useState<number>(50);
+  const [areaInput, setAreaInput] = useState<string>('50');
   const [selectedThickness, setSelectedThickness] = useState<number>(10);
   const [applicationType, setApplicationType] = useState<string>('duct');
 
   const result = calculateMgoMaterials(area, selectedThickness);
+
+  const commitAreaInput = () => {
+    const parsed = Number(areaInput);
+    const clamped = Number.isFinite(parsed) ? Math.min(500, Math.max(5, Math.round(parsed))) : area;
+    setArea(clamped);
+    setAreaInput(String(clamped));
+  };
 
   return (
     <section id={id} className="max-w-[1440px] mx-auto px-4 lg:px-8">
@@ -38,7 +46,7 @@ export default function MaterialCalculator({
               <label className="block text-sm font-bold text-slate-800 mb-2">
                 1. Ứng dụng thi công:
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3" role="group" aria-label="Ứng dụng thi công">
                 {[
                   { id: 'duct', label: 'Bọc ống gió PCCC' },
                   { id: 'wall', label: 'Vách ngăn chống cháy' },
@@ -69,12 +77,28 @@ export default function MaterialCalculator({
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="text-sm font-bold text-slate-800">
+                <label htmlFor="area-input" className="text-sm font-bold text-slate-800">
                   2. Diện tích cần thi công:
                 </label>
-                <span className="text-lg font-black text-[#5F8A03] bg-[#F4F9E8] px-3 py-1 rounded-lg">
-                  {area} m²
-                </span>
+                <div className="flex items-center gap-1 bg-[#F4F9E8] rounded-lg pl-2 pr-3 py-1 focus-within:ring-2 focus-within:ring-[#7CB305]">
+                  <input
+                    id="area-input"
+                    type="number"
+                    inputMode="numeric"
+                    min={5}
+                    max={500}
+                    value={areaInput}
+                    onChange={(e) => setAreaInput(e.target.value)}
+                    onBlur={commitAreaInput}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.currentTarget.blur();
+                      }
+                    }}
+                    className="w-14 bg-transparent text-lg font-black text-[#5F8A03] text-right focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="text-lg font-black text-[#5F8A03]">m²</span>
+                </div>
               </div>
               <input
                 type="range"
@@ -82,10 +106,13 @@ export default function MaterialCalculator({
                 max="500"
                 step="5"
                 value={area}
-                onChange={(e) => setArea(Number(e.target.value))}
+                onChange={(e) => {
+                  setArea(Number(e.target.value));
+                  setAreaInput(e.target.value);
+                }}
                 aria-label="Diện tích cần thi công (m²)"
                 aria-valuetext={`${area} mét vuông`}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#7CB305]"
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#7CB305] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#7CB305] [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#7CB305] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
               />
               <div className="flex justify-between text-[11px] text-slate-400 mt-1 font-medium">
                 <span>5 m²</span>
@@ -98,7 +125,7 @@ export default function MaterialCalculator({
               <label className="block text-sm font-bold text-slate-800 mb-2">
                 3. Độ dày tấm MGO đề xuất:
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Độ dày tấm MGO đề xuất">
                 {[5, 8, 10, 12, 15, 18].map((th) => (
                   <button
                     key={th}
@@ -119,13 +146,16 @@ export default function MaterialCalculator({
           </div>
 
           {/* Cột kết quả bóc tách (Phải) */}
-          <div className="lg:col-span-6 bg-slate-900 text-white p-6 sm:p-8 rounded-2xl space-y-6">
+          <div
+            className="lg:col-span-6 bg-slate-900 text-white p-6 sm:p-8 rounded-2xl space-y-6"
+            aria-live="polite"
+          >
             <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
               <div className="w-10 h-10 rounded-xl bg-[#7CB305]/20 text-[#7CB305] flex items-center justify-center">
                 <Calculator size={22} />
               </div>
               <div>
-                <h4 className="font-bold text-base">Bảng Dự Toán Vật Tư Tạm Tính</h4>
+                <h3 className="font-bold text-base">Bảng Dự Toán Vật Tư Tạm Tính</h3>
                 <p className="text-xs text-slate-400">Đã cộng 5% hao hụt thi công tiêu chuẩn</p>
               </div>
             </div>

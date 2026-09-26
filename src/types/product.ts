@@ -18,6 +18,7 @@ export interface FeaturedProject {
   application: string;
   fireRating: string;
   image: string;
+  link: string;
 }
 
 export interface MaterialComparisonItem {

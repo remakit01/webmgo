@@ -52,7 +52,7 @@ interface HomeBannerSwiperProps {
 export default function HomeBannerSwiper({
   banners = defaultBanners,
   autoPlayInterval = 3500,
-  showDots = true,
+  showDots = false,
 }: HomeBannerSwiperProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);

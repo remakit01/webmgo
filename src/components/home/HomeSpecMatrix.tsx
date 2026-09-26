@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Layers, ArrowRight, Download, Filter, CheckCircle2, ShieldCheck, Flame } from 'lucide-react';
+import { ArrowRight, Download, Filter, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { MGO_SPECS } from '@/data/products';
 import SectionHeading from '@/components/ui/SectionHeading';
 
@@ -43,7 +43,9 @@ export default function HomeSpecMatrix() {
               key={tab.id}
               type="button"
               role="tab"
+              id={`spec-tab-${tab.id}`}
               aria-selected={isActive}
+              aria-controls="spec-tabpanel"
               onClick={() => setActiveCategory(tab.id)}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 border ${
                 isActive
@@ -64,36 +66,25 @@ export default function HomeSpecMatrix() {
       </div>
 
       {/* LƯỚI QUY CÁCH ĐỘ DÀY CHI TIẾT */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div
+        id="spec-tabpanel"
+        role="tabpanel"
+        aria-label={FILTER_TABS.find((t) => t.id === activeCategory)?.label}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
         {filteredSpecs.map((item, idx) => (
-          <div 
-            key={idx} 
-            className={`relative bg-white rounded-3xl p-6 sm:p-7 border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between ${
-              item.isPopular 
-                ? 'border-[#7CB305] shadow-md ring-2 ring-[#7CB305]/20' 
-                : 'border-slate-200/90'
-            }`}
+          <div
+            key={idx}
+            className="group relative bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-[#7CB305] flex flex-col justify-between"
           >
-            {item.isPopular && (
-              <span className="absolute -top-3 left-6 px-3.5 py-1 rounded-full bg-[#7CB305] text-white text-[11px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
-                <Flame size={12} />
-                <span>Quy Cách Phổ Biến</span>
-              </span>
-            )}
-
             <div>
               {/* Header card độ dày */}
               <div className="flex items-center justify-between mb-5 pt-1">
-                <div>
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Độ dày tấm
-                  </div>
-                  <div className="text-3xl font-bold text-slate-900 mt-0.5">
-                    {item.thickness}
-                  </div>
-                </div>
-                <div className="w-12 h-12 rounded-2xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center shadow-inner">
-                  <Layers size={24} />
+                <div className="flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-slate-900">
+                    {item.thickness.replace(/mm$/i, '')}
+                  </span>
+                  <span className="text-base font-bold text-slate-400 transition-colors group-hover:text-[#5F8A03]">mm</span>
                 </div>
               </div>
 
@@ -101,17 +92,15 @@ export default function HomeSpecMatrix() {
               <div className="space-y-2.5 text-xs pb-5 border-b border-slate-100">
                 <div className="flex justify-between items-center py-1 border-b border-slate-50">
                   <span className="text-slate-500 font-medium">Khối lượng tấm:</span>
-                  <span className="font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded-md">
-                    {item.weightPerSheet}
-                  </span>
+                  <span className="font-semibold text-slate-700">{item.weightPerSheet}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-slate-50">
                   <span className="text-slate-500 font-medium">Tỷ trọng danh định:</span>
-                  <span className="font-semibold text-slate-800">{item.density}</span>
+                  <span className="font-semibold text-slate-700">{item.density}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 border-b border-slate-50">
                   <span className="text-slate-500 font-medium">Cường độ chịu uốn:</span>
-                  <span className="font-semibold text-[#5F8A03]">{item.flexuralStrength || '≥ 18 MPa'}</span>
+                  <span className="font-semibold text-slate-700">{item.flexuralStrength || '≥ 18 MPa'}</span>
                 </div>
                 <div className="flex justify-between items-center py-1">
                   <span className="text-slate-500 font-medium">Khả năng chịu lửa:</span>
@@ -128,7 +117,7 @@ export default function HomeSpecMatrix() {
                   <span>Ứng dụng thi công:</span>
                 </div>
                 <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  {item.standardApplication}
+                  {item.standardApplication.split('•')[0].trim()}
                 </p>
               </div>
             </div>

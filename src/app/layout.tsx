@@ -12,10 +12,29 @@ const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
 });
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mgo.remak.vn";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: "Tấm Chống Cháy MGO Remak® FireOFF - Chuẩn PCCC QCVN 06:2022/BXD",
   description: "Tổng kho tấm chống cháy MGO (Magie Oxit) đạt chuẩn PCCC A1, EI 15 - EI 120. Kháng nước 100%, không rỉ sét, nhẹ hơn cemboard 30%. Báo giá sỉ nhà máy, nhận mẫu thử miễn phí!",
   keywords: "tấm mgo, tấm chống cháy mgo, mgo remak, bọc ống gió chống cháy, vách ngăn chống cháy ei 60, vách karaoke, sàn chịu lực mgo",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: baseUrl,
+    siteName: "Remak® Vietnam",
+    title: "Tấm Chống Cháy MGO Remak® FireOFF - Chuẩn PCCC QCVN 06:2022/BXD",
+    description: "Tổng kho tấm chống cháy MGO (Magie Oxit) đạt chuẩn PCCC A1, EI 15 - EI 120. Kháng nước 100%, không rỉ sét, nhẹ hơn cemboard 30%.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tấm Chống Cháy MGO Remak® FireOFF - Chuẩn PCCC QCVN 06:2022/BXD",
+    description: "Tổng kho tấm chống cháy MGO (Magie Oxit) đạt chuẩn PCCC A1, EI 15 - EI 120. Kháng nước 100%, không rỉ sét, nhẹ hơn cemboard 30%.",
+  },
 };
 
 export default function RootLayout({

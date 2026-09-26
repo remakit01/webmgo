@@ -15,11 +15,16 @@ import {
   FaqAccordion,
 } from '@/components/shared';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { FAQ_LIST } from '@/data/products';
+import { FAQ_LIST, THICKNESS_DATA } from '@/data/products';
+
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mgo.remak.vn';
 
 export const metadata: Metadata = {
   title: 'Tấm Chống Cháy MGO Remak® FireOFF - Chuẩn PCCC QCVN 06:2022/BXD',
   description: 'Tổng kho phân phối và sản xuất tấm Magie Oxit (MGO) chống cháy A1, chịu nhiệt 1200°C, kháng nước 100%, không rỉ sét. Báo giá nhà máy, nhận mẫu thử miễn phí!',
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function HomePage() {
@@ -41,7 +46,7 @@ export default function HomePage() {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: 'Tấm Chống Cháy MGO Remak® FireOFF',
-    image: 'https://mgo.com.vn/wp-content/uploads/2022/08/Logo_remak_800.png',
+    image: '/images/mgo-board.jpg',
     description: 'Tấm chống cháy Magie Oxit (MGO) nhóm A1 đạt kiểm định PCCC QCVN 06:2022/BXD',
     brand: {
       '@type': 'Brand',
@@ -50,7 +55,40 @@ export default function HomePage() {
     offers: {
       '@type': 'AggregateOffer',
       priceCurrency: 'VND',
+      lowPrice: 125000,
+      highPrice: 540000,
+      offerCount: Object.keys(THICKNESS_DATA).length,
       availability: 'https://schema.org/InStock',
+    },
+  };
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Remak® Vietnam',
+    url: baseUrl,
+    logo: `${baseUrl}/images/Logo_remak_800.png`,
+    description: 'Công ty Cổ phần Xây dựng và Nội thất Remak - nhà máy sản xuất và phân phối tấm chống cháy Magie Oxit (MGO) FireOFF đạt chuẩn PCCC QCVN 06:2022/BXD.',
+    address: [
+      {
+        '@type': 'PostalAddress',
+        streetAddress: 'Cụm Công Nghiệp Lại Yên',
+        addressLocality: 'Hoài Đức, TP. Hà Nội',
+        addressCountry: 'VN',
+      },
+      {
+        '@type': 'PostalAddress',
+        streetAddress: 'KCN Mông Hóa',
+        addressLocality: 'TP. Hòa Bình',
+        addressCountry: 'VN',
+      },
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      telephone: '+84-902-441-981',
+      contactType: 'sales',
+      email: 'contact@remak.vn',
+      areaServed: 'VN',
     },
   };
 
@@ -65,12 +103,16 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
 
       <div className="space-y-16 pb-20">
         {/* 1. AUTO BANNER SWIPER (TỰ ĐỘNG CHẠY, KHÔNG ACTION TRÁI PHẢI, KHÔNG PROGRESS BAR) */}
         <HomeBannerSwiper />
 
-        {/* 2. HERO INTRO & TRUST BADGES (SERVER COMPONENT) */}
+        {/* 2. HERO INTRO & TRUST BADGES (CLIENT COMPONENT - accordion giới thiệu) */}
         <HomeHeroSection />
 
         {/* 3. MGO BENEFITS - 4 ĐẶC TÍNH VƯỢT TRỘI (INTERACTIVE TAB SWITCHER) */}

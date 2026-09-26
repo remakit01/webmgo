@@ -75,46 +75,49 @@ export default function SampleRequestForm({
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label htmlFor="sample-name" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     Họ và tên người nhận *
                   </label>
-                  <input 
-                    type="text" 
-                    required 
-                    placeholder="Nguyễn Văn A" 
+                  <input
+                    id="sample-name"
+                    type="text"
+                    required
+                    placeholder="Nguyễn Văn A"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label htmlFor="sample-phone" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     Số điện thoại nhận hàng *
                   </label>
-                  <input 
-                    type="tel" 
-                    required 
-                    placeholder="0902 xxx xxx" 
+                  <input
+                    id="sample-phone"
+                    type="tel"
+                    required
+                    placeholder="0902 xxx xxx"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label htmlFor="sample-address" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     Địa chỉ nhận mẫu *
                   </label>
-                  <input 
-                    type="text" 
-                    required 
-                    placeholder="Số nhà, tên đường, Quận/Huyện, Tỉnh/TP" 
+                  <input
+                    id="sample-address"
+                    type="text"
+                    required
+                    placeholder="Số nhà, tên đường, Quận/Huyện, Tỉnh/TP"
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                  <label htmlFor="sample-purpose" className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     Mục đích sử dụng chính
                   </label>
-                  <select className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305] text-slate-600">
+                  <select id="sample-purpose" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305] text-slate-600">
                     <option value="duct">Bọc ống gió PCCC</option>
                     <option value="wall">Vách ngăn cách âm chống cháy</option>
                     <option value="floor">Lót sàn chịu lực gác lửng</option>

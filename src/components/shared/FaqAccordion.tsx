@@ -43,16 +43,21 @@ export default function FaqAccordion({
                 }`}
               />
             </button>
-            {openFaq === idx && (
-              <div
-                id={`faq-panel-${idx}`}
-                role="region"
-                aria-labelledby={`faq-button-${idx}`}
-                className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3"
-              >
-                {faq.a}
+            <div
+              id={`faq-panel-${idx}`}
+              role="region"
+              aria-labelledby={`faq-button-${idx}`}
+              aria-hidden={openFaq !== idx}
+              className={`grid transition-all duration-300 ease-out ${
+                openFaq === idx ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+                  {faq.a}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         ))}
       </div>
