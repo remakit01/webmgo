@@ -130,7 +130,7 @@ export default function HomeStickyBenefits() {
 
             {/* BỘ 4 TAB BẤM CHỌN ĐẶC TÍNH (CLICK ĐỂ CHỌN - KHÔNG HOVER TỰ ĐỔI) */}
             <div className="space-y-2.5 pt-2">
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2.5" role="tablist" aria-orientation="vertical">
                 {BENEFITS.map((item) => {
                   const isCurrent = activeId === item.id;
                   const itemOrange = item.accentColor === 'orange';
@@ -140,6 +140,10 @@ export default function HomeStickyBenefits() {
                     <button
                       key={item.id}
                       type="button"
+                      role="tab"
+                      id={`benefit-tab-${item.id}`}
+                      aria-selected={isCurrent}
+                      aria-controls={`benefit-panel-${item.id}`}
                       onClick={() => setActiveId(item.id)}
                       className={`relative w-full p-4 rounded-2xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer border overflow-hidden ${
                         isCurrent
@@ -227,8 +231,12 @@ export default function HomeStickyBenefits() {
                 const IconComponent = item.icon;
 
                 return (
-                  <div 
+                  <div
                     key={item.id}
+                    role="tabpanel"
+                    id={`benefit-panel-${item.id}`}
+                    aria-labelledby={`benefit-tab-${item.id}`}
+                    aria-hidden={!isActive}
                     className={`col-start-1 row-start-1 bg-white rounded-3xl overflow-hidden border shadow-xl transition-all duration-500 ease-out ${
                       isActive 
                         ? 'opacity-100 translate-y-0 scale-100 z-10 pointer-events-auto' 

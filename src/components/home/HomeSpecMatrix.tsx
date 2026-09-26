@@ -28,14 +28,22 @@ export default function HomeSpecMatrix() {
       aria-label="Bảng Thông Số Kỹ Thuật Tấm MGO Remak"
       className="max-w-[1440px] mx-auto px-4 lg:px-8"
     >
+      <SectionHeading title="Bảng Thông Số Kỹ Thuật Tấm MGO Remak" />
+
       {/* BỘ LỌC THEO MỤC ĐÍCH THI CÔNG DÀNH CHO KỸ SƯ / NHÀ THẦU */}
-      <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+      <div
+        className="flex flex-wrap items-center justify-center gap-2 mb-8"
+        role="tablist"
+        aria-label="Lọc theo quy cách thi công"
+      >
         {FILTER_TABS.map((tab) => {
           const isActive = activeCategory === tab.id;
           return (
             <button
               key={tab.id}
               type="button"
+              role="tab"
+              aria-selected={isActive}
               onClick={() => setActiveCategory(tab.id)}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 cursor-pointer flex items-center gap-2 border ${
                 isActive
