@@ -48,6 +48,7 @@ export default function MaterialCalculator({
                   <button
                     key={item.id}
                     type="button"
+                    aria-pressed={applicationType === item.id}
                     onClick={() => {
                       setApplicationType(item.id);
                       if (item.id === 'floor') setSelectedThickness(18);
@@ -75,13 +76,15 @@ export default function MaterialCalculator({
                   {area} m²
                 </span>
               </div>
-              <input 
-                type="range" 
-                min="5" 
-                max="500" 
+              <input
+                type="range"
+                min="5"
+                max="500"
                 step="5"
                 value={area}
                 onChange={(e) => setArea(Number(e.target.value))}
+                aria-label="Diện tích cần thi công (m²)"
+                aria-valuetext={`${area} mét vuông`}
                 className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#7CB305]"
               />
               <div className="flex justify-between text-[11px] text-slate-400 mt-1 font-medium">
@@ -100,6 +103,7 @@ export default function MaterialCalculator({
                   <button
                     key={th}
                     type="button"
+                    aria-pressed={selectedThickness === th}
                     onClick={() => setSelectedThickness(th)}
                     className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                       selectedThickness === th

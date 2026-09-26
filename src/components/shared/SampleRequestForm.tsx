@@ -57,7 +57,11 @@ export default function SampleRequestForm({
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-xl">
+          <div
+            className="lg:col-span-5 bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-xl"
+            aria-live="polite"
+            role="status"
+          >
             {submitted ? (
               <div className="text-center py-8 space-y-3">
                 <div className="w-16 h-16 bg-[#F4F9E8] text-[#5F8A03] rounded-full flex items-center justify-center mx-auto">

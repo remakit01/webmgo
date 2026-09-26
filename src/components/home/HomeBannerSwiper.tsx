@@ -52,10 +52,11 @@ interface HomeBannerSwiperProps {
 export default function HomeBannerSwiper({
   banners = defaultBanners,
   autoPlayInterval = 3500,
-  showDots = false,
+  showDots = true,
 }: HomeBannerSwiperProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   // Quản lý vuốt chạm trên Mobile
   const touchStartX = useRef<number | null>(null);
@@ -63,14 +64,14 @@ export default function HomeBannerSwiper({
 
   // Tự động chạy slider (Auto play)
   useEffect(() => {
-    if (banners.length <= 1 || isHovered) return;
+    if (banners.length <= 1 || isHovered || isFocused) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % banners.length);
     }, autoPlayInterval);
 
     return () => clearInterval(timer);
-  }, [banners.length, autoPlayInterval, isHovered]);
+  }, [banners.length, autoPlayInterval, isHovered, isFocused]);
 
   // Touch Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -104,6 +105,8 @@ export default function HomeBannerSwiper({
       className="relative w-full overflow-hidden select-none bg-slate-100"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}

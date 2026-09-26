@@ -28,20 +28,28 @@ export default function FaqAccordion({
       <div className="max-w-3xl mx-auto space-y-4">
         {items.map((faq, idx) => (
           <div key={idx} className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-            <button 
+            <button
+              id={`faq-button-${idx}`}
               onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+              aria-expanded={openFaq === idx}
+              aria-controls={`faq-panel-${idx}`}
               className="w-full px-5 py-4 text-left font-bold text-slate-900 flex items-center justify-between gap-4 hover:text-[#5F8A03] transition-colors cursor-pointer"
             >
               <span>{faq.q}</span>
-              <ChevronDown 
-                size={18} 
+              <ChevronDown
+                size={18}
                 className={`text-slate-400 transition-transform flex-shrink-0 ${
                   openFaq === idx ? 'rotate-180 text-[#7CB305]' : ''
-                }`} 
+                }`}
               />
             </button>
             {openFaq === idx && (
-              <div className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
+              <div
+                id={`faq-panel-${idx}`}
+                role="region"
+                aria-labelledby={`faq-button-${idx}`}
+                className="px-5 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3"
+              >
                 {faq.a}
               </div>
             )}

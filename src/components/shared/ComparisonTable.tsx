@@ -76,8 +76,8 @@ export default function ComparisonTable({
           <table className="w-full text-left border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50/90 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <th className="p-5 w-[28%]">Chỉ Tiêu Kỹ Thuật Nghiệm Thu</th>
-                <th className="p-5 w-[36%] bg-[#F4F9E8] text-[#5F8A03] border-x-2 border-[#7CB305] relative">
+                <th scope="col" className="p-5 w-[28%]">Chỉ Tiêu Kỹ Thuật Nghiệm Thu</th>
+                <th scope="col" className="p-5 w-[36%] bg-[#F4F9E8] text-[#5F8A03] border-x-2 border-[#7CB305] relative">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="w-3 h-3 rounded-full bg-[#7CB305] animate-pulse"></span>
@@ -88,8 +88,8 @@ export default function ComparisonTable({
                     </span>
                   </div>
                 </th>
-                <th className="p-5 w-[18%]">Tấm Cemboard Xi Măng</th>
-                <th className="p-5 w-[18%]">Tấm Thạch Cao Chống Cháy</th>
+                <th scope="col" className="p-5 w-[18%]">Tấm Cemboard Xi Măng</th>
+                <th scope="col" className="p-5 w-[18%]">Tấm Thạch Cao Chống Cháy</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">

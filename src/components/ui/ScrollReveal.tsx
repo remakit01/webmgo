@@ -69,7 +69,7 @@ export default function ScrollReveal({
   return (
     <div
       ref={domRef}
-      className={className}
+      className={`scroll-reveal ${className}`}
       style={{
         opacity: isVisible ? 1 : 0,
         transform: getTransform(),
