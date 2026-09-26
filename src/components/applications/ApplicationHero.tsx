@@ -63,28 +63,40 @@ export default function ApplicationHero() {
         {/* 4 Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-10 pt-6 border-t border-slate-200/80">
           
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-center">
-            <div className="text-2xl sm:text-3xl font-black text-[#5F8A03]">5+</div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Hệ Ứng Dụng</div>
-            <div className="text-[11px] text-slate-500">Ống gió, vách, sàn, trần, cửa</div>
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-2xs text-center overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#7CB305] to-[#5F8A03]" />
+            <div className="p-3.5">
+              <div className="text-2xl sm:text-3xl font-black text-[#5F8A03]">5+</div>
+              <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Hệ Ứng Dụng</div>
+              <div className="text-[11px] text-slate-500">Ống gió, vách, sàn, trần, cửa</div>
+            </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-center">
-            <div className="text-2xl sm:text-3xl font-black text-[#F26522]">EI 30 – 180</div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Giới Hạn Chịu Lửa</div>
-            <div className="text-[11px] text-slate-500">Đốt lò thực tế Viện IBST</div>
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-2xs text-center overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#F26522] to-[#D95314]" />
+            <div className="p-3.5">
+              <div className="text-2xl sm:text-3xl font-black text-[#F26522]">EI 30 – 180</div>
+              <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Giới Hạn Chịu Lửa</div>
+              <div className="text-[11px] text-slate-500">Đốt lò thực tế Viện IBST</div>
+            </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-center">
-            <div className="text-2xl sm:text-3xl font-black text-[#5F8A03]">1.200°C</div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Không Cháy (A1)</div>
-            <div className="text-[11px] text-slate-500">100% gốc khoáng vô cơ</div>
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-2xs text-center overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-[#7CB305] to-[#5F8A03]" />
+            <div className="p-3.5">
+              <div className="text-2xl sm:text-3xl font-black text-[#5F8A03]">1.200°C</div>
+              <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Không Cháy (A1)</div>
+              <div className="text-[11px] text-slate-500">100% gốc khoáng vô cơ</div>
+            </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs text-center">
-            <div className="text-2xl sm:text-3xl font-black text-slate-800">0% Rỉ Sét</div>
-            <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Không Muối Clorua</div>
-            <div className="text-[11px] text-slate-500">Bảo vệ an toàn tôn kẽm & ty treo</div>
+          <div className="rounded-2xl bg-white border border-slate-200 shadow-2xs text-center overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-slate-500 to-slate-700" />
+            <div className="p-3.5">
+              <div className="text-2xl sm:text-3xl font-black text-slate-800">0% Rỉ Sét</div>
+              <div className="text-xs sm:text-sm font-bold text-slate-900 mt-0.5">Không Muối Clorua</div>
+              <div className="text-[11px] text-slate-500">Bảo vệ an toàn tôn kẽm & ty treo</div>
+            </div>
           </div>
 
         </div>

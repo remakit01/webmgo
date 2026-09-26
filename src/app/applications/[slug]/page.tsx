@@ -70,7 +70,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs text-slate-500 flex items-center gap-2 flex-wrap">
           <Link href="/" className="hover:text-[#5F8A03] transition-colors">Trang chủ</Link>
           <span>/</span>
-          <Link href="/ung-dung" className="hover:text-[#5F8A03] transition-colors">Ứng dụng</Link>
+          <Link href="/giai-phap-ung-dung" className="hover:text-[#5F8A03] transition-colors">Ứng dụng</Link>
           <span>/</span>
           <span className="font-semibold text-slate-800 truncate max-w-xs sm:max-w-md">{application.title}</span>
         </div>
@@ -376,7 +376,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 {otherApplications.map((other) => (
                   <Link
                     key={other.id}
-                    href={`/ung-dung/${other.slug}`}
+                    href={`/giai-phap-ung-dung/${other.slug}`}
                     className="p-3 rounded-xl bg-slate-50 hover:bg-[#F4F9E8] border border-slate-100 text-xs sm:text-sm font-semibold text-slate-800 hover:text-[#5F8A03] transition-colors flex items-center justify-between group"
                   >
                     <span className="truncate max-w-[200px]">{other.title}</span>

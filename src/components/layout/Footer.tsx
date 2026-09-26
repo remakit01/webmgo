@@ -88,22 +88,22 @@ export default function Footer() {
             </h4>
             <ul className="flex flex-col gap-2.5 text-sm text-slate-400">
               <li>
-                <Link href="/ung-dung/boc-ong-gio-chong-chay-pccc" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <Link href="/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc" className="hover:text-white flex items-center gap-1.5 transition-colors">
                   <ChevronRight size={14} className="text-[#F26522]" /> Bọc ống gió PCCC (EI 30 - 120)
                 </Link>
               </li>
               <li>
-                <Link href="/ung-dung/vach-ngan-chong-chay-karaoke-bar" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <Link href="/giai-phap-ung-dung/vach-ngan-chong-chay-karaoke-bar" className="hover:text-white flex items-center gap-1.5 transition-colors">
                   <ChevronRight size={14} className="text-[#F26522]" /> Vách ngăn Karaoke / Bar tiêu âm
                 </Link>
               </li>
               <li>
-                <Link href="/ung-dung/san-chieu-luc-nha-thep-tien-che" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <Link href="/giai-phap-ung-dung/san-chieu-luc-nha-thep-tien-che" className="hover:text-white flex items-center gap-1.5 transition-colors">
                   <ChevronRight size={14} className="text-[#F26522]" /> Sàn chịu lực nhà thép tiền chế
                 </Link>
               </li>
               <li>
-                <Link href="/ung-dung/vach-tran-nha-xuong-cong-nghiep" className="hover:text-white flex items-center gap-1.5 transition-colors">
+                <Link href="/giai-phap-ung-dung/vach-tran-nha-xuong-cong-nghiep" className="hover:text-white flex items-center gap-1.5 transition-colors">
                   <ChevronRight size={14} className="text-[#F26522]" /> Vách ngăn cháy kho xưởng KCN
                 </Link>
               </li>

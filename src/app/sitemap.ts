@@ -26,7 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.95,
     },
     {
-      url: `${baseUrl}/ung-dung`,
+      url: `${baseUrl}/giai-phap-ung-dung`,
       lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 0.85,

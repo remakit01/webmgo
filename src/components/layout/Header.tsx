@@ -34,7 +34,7 @@ export default function Header() {
   // Nhận diện trang đang active
   const isHomeActive = pathname === '/';
   const isProductsActive = pathname.startsWith('/san-pham');
-  const isAppsActive = pathname.startsWith('/ung-dung');
+  const isAppsActive = pathname.startsWith('/giai-phap-ung-dung');
   const isProjectsActive = pathname.startsWith('/du-an');
   const isTechActive = pathname.startsWith('/thu-vien-tai-lieu') || 
                        pathname.startsWith('/huong-dan-thi-cong') || 
@@ -91,14 +91,14 @@ export default function Header() {
           ? 'bg-white/98 backdrop-blur-md shadow-md border-b border-slate-200' 
           : 'bg-white border-b border-slate-200'
       }`}>
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8 h-20 flex items-center justify-between gap-2 lg:gap-6">
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-8 h-20 flex items-center justify-between gap-1.5 sm:gap-2 lg:gap-6">
           
           {/* LOGO REMAK */}
           <Link href="/" className="flex-shrink-0 flex items-center py-2">
-            <img 
-              src="https://mgo.com.vn/wp-content/uploads/2022/08/Logo_remak_800.png" 
-              alt="Remak MGO Fireproof Board" 
-              className="h-10 lg:h-11 w-auto object-contain" 
+            <img
+              src="https://mgo.com.vn/wp-content/uploads/2022/08/Logo_remak_800.png"
+              alt="Remak MGO Fireproof Board"
+              className="h-8 sm:h-10 lg:h-11 w-auto object-contain"
             />
           </Link>
 
@@ -217,14 +217,14 @@ export default function Header() {
             {/* 3. Ứng dụng (Dropdown) */}
             <div className="group relative h-full flex items-center flex-shrink-0">
               <Link 
-                href="/ung-dung" 
+                href="/giai-phap-ung-dung" 
                 className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 ${
                   isAppsActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
                     : 'text-slate-800 group-hover:text-[#5F8A03] group-hover:bg-[#F4F9E8]'
                 }`}
               >
-                <span>Ứng dụng</span>
+                <span>Giải pháp Ứng dụng</span>
                 <ChevronDown size={14} className={`transition-transform duration-200 flex-shrink-0 group-hover:rotate-180 ${
                   isAppsActive ? 'text-[#5F8A03]' : 'text-slate-400'
                 }`} />
@@ -233,28 +233,28 @@ export default function Header() {
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
               <div className="absolute top-[calc(100%-8px)] left-0 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-50">
-                <Link href="/ung-dung/boc-ong-gio-chong-chay-pccc" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#FEF3EC] text-slate-800 hover:text-[#D95314] transition-colors">
+                <Link href="/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#FEF3EC] text-slate-800 hover:text-[#D95314] transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0"><Wind size={16} /></div>
                   <span className="text-sm font-semibold whitespace-nowrap">Bọc ống gió PCCC (EI 30 - 120)</span>
                 </Link>
-                <Link href="/ung-dung/vach-ngan-chong-chay-karaoke-bar" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
+                <Link href="/giai-phap-ung-dung/vach-ngan-chong-chay-karaoke-bar" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Music size={16} /></div>
                   <span className="text-sm font-semibold whitespace-nowrap">Vách ngăn Karaoke / Bar</span>
                 </Link>
-                <Link href="/ung-dung/san-chieu-luc-nha-thep-tien-che" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
+                <Link href="/giai-phap-ung-dung/san-chieu-luc-nha-thep-tien-che" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Layers size={16} /></div>
                   <span className="text-sm font-semibold whitespace-nowrap">Sàn chịu lực nhà tiền chế</span>
                 </Link>
-                <Link href="/ung-dung/vach-tran-nha-xuong-cong-nghiep" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
+                <Link href="/giai-phap-ung-dung/vach-tran-nha-xuong-cong-nghiep" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Building2 size={16} /></div>
                   <span className="text-sm font-semibold whitespace-nowrap">Vách trần nhà xưởng KCN</span>
                 </Link>
-                <Link href="/ung-dung/loi-cua-chong-chay" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
+                <Link href="/giai-phap-ung-dung/loi-cua-chong-chay" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
                   <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><DoorClosed size={16} /></div>
                   <span className="text-sm font-semibold whitespace-nowrap">Lõi cửa thép chống cháy</span>
                 </Link>
                 <div className="pt-1.5 mt-1 border-t border-slate-100">
-                  <Link href="/ung-dung" className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-slate-50 hover:bg-[#F4F9E8] text-[#5F8A03] text-xs font-bold transition-colors">
+                  <Link href="/giai-phap-ung-dung" className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-slate-50 hover:bg-[#F4F9E8] text-[#5F8A03] text-xs font-bold transition-colors">
                     <span>Xem Tất Cả 8 Giải Pháp Thi Công</span>
                     <ArrowRight size={13} />
                   </Link>
@@ -374,18 +374,18 @@ export default function Header() {
           </nav>
 
           {/* ACTIONS BÊN PHẢI (SEARCH & CTA MẪU THỬ) */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <button 
+          <div className="flex items-center gap-1 sm:gap-3 flex-shrink-0">
+            <button
               onClick={() => setSearchOpen(true)}
-              className="w-10 h-10 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-[#5F8A03] hover:border-[#7CB305] hover:bg-[#F4F9E8] flex items-center justify-center transition-all flex-shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-[#5F8A03] hover:border-[#7CB305] hover:bg-[#F4F9E8] flex items-center justify-center transition-all flex-shrink-0"
               title="Tìm kiếm"
             >
               <Search size={18} />
             </button>
 
-            <Link 
-              href="#nhan-mau-thu" 
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white text-sm font-bold shadow-md hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
+            <Link
+              href="#nhan-mau-thu"
+              className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
             >
               <Package size={16} className="flex-shrink-0" />
               <span className="hidden sm:inline">Nhận Mẫu Thử Miễn Phí</span>
@@ -393,9 +393,9 @@ export default function Header() {
             </Link>
 
             {/* Nút Mobile Hamburger */}
-            <button 
-              onClick={() => setMobileOpen(true)} 
-              className="xl:hidden p-2 text-slate-800 hover:text-[#F26522] flex-shrink-0"
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="xl:hidden p-1.5 sm:p-2 text-slate-800 hover:text-[#F26522] flex-shrink-0"
               aria-label="Menu"
             >
               <Menu size={24} />
@@ -415,16 +415,17 @@ export default function Header() {
           />
 
           {/* Drawer Body */}
-          <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-white shadow-2xl z-50 flex flex-col overflow-y-auto">
-            <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <img 
-                src="https://mgo.com.vn/wp-content/uploads/2022/08/Logo_remak_800.png" 
-                alt="Remak Logo" 
-                className="h-8 w-auto object-contain" 
+          <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-2xl z-50 flex flex-col overflow-y-auto">
+            <div className="relative p-4 border-b border-slate-200 flex items-center justify-center">
+              <img
+                src="https://mgo.com.vn/wp-content/uploads/2022/08/Logo_remak_800.png"
+                alt="Remak Logo"
+                className="h-8 w-auto object-contain"
               />
-              <button 
+              <button
                 onClick={() => setMobileOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-700"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700"
+                aria-label="Đóng menu"
               >
                 <X size={22} />
               </button>
@@ -478,16 +479,16 @@ export default function Header() {
                         : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
                     }`}
                   >
-                    <span>Ứng dụng</span>
+                    <span>Giải pháp Ứng dụng</span>
                     <ChevronDown size={16} className={`transition-transform ${activeMobileSubmenu === 'apps' ? 'rotate-180 text-[#5F8A03]' : ''}`} />
                   </button>
                   {activeMobileSubmenu === 'apps' && (
                     <div className="pl-4 py-1 flex flex-col gap-1 text-sm text-slate-600">
-                      <Link href="/ung-dung/boc-ong-gio-chong-chay-pccc" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Bọc ống gió PCCC</Link>
-                      <Link href="/ung-dung/vach-ngan-chong-chay-karaoke-bar" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Vách ngăn Karaoke / Bar</Link>
-                      <Link href="/ung-dung/san-chieu-luc-nha-thep-tien-che" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Sàn chịu lực nhà thép</Link>
-                      <Link href="/ung-dung/vach-tran-nha-xuong-cong-nghiep" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Vách trần nhà xưởng</Link>
-                      <Link href="/ung-dung/loi-cua-chong-chay" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Lõi cửa chống cháy</Link>
+                      <Link href="/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Bọc ống gió PCCC</Link>
+                      <Link href="/giai-phap-ung-dung/vach-ngan-chong-chay-karaoke-bar" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Vách ngăn Karaoke / Bar</Link>
+                      <Link href="/giai-phap-ung-dung/san-chieu-luc-nha-thep-tien-che" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Sàn chịu lực nhà thép</Link>
+                      <Link href="/giai-phap-ung-dung/vach-tran-nha-xuong-cong-nghiep" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Vách trần nhà xưởng</Link>
+                      <Link href="/giai-phap-ung-dung/loi-cua-chong-chay" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Lõi cửa chống cháy</Link>
                     </div>
                   )}
                 </div>

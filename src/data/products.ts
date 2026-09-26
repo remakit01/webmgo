@@ -773,7 +773,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     application: 'Ống gió PCCC EI 120 & vách phòng sạch',
     fireRating: 'EI 120',
     image: '/images/mgo-duct.jpg',
-    link: '/ung-dung/boc-ong-gio-chong-chay-pccc',
+    link: '/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc',
   },
   {
     id: 'lotte-mall-tay-ho',
@@ -784,7 +784,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     application: 'Vách thoát hiểm & ống gió tầng hầm',
     fireRating: 'EI 90',
     image: '/images/mgo-wall.jpg',
-    link: '/ung-dung',
+    link: '/giai-phap-ung-dung',
   },
   {
     id: 'viettel-data-center',
@@ -795,7 +795,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     application: 'Vách chống cháy Server & sàn nâng kỹ thuật',
     fireRating: 'EI 180',
     image: '/images/mgo-floor.jpg',
-    link: '/ung-dung/san-chieu-luc-nha-thep-tien-che',
+    link: '/giai-phap-ung-dung/san-chieu-luc-nha-thep-tien-che',
   },
   {
     id: 'landmark-complex',
@@ -806,7 +806,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     application: 'Bọc dầm cột chịu lửa & lõi cửa thép PCCC',
     fireRating: 'EI 120',
     image: '/images/mgo-board.jpg',
-    link: '/ung-dung/boc-ket-cau-thep-chong-chay',
+    link: '/giai-phap-ung-dung/boc-ket-cau-thep-chong-chay',
   },
 ];
 

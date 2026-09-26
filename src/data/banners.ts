@@ -19,7 +19,7 @@ export const BANNER_SLIDES: BannerSlide[] = [
     id: 3,
     image: '/images/banners/banner-3-lot-san.png',
     alt: 'Tấm MGO lót sàn - Độ bền vượt trội và chi phí hiệu quả - Nền sàn hèm khóa độc đáo',
-    link: '/ung-dung#san-mgo',
+    link: '/giai-phap-ung-dung#san-mgo',
     title: 'Tấm MGO lót sàn',
   },
 ];

@@ -12,11 +12,11 @@ const nextConfig: NextConfig = {
         destination: '/products/:slug',
       },
       {
-        source: '/ung-dung',
+        source: '/giai-phap-ung-dung',
         destination: '/applications',
       },
       {
-        source: '/ung-dung/:slug',
+        source: '/giai-phap-ung-dung/:slug',
         destination: '/applications/:slug',
       },
     ];

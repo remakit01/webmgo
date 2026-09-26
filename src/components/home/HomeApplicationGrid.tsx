@@ -9,28 +9,28 @@ const APPLICATIONS = [
     desc: 'Đạt chuẩn QCVN 06:2022 (EI 30 - 120). Nhẹ hơn Cemboard 30%, không sinh khói độc.',
     thickness: '8mm – 10mm',
     img: '/images/mgo-duct.jpg',
-    link: '/ung-dung#boc-ong-gio',
+    link: '/giai-phap-ung-dung#boc-ong-gio',
   },
   {
     title: 'Vách Chống Cháy & Cách Âm',
     desc: 'Cách âm 45dB, kháng ẩm 100%, chống nấm mốc cho phòng máy và quán karaoke.',
     thickness: '10mm – 12mm',
     img: '/images/mgo-wall.jpg',
-    link: '/ung-dung#vach-chong-chay',
+    link: '/giai-phap-ung-dung#vach-chong-chay',
   },
   {
     title: 'Lót Sàn Chịu Tải Gác Lửng',
     desc: 'Tải trọng >500kg/m², kháng mối mọt vĩnh viễn, thi công nhanh hơn đổ bê tông.',
     thickness: '15mm – 18mm',
     img: '/images/mgo-floor.jpg',
-    link: '/ung-dung#san-chiu-luc',
+    link: '/giai-phap-ung-dung#san-chiu-luc',
   },
   {
     title: 'Lõi Cửa Thép Chống Cháy',
     desc: 'Thay thế bông khoáng truyền thống, định hình chắc chắn cho cánh cửa thép PCCC.',
     thickness: '5mm – 6mm',
     img: '/images/mgo-board.jpg',
-    link: '/ung-dung#cua-chong-chay',
+    link: '/giai-phap-ung-dung#cua-chong-chay',
   },
 ];
 
@@ -84,7 +84,7 @@ export default function HomeApplicationGrid() {
 
       <div className="mt-8 text-center">
         <Link
-          href="/ung-dung"
+          href="/giai-phap-ung-dung"
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-sm"
         >
           <span>Xem Thêm Giải Pháp Ứng Dụng</span>
