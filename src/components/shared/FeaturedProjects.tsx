@@ -24,7 +24,7 @@ export default function FeaturedProjects({
     >
       {showHeading && (
         <SectionHeading 
-          title="Công Trình Đã Nghiệm Thu PCCC"
+          title="Dự Án Tiêu Biểu Đã Nghiệm Thu PCCC"
         />
       )}
 
@@ -81,9 +81,9 @@ export default function FeaturedProjects({
 
             {/* Footer card */}
             <div className="p-5 pt-0">
-              <Link 
-                href="/ung-dung"
-                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-[#F4F9E8] text-slate-700 hover:text-[#5F8A03] text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+              <Link
+                href={project.link}
+                className="w-full py-3 rounded-xl bg-slate-100 hover:bg-[#F4F9E8] text-slate-700 hover:text-[#5F8A03] text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
               >
                 <span>Xem giải pháp</span>
                 <ArrowRight size={13} />
@@ -91,6 +91,16 @@ export default function FeaturedProjects({
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-8 text-center">
+        <Link
+          href="/du-an"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-sm"
+        >
+          <span>Xem Thêm Dự Án</span>
+          <ArrowRight size={16} />
+        </Link>
       </div>
     </section>
   );

@@ -102,10 +102,6 @@ const BENEFITS: BenefitItem[] = [
 export default function HomeStickyBenefits() {
   const [activeId, setActiveId] = useState<string>('insect');
 
-  const activeBenefit = BENEFITS.find((b) => b.id === activeId) || BENEFITS[0];
-  const isOrange = activeBenefit.accentColor === 'orange';
-  const IconComponent = activeBenefit.icon;
-
   return (
     <section 
       aria-label="Ưu Điểm Vượt Trội Tấm MGO Remak"
@@ -295,9 +291,6 @@ export default function HomeStickyBenefits() {
                     <div className="p-6 sm:p-8 space-y-4">
                       
                       <div>
-                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-                          0{item.index} • Remak® FireOFF
-                        </div>
                         <h3 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
                           {item.title}
                         </h3>

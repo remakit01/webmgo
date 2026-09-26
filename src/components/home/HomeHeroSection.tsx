@@ -1,12 +1,16 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { Flame, Droplets, Feather, ShieldCheck, Sparkles, Package, Calculator, CheckCircle2 } from 'lucide-react';
+import { Flame, Droplets, Feather, ShieldCheck, Sparkles, Package, Calculator, CheckCircle2, ChevronDown } from 'lucide-react';
 
 export default function HomeHeroSection() {
+  const [showIntro, setShowIntro] = useState(false);
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-[#F8FAFC] pt-6 pb-16">
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           <div className="lg:col-span-7 space-y-6">
             
@@ -24,6 +28,49 @@ export default function HomeHeroSection() {
             <p className="animate-hero-fade-up delay-300 text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
               Khoáng vô cơ Magie Oxit chịu lửa <strong>1.200°C</strong>, kháng ẩm tuyệt đối và chống ăn mòn. Đốt thử nghiệm đạt chuẩn kiểm định IBST cho ống gió, vách ngăn và sàn chịu tải.
             </p>
+
+            {/* 3b. Giới thiệu chi tiết (accordion, mặc định thu gọn) */}
+            <div className="animate-hero-fade-up delay-300">
+              <h2 className="inline-block m-0 p-0 text-sm font-bold">
+                <button
+                  type="button"
+                  id="hero-intro-trigger"
+                  onClick={() => setShowIntro((v) => !v)}
+                  aria-expanded={showIntro}
+                  aria-controls="hero-intro-panel"
+                  className="inline-flex items-center gap-1.5 text-[#5F8A03] hover:text-[#3E5C02] transition-colors cursor-pointer"
+                >
+                  <span>Tấm MGO Remak® FireOFF là gì?</span>
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform ${showIntro ? 'rotate-180' : ''}`}
+                  />
+                </button>
+              </h2>
+              <div
+                id="hero-intro-panel"
+                role="region"
+                aria-labelledby="hero-intro-trigger"
+                aria-hidden={!showIntro}
+                className={`grid transition-all duration-300 ease-out ${
+                  showIntro ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0'
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="space-y-3 text-sm text-slate-600 leading-relaxed max-w-2xl border-l-2 border-[#7CB305]/30 pl-4">
+                    <p>
+                      Tấm chống cháy MGO Remak® FireOFF được sản xuất từ khoáng Magie Oxit (MgO) gốc Sulfate (MgSO4), gia cường lưới sợi thủy tinh đa lớp và ép nén thành tấm phẳng. Khác với dòng MGO gốc Clorua (MgCl2) phổ biến trên thị trường — dễ hút ẩm, ăn mòn ốc vít và &quot;chảy nước&quot; mùa nồm ẩm — công thức gốc Sulfate của Remak loại bỏ hoàn toàn rủi ro này.
+                    </p>
+                    <p>
+                      Vật liệu đạt chuẩn chống cháy A1 (không cháy, chịu nhiệt 1.200°C), kháng nước tuyệt đối (độ giãn nở ẩm ≤0.05%), nhẹ hơn Cemboard 30%, dễ cắt khoan thi công, chịu lực và chịu va đập tốt.
+                    </p>
+                    <p>
+                      Ứng dụng rộng rãi trong bọc ống gió PCCC, vách ngăn chống cháy, trần, sàn chịu lực và lõi cửa thép. Không chứa Amiăng, không phát thải VOC, an toàn cho người thi công, đạt chuẩn PCCC QCVN 06:2022/BXD.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* 4. Nút Call-To-Action xuất hiện đồng bộ */}
             <div className="animate-hero-fade-up delay-400 flex flex-wrap gap-4 pt-2">
