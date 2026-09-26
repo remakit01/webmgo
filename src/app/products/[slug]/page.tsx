@@ -1,19 +1,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { 
-  FileText, 
-  PhoneCall, 
-  Download, 
-  Package,
+import {
+  FileText,
+  PhoneCall,
+  Download,
   ChevronRight,
 } from 'lucide-react';
 import { PRODUCTS } from '@/data/products';
-import { 
-  ProductGallery, 
-  ProductQuickInfo, 
-  ProductSystemAssemblies, 
-  ProductSpecsTable 
+import {
+  ProductGallery,
+  ProductQuickInfo,
+  ProductSystemAssemblies,
+  ProductSpecsTable,
+  ProductCard,
 } from '@/components/products';
 
 interface PageProps {
@@ -112,9 +112,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             {/* ƯU ĐIỂM VƯỢT TRỘI */}
             <div>
               <div className="border-b border-slate-200 pb-3 mb-6">
-                <span className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider bg-[#F4F9E8] px-3 py-1 rounded-full">
-                  Hiệu Quả Dự Án
-                </span>
+
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
                   Ưu Điểm Vượt Trội Cho Công Trình
                 </h2>
@@ -230,9 +228,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
             <div>
-              <span className="text-xs font-bold text-[#F26522] uppercase tracking-wider bg-[#FEF3EC] px-3 py-1 rounded-full">
-                Sản Phẩm Tương Thích
-              </span>
+
               <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
                 Các Dòng Tấm Chống Cháy Khác
               </h2>
@@ -251,31 +247,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedProducts.map((rel) => (
-              <div 
-                key={rel.id}
-                className="bg-slate-50 rounded-2xl p-4 border border-slate-200 hover:border-[#7CB305] transition-all flex flex-col justify-between group shadow-2xs"
-              >
-                <div>
-                  <div className="h-44 rounded-xl overflow-hidden mb-3 bg-slate-200">
-                    <img src={rel.image} alt={rel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                  </div>
-                  <span className="text-[11px] font-bold text-[#F26522] uppercase tracking-wider">{rel.categoryLabel}</span>
-                  <h3 className="text-sm sm:text-base font-bold text-slate-900 mt-1 line-clamp-1 group-hover:text-[#5F8A03] transition-colors">
-                    {rel.name}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1 line-clamp-2 leading-relaxed">{rel.tagline}</p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-200 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200">{rel.fireRating}</span>
-                  <Link
-                    href={`/san-pham/${rel.slug}`}
-                    className="text-xs sm:text-sm font-bold text-[#5F8A03] hover:underline"
-                  >
-                    Chi tiết →
-                  </Link>
-                </div>
-              </div>
+              <ProductCard key={rel.id} product={rel} />
             ))}
           </div>
         </div>

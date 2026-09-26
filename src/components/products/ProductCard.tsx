@@ -2,14 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { 
-  Flame, 
-  CheckCircle2, 
-  ArrowRight, 
-  Sparkles, 
-  Scale, 
-  ShieldCheck, 
-  Star,
+import {
+  Flame,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  Scale,
   TrendingUp,
   Tag,
   Check
@@ -130,19 +128,6 @@ export default function ProductCard({
       {/* 2. CARD BODY */}
       <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3.5">
         <div>
-          
-          {/* Warehouse status & Rating */}
-          <div className="flex items-center justify-between text-[11px] font-semibold mb-2">
-            <div className="flex items-center gap-1 text-amber-500 font-bold">
-              <Star size={12} className="fill-amber-400 text-amber-400" />
-              <span>{product.ratingScore || '5.0'}</span>
-              <span className="text-slate-400 font-normal">({product.reviewsCount || 120} dự án)</span>
-            </div>
-            <span className="flex items-center gap-1 text-[#5F8A03]">
-              <ShieldCheck size={12} />
-              <span>Sẵn kho HN & HCM</span>
-            </span>
-          </div>
 
           <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-[#5F8A03] transition-colors leading-snug">
             <Link href={`/san-pham/${product.slug}`}>
@@ -157,7 +142,7 @@ export default function ProductCard({
           {COMPARE_ADVANTAGES[product.id] && (
             <div className="mt-2.5 px-2.5 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex items-center gap-1.5">
               <Scale size={12} className="text-[#5F8A03] flex-shrink-0" />
-              <span className="truncate">
+              <span className="line-clamp-2">
                 <strong className="text-slate-800 font-semibold">Ưu thế:</strong> {COMPARE_ADVANTAGES[product.id]}
               </span>
             </div>
@@ -170,15 +155,16 @@ export default function ProductCard({
               <span className="text-[#F26522] font-bold lowercase">{activeThickness}</span>
             </div>
             
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="Chọn độ dày">
               {product.thicknessList.map((th) => {
                 const isSelected = activeThickness === th;
                 return (
                   <button
                     key={th}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => handleSelectThickness(th)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+                    className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
                       isSelected
                         ? 'bg-[#7CB305] text-white border-[#7CB305] shadow-xs scale-105'
                         : 'bg-slate-100 text-slate-700 border-transparent hover:bg-slate-200'

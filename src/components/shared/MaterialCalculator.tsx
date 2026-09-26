@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calculator, Phone, ArrowRight } from 'lucide-react';
+import { Calculator, Phone } from 'lucide-react';
 import { calculateMgoMaterials } from '@/lib/calculator';
 import { formatNumber } from '@/lib/utils';
 import SectionHeading from '@/components/ui/SectionHeading';

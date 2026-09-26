@@ -40,17 +40,45 @@ export default function ProductCompareModal({
   onAddProduct,
 }: ProductCompareModalProps) {
   const modalContentRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
-  // Khóa cuộn trang nền và lắng nghe phím Escape
+  // Khóa cuộn trang nền, quản lý focus (trap + trả focus) và lắng nghe phím Escape
   useEffect(() => {
     if (!isOpen) return;
+
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement;
+    closeButtonRef.current?.focus();
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
+    const getFocusableElements = () => {
+      if (!modalContentRef.current) return [];
+      return Array.from(
+        modalContentRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      );
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
+        return;
+      }
+      if (e.key === 'Tab') {
+        const focusable = getFocusableElements();
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
 
@@ -59,6 +87,7 @@ export default function ProductCompareModal({
     return () => {
       document.body.style.overflow = originalOverflow;
       window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedElementRef.current?.focus();
     };
   }, [isOpen, onClose]);
 
@@ -86,7 +115,7 @@ export default function ProductCompareModal({
     >
       <div 
         ref={modalContentRef}
-        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 w-full max-w-7xl xl:max-w-[1380px] max-h-[94vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 w-full min-w-0 max-w-7xl xl:max-w-[1380px] max-h-[94vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="compare-modal-title"
@@ -94,14 +123,9 @@ export default function ProductCompareModal({
         {/* 1. MODAL HEADER */}
         <div className="px-6 py-4.5 sm:px-8 sm:py-5 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 flex-shrink-0">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#7CB305] shadow-[0_0_8px_#7CB305]" />
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#A0D911]">
-                Bảng Đối Chiếu Kỹ Thuật Đối Đầu
-              </span>
-            </div>
+
             <h2 id="compare-modal-title" className="text-lg sm:text-2xl font-extrabold text-white mt-1 leading-snug">
-              So Sánh Trực Tiếp Các Dòng Tấm MGO Remak® ({products.length} sản phẩm)
+              So Sánh Trực Tiếp Các Dòng Tấm MGO Remak® <span className="text-[#A0D911]">({products.length} sản phẩm)</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5 hidden sm:block">
               Đối chiếu thông số khả năng chịu lửa, độ dày, tải trọng và tỷ trọng phục vụ lập hồ sơ thầu dự án
@@ -110,6 +134,7 @@ export default function ProductCompareModal({
           
           <button
             type="button"
+            ref={closeButtonRef}
             onClick={onClose}
             className="p-2 sm:p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer flex-shrink-0 ml-3"
             aria-label="Đóng bảng so sánh"
@@ -119,7 +144,7 @@ export default function ProductCompareModal({
         </div>
 
         {/* 2. MODAL BODY (RỘNG RÃI, THOÁNG MẮT, HẠN CHẾ XUỐNG DÒNG) */}
-        <div className="flex-1 overflow-y-auto overflow-x-auto bg-slate-50">
+        <div className="flex-1 min-w-0 overflow-y-auto overflow-x-auto bg-slate-50">
           <table className="w-full text-left text-xs border-collapse min-w-[950px]">
             
             {/* STICKY HEADER - GHIM CỐ ĐỊNH ẢNH, TÊN, GIÁ KHI CUỘN */}
@@ -457,15 +482,14 @@ export default function ProductCompareModal({
                       {prod.testedStandards.map((std, sIdx) => {
                         const isSpanFull = prod.testedStandards.length === 3 && sIdx === 2;
                         return (
-                          <div 
-                            key={sIdx} 
-                            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-[#F4F9E8] border border-slate-200/90 hover:border-[#7CB305]/40 text-slate-800 hover:text-[#5F8A03] text-xs font-semibold shadow-2xs transition-all ${
+                          <div
+                            key={sIdx}
+                            className={`flex items-start gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 hover:bg-[#F4F9E8] border border-slate-200/90 hover:border-[#7CB305]/40 text-slate-800 hover:text-[#5F8A03] text-xs font-semibold shadow-2xs transition-all ${
                               isSpanFull ? 'col-span-2' : 'col-span-1'
                             }`}
-                            title={std}
                           >
-                            <CheckCircle2 size={13} className="text-[#5F8A03] flex-shrink-0" />
-                            <span className="truncate">{std}</span>
+                            <CheckCircle2 size={13} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
+                            <span>{std}</span>
                           </div>
                         );
                       })}

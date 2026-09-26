@@ -12,9 +12,7 @@ export default function ProductSystemAssemblies({ assemblies }: ProductSystemAss
   return (
     <div>
       <div className="border-b border-slate-200 pb-3 mb-6">
-        <span className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider bg-[#F4F9E8] px-3 py-1 rounded-full">
-          Cẩm Nang Thi Công Kỹ Thuật
-        </span>
+
         <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
           Cấu Tạo Hệ Thống Đạt Chuẩn Nghiệm Thu PCCC
         </h2>

@@ -7,14 +7,12 @@ interface SampleRequestFormProps {
   id?: string;
   title?: string;
   subtitle?: string;
-  compact?: boolean;
 }
 
 export default function SampleRequestForm({
   id = 'mau-thu',
   title = 'Đăng Ký Nhận Hộp Mẫu Thử',
   subtitle = 'Hộp mẫu gồm đủ các độ dày (5mm – 18mm), catalogue kỹ thuật và kết quả đốt mẫu IBST gửi tận tay bạn.',
-  compact = false,
 }: SampleRequestFormProps) {
   const [submitted, setSubmitted] = useState(false);
 
@@ -34,9 +32,6 @@ export default function SampleRequestForm({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
           
           <div className="lg:col-span-7 space-y-4">
-            <div className="inline-block text-xs font-bold text-[#7CB305] uppercase tracking-wider bg-[#7CB305]/20 px-3 py-1 rounded-full">
-              DÀNH CHO CHỦ ĐẦU TƯ & NHÀ THẦU
-            </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
               {title} <br />
               <span className="text-[#F26522]">Tấm MGO Remak® Miễn Phí</span>

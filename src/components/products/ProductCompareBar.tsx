@@ -123,11 +123,11 @@ export default function ProductCompareBar({
                   <button
                     type="button"
                     onClick={() => onRemoveProduct(prod.id)}
-                    className="w-5 h-5 rounded-full bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors flex-shrink-0"
+                    className="w-6 h-6 rounded-full bg-slate-800 hover:bg-red-500 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors flex-shrink-0"
                     title="Bỏ chọn"
                     aria-label={`Bỏ chọn ${prod.name}`}
                   >
-                    <X size={11} />
+                    <X size={12} />
                   </button>
                 </div>
               );
@@ -184,9 +184,10 @@ export default function ProductCompareBar({
                 <button
                   type="button"
                   onClick={() => onRemoveProduct(prod.id)}
-                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px]"
+                  aria-label={`Bỏ chọn ${prod.name}`}
+                  className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px]"
                 >
-                  <X size={9} />
+                  <X size={12} />
                 </button>
               </div>
             ))}
