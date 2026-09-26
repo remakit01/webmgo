@@ -20,7 +20,8 @@ import {
   Music, 
   Hammer, 
   HelpCircle, 
-  Package 
+  Package,
+  ArrowRight
 } from 'lucide-react';
 
 export default function Header() {
@@ -248,6 +249,16 @@ export default function Header() {
                   <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Building2 size={16} /></div>
                   <span className="text-sm font-semibold whitespace-nowrap">Vách trần nhà xưởng KCN</span>
                 </Link>
+                <Link href="/ung-dung/loi-cua-chong-chay" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><DoorClosed size={16} /></div>
+                  <span className="text-sm font-semibold whitespace-nowrap">Lõi cửa thép chống cháy</span>
+                </Link>
+                <div className="pt-1.5 mt-1 border-t border-slate-100">
+                  <Link href="/ung-dung" className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-slate-50 hover:bg-[#F4F9E8] text-[#5F8A03] text-xs font-bold transition-colors">
+                    <span>Xem Tất Cả 8 Giải Pháp Thi Công</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -476,6 +487,7 @@ export default function Header() {
                       <Link href="/ung-dung/vach-ngan-chong-chay-karaoke-bar" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Vách ngăn Karaoke / Bar</Link>
                       <Link href="/ung-dung/san-chieu-luc-nha-thep-tien-che" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Sàn chịu lực nhà thép</Link>
                       <Link href="/ung-dung/vach-tran-nha-xuong-cong-nghiep" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Vách trần nhà xưởng</Link>
+                      <Link href="/ung-dung/loi-cua-chong-chay" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">• Lõi cửa chống cháy</Link>
                     </div>
                   )}
                 </div>

@@ -10,11 +10,7 @@ export default function HomeHeroSection() {
           
           <div className="lg:col-span-7 space-y-6">
             
-            {/* 1. Tag chứng chỉ */}
-            <div className="animate-hero-fade-up delay-100 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F4F9E8] border border-[#7CB305]/30 text-[#5F8A03] text-xs font-bold tracking-wide">
-              <Flame size={14} className="text-[#F26522]" />
-              <span>QCVN 06:2022/BXD • Nhóm A1</span>
-            </div>
+
 
             {/* 2. Tiêu đề chính lớn */}
             <h1 className="animate-hero-fade-up delay-200 text-3xl sm:text-4xl lg:text-[46px] font-bold text-slate-900 leading-[1.18] tracking-tight">
@@ -105,10 +101,6 @@ export default function HomeHeroSection() {
                     Cấu Trúc Tấm MGO Thực Tế
                   </span>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F4F9E8] border border-[#7CB305]/30 text-[#5F8A03] text-xs font-bold">
-                  <Sparkles size={13} className="text-[#7CB305]" />
-                  <span>Bảo Hành 10 Năm</span>
-                </span>
               </div>
 
               {/* Hình ảnh sản phẩm thông thoáng 100%, KHÔNG BỊ BẤT KỲ BADGE NÀO CHE KHUẤT */}

@@ -28,12 +28,6 @@ export default function HomeSpecMatrix() {
       aria-label="Bảng Thông Số Kỹ Thuật Tấm MGO Remak"
       className="max-w-[1440px] mx-auto px-4 lg:px-8"
     >
-      <SectionHeading 
-        badge="QUY CÁCH ĐỘ DÀY"
-        badgeColor="orange"
-        title="Thông Số Kỹ Thuật Tấm MGO"
-      />
-
       {/* BỘ LỌC THEO MỤC ĐÍCH THI CÔNG DÀNH CHO KỸ SƯ / NHÀ THẦU */}
       <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
         {FILTER_TABS.map((tab) => {

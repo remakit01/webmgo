@@ -21,8 +21,6 @@ export default function FaqAccordion({
     <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
       {showHeading && (
         <SectionHeading 
-          badge="HỎI ĐÁP PCCC"
-          badgeColor="green"
           title="Giải Đáp Kỹ Thuật Thường Gặp"
         />
       )}
