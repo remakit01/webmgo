@@ -5,6 +5,7 @@ import {
   ClipboardCheck, Handshake, Award, ChevronRight,
   PhoneCall, CheckCircle2, ArrowRight,
 } from 'lucide-react';
+import DealerStats from '@/components/dealer/DealerStats';
 
 export const metadata: Metadata = {
   title: 'Chính Sách Đại Lý | Remak® MGO FireOFF',
@@ -103,19 +104,7 @@ export default function DaiLyPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8">
-            {[
-              { n: '200+', label: 'Dự án hoàn thành' },
-              { n: '32',   label: 'Tỉnh thành phủ sóng' },
-              { n: '50+',  label: 'Đại lý toàn quốc' },
-              { n: '10+',  label: 'Năm kinh nghiệm' },
-            ].map(({ n, label }) => (
-              <div key={label} className="bg-white/10 border border-white/20 rounded-2xl px-4 py-3 text-center">
-                <div className="text-xl font-black text-white">{n}</div>
-                <div className="text-xs text-slate-300 mt-0.5">{label}</div>
-              </div>
-            ))}
-          </div>
+          <DealerStats />
         </div>
       </div>
 
