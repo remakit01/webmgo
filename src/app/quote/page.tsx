@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import BaoGiaClient from './BaoGiaClient';
+import QuoteClient from './QuoteClient';
 
 export const metadata: Metadata = {
   title: 'Báo Giá Tấm MGO Remak® FireOFF | Nhận Báo Giá Trong 2 Giờ',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function BaoGiaPage() {
-  return <BaoGiaClient />;
+  return <QuoteClient />;
 }
