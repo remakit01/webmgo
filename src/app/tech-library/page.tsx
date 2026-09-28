@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TechLibraryClient from './TechLibraryClient';
+import { TechLibraryHero, TechLibraryClientView } from '@/components/tech-library';
 
 export const metadata: Metadata = {
   title: 'Thư Viện Kiểm Định PCCC | Remak® MGO FireOFF',
@@ -7,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function TechLibraryPage() {
-  return <TechLibraryClient />;
+  return (
+    <>
+      <TechLibraryHero />
+      <TechLibraryClientView />
+    </>
+  );
 }
