@@ -92,7 +92,16 @@ export default function Header() {
           : 'bg-white border-b border-slate-200'
       }`}>
         <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-8 h-20 flex items-center justify-between gap-1.5 sm:gap-2 lg:gap-6">
-          
+
+          {/* Nút Mobile Hamburger — bên TRÁI khớp với drawer mở từ trái */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="xl:hidden p-1.5 sm:p-2 text-slate-800 hover:text-[#F26522] flex-shrink-0"
+            aria-label="Menu"
+          >
+            <Menu size={24} />
+          </button>
+
           {/* LOGO REMAK */}
           <Link href="/" className="flex-shrink-0 flex items-center py-2">
             <img
@@ -392,14 +401,6 @@ export default function Header() {
               <span className="sm:hidden">Nhận Mẫu</span>
             </Link>
 
-            {/* Nút Mobile Hamburger */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="xl:hidden p-1.5 sm:p-2 text-slate-800 hover:text-[#F26522] flex-shrink-0"
-              aria-label="Menu"
-            >
-              <Menu size={24} />
-            </button>
           </div>
 
         </div>
