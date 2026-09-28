@@ -18,10 +18,9 @@ import {
   Layers, 
   DoorClosed, 
   Music, 
-  Hammer, 
-  HelpCircle, 
-  Package,
-  ArrowRight
+  Hammer,
+  HelpCircle,
+  Package
 } from 'lucide-react';
 
 export default function Header() {
@@ -150,83 +149,51 @@ export default function Header() {
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
               
-              {/* Dropdown Menu 1 Cột Thẳng Hàng Tuyệt Đối */}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-[380px] bg-white rounded-2xl shadow-2xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-50">
-                <div className="flex items-center justify-between pb-2 px-1 border-b border-slate-100 mb-0.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    Dòng sản phẩm Remak® FireOFF
-                  </span>
-                  <Link href="/san-pham" className="text-xs font-semibold text-[#5F8A03] hover:underline flex items-center gap-1">
-                    Xem tất cả ({'>'})
-                  </Link>
+              {/* Dropdown: Sản phẩm */}
+              <div className="absolute top-[calc(100%-8px)] left-0 w-[360px] bg-white rounded-2xl shadow-xl border border-slate-200 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
+                <div className="flex items-center justify-between px-3 py-2 mb-1 border-b border-slate-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dòng sản phẩm Remak® FireOFF</span>
+                  <Link href="/san-pham" className="text-[11px] font-semibold text-[#5F8A03] hover:underline">Xem tất cả →</Link>
                 </div>
-                
-                {/* 1. MGO Bọc Ống Gió PCCC */}
-                <Link href="/san-pham/tam-mgo-boc-ong-gio-pccc" className="flex items-center justify-between p-2 rounded-xl hover:bg-[#FEF3EC] transition-all group/item border border-transparent hover:border-[#F26522]/20">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                      <Wind size={16} />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#D95314] transition-colors">
-                      MGO Bọc Ống Gió PCCC
-                    </span>
+                <Link href="/san-pham/tam-mgo-boc-ong-gio-pccc" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Wind size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">MGO Bọc Ống Gió PCCC</div>
+                    <div className="text-xs text-slate-400 mt-0.5">DuctBoard 5–12mm, kháng ẩm ngưng tụ</div>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#F26522]/10 text-[#F26522] font-semibold whitespace-nowrap">
-                    EI 30 - 120
-                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">EI 30–120</span>
                 </Link>
-
-                {/* 2. MGO Tiêu Chuẩn Chống Cháy */}
-                <Link href="/san-pham/tam-mgo-tieu-chuan-chong-chay" className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F4F9E8] transition-all group/item border border-transparent hover:border-[#7CB305]/20">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                      <Flame size={16} />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#5F8A03] transition-colors">
-                      MGO Tiêu Chuẩn Chống Cháy
-                    </span>
+                <Link href="/san-pham/tam-mgo-tieu-chuan-chong-chay" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Flame size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">MGO Tiêu Chuẩn Chống Cháy</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Vách, trần, chuẩn Euroclass A1</div>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#7CB305]/10 text-[#5F8A03] font-semibold whitespace-nowrap">
-                    Class A1
-                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">Class A1</span>
                 </Link>
-
-                {/* 3. MGO Lót Sàn Chịu Tải */}
-                <Link href="/san-pham/tam-mgo-lot-san-chiu-luc" className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-all group/item border border-transparent hover:border-slate-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                      <Layers size={16} />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#5F8A03] transition-colors">
-                      MGO Lót Sàn Chịu Tải
-                    </span>
+                <Link href="/san-pham/tam-mgo-lot-san-chiu-luc" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Layers size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">MGO Lót Sàn Chịu Tải</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Chịu tải 850 kg/m², dày 15–18mm</div>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-semibold whitespace-nowrap">
-                    15 - 18mm
-                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">REI 180</span>
                 </Link>
-
-                {/* 4. MGO Tiêu Âm & Trang Trí */}
-                <Link href="/san-pham/tam-mgo-trang-tri-tieu-am" className="flex items-center justify-between p-2 rounded-xl hover:bg-[#F4F9E8] transition-all group/item border border-transparent hover:border-[#7CB305]/20">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 group-hover/item:scale-105 transition-transform">
-                      <Music size={16} />
-                    </div>
-                    <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#5F8A03] transition-colors">
-                      MGO Tiêu Âm & Trang Trí
-                    </span>
+                <Link href="/san-pham/tam-mgo-trang-tri-tieu-am" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Music size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">MGO Tiêu Âm & Trang Trí</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Cách âm STC 50–55 dB, bề mặt đẹp</div>
                   </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-[#7CB305]/10 text-[#5F8A03] font-semibold whitespace-nowrap">
-                    Tiêu Âm
-                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">Tiêu âm</span>
                 </Link>
               </div>
             </div>
 
             {/* 3. Ứng dụng (Dropdown) */}
             <div className="group relative h-full flex items-center flex-shrink-0">
-              <Link 
-                href="/giai-phap-ung-dung" 
+              <Link
+                href="/giai-phap-ung-dung"
                 className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 ${
                   isAppsActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
@@ -241,40 +208,59 @@ export default function Header() {
               {isAppsActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-50">
-                <Link href="/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#FEF3EC] text-slate-800 hover:text-[#D95314] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0"><Wind size={16} /></div>
-                  <span className="text-sm font-semibold whitespace-nowrap">Bọc ống gió PCCC (EI 30 - 120)</span>
-                </Link>
-                <Link href="/giai-phap-ung-dung/vach-ngan-chong-chay-karaoke-bar" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Music size={16} /></div>
-                  <span className="text-sm font-semibold whitespace-nowrap">Vách ngăn Karaoke / Bar</span>
-                </Link>
-                <Link href="/giai-phap-ung-dung/san-chieu-luc-nha-thep-tien-che" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Layers size={16} /></div>
-                  <span className="text-sm font-semibold whitespace-nowrap">Sàn chịu lực nhà tiền chế</span>
-                </Link>
-                <Link href="/giai-phap-ung-dung/vach-tran-nha-xuong-cong-nghiep" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Building2 size={16} /></div>
-                  <span className="text-sm font-semibold whitespace-nowrap">Vách trần nhà xưởng KCN</span>
-                </Link>
-                <Link href="/giai-phap-ung-dung/loi-cua-chong-chay" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 hover:text-[#5F8A03] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><DoorClosed size={16} /></div>
-                  <span className="text-sm font-semibold whitespace-nowrap">Lõi cửa thép chống cháy</span>
-                </Link>
-                <div className="pt-1.5 mt-1 border-t border-slate-100">
-                  <Link href="/giai-phap-ung-dung" className="flex items-center justify-center gap-1.5 p-2 rounded-xl bg-slate-50 hover:bg-[#F4F9E8] text-[#5F8A03] text-xs font-bold transition-colors">
-                    <span>Xem Tất Cả 8 Giải Pháp Thi Công</span>
-                    <ArrowRight size={13} />
-                  </Link>
+              {/* Dropdown: Giải pháp Ứng dụng */}
+              <div className="absolute top-[calc(100%-8px)] left-0 w-[360px] bg-white rounded-2xl shadow-xl border border-slate-200 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
+                <div className="flex items-center justify-between px-3 py-2 mb-1 border-b border-slate-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hệ thống thi công PCCC</span>
+                  <Link href="/giai-phap-ung-dung" className="text-[11px] font-semibold text-[#5F8A03] hover:underline">Xem tất cả →</Link>
                 </div>
+                <Link href="/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Wind size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Bọc Ống Gió PCCC</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Hút khói sự cố, cấp khí tươi, tăng áp</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">EI 30–120</span>
+                </Link>
+                <Link href="/giai-phap-ung-dung/vach-ngan-chong-chay-karaoke-bar" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Music size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Vách Ngăn Karaoke / Bar</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Cách âm 52 dB + chống cháy lan</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">EI 60–120</span>
+                </Link>
+                <Link href="/giai-phap-ung-dung/san-chieu-luc-nha-thep-tien-che" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Layers size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Sàn Chịu Lực Nhà Tiền Chế</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Nhà kho, xưởng thép, sàn gác lửng</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">REI 180</span>
+                </Link>
+                <Link href="/giai-phap-ung-dung/vach-tran-nha-xuong-cong-nghiep" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Building2 size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Vách Trần Nhà Xưởng KCN</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Tường bao kho lạnh, phân xưởng sản xuất</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">EI 60</span>
+                </Link>
+                <Link href="/giai-phap-ung-dung/loi-cua-chong-chay" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <DoorClosed size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Lõi Cửa Thép Chống Cháy</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Điền lõi cửa thoát hiểm, cửa buồng thang</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">EI 30–90</span>
+                </Link>
               </div>
             </div>
 
             {/* 4. Dự án (Dropdown) */}
             <div className="group relative h-full flex items-center flex-shrink-0">
-              <Link 
-                href="/du-an" 
+              <Link
+                href="/du-an"
                 className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 ${
                   isProjectsActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
@@ -289,22 +275,42 @@ export default function Header() {
               {isProjectsActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-50">
-                <Link href="/du-an/boc-ong-gio-toa-nha-chung-cu" className="p-2.5 rounded-xl hover:bg-slate-50 text-sm font-medium text-slate-800 block whitespace-nowrap">
-                  Tòa nhà cao tầng & Chung cư
+              {/* Dropdown: Dự án */}
+              <div className="absolute top-[calc(100%-8px)] left-0 w-[360px] bg-white rounded-2xl shadow-xl border border-slate-200 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
+                <div className="flex items-center justify-between px-3 py-2 mb-1 border-b border-slate-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dự án tiêu biểu</span>
+                  <Link href="/du-an" className="text-[11px] font-semibold text-[#5F8A03] hover:underline">Xem tất cả →</Link>
+                </div>
+                <Link href="/du-an/nha-may-samsung-yen-phong" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Building2 size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Nhà Máy Samsung Yên Phong</div>
+                    <div className="text-xs text-slate-400 mt-0.5">KCN Yên Phong, Bắc Ninh · 45.000 m²</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">KCN</span>
                 </Link>
-                <Link href="/du-an/to-hop-karaoke-lounge" className="p-2.5 rounded-xl hover:bg-slate-50 text-sm font-medium text-slate-800 block whitespace-nowrap">
-                  Tổ hợp Karaoke & Bar Lounge
+                <Link href="/du-an/tttm-lotte-mall-tay-ho" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Building2 size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">TTTM Lotte Mall Tây Hồ</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Võ Chí Công, Hà Nội · 28.500 m²</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">TM</span>
                 </Link>
-                <Link href="/du-an/nha-may-kcn-vsip" className="p-2.5 rounded-xl hover:bg-slate-50 text-sm font-medium text-slate-800 block whitespace-nowrap">
-                  Nhà máy KCN Công nghệ cao
+                <Link href="/du-an/data-center-viettel-idc" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Building2 size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Data Center Viettel IDC</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Khu CNC Hòa Lạc, Hà Nội · 16.000 m²</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">HT</span>
                 </Link>
               </div>
             </div>
 
             {/* 5. Kỹ thuật & Thi công (Dropdown) */}
             <div className="group relative h-full flex items-center flex-shrink-0">
-              <button 
+              <button
                 type="button"
                 className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 cursor-pointer ${
                   isTechActive
@@ -320,27 +326,34 @@ export default function Header() {
               {isTechActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col gap-1 z-50">
-                <Link href="/thu-vien-tai-lieu" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><FileText size={16} /></div>
-                  <div>
-                    <div className="text-sm font-semibold whitespace-nowrap">Thư viện kiểm định PCCC</div>
-                    <div className="text-xs text-slate-500">Tải kết quả đốt mẫu IBST, CAD</div>
+              {/* Dropdown: Kỹ thuật & Thi công */}
+              <div className="absolute top-[calc(100%-8px)] left-0 w-[360px] bg-white rounded-2xl shadow-xl border border-slate-200 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
+                <div className="px-3 py-2 mb-1 border-b border-slate-100">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tài liệu kỹ thuật</span>
+                </div>
+                <Link href="/thu-vien-tai-lieu" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <FileText size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Thư viện kiểm định PCCC</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Tải kết quả đốt mẫu IBST, bản vẽ CAD</div>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">PDF</span>
                 </Link>
-                <Link href="/huong-dan-thi-cong" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><Hammer size={16} /></div>
-                  <div>
-                    <div className="text-sm font-semibold whitespace-nowrap">Hướng dẫn thi công chuẩn thợ</div>
-                    <div className="text-xs text-slate-500">Kỹ thuật bắt vít, xử lý mối nối</div>
+                <Link href="/huong-dan-thi-cong" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <Hammer size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Hướng dẫn thi công chuẩn thợ</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Bắn vít, trét keo, xử lý mối nối</div>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">Video</span>
                 </Link>
-                <Link href="/faq" className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0"><HelpCircle size={16} /></div>
-                  <div>
-                    <div className="text-sm font-semibold whitespace-nowrap">Hỏi đáp kỹ thuật (FAQ)</div>
-                    <div className="text-xs text-slate-500">Giải đáp 15 thắc mắc PCCC</div>
+                <Link href="/faq" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
+                  <HelpCircle size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-slate-800">Hỏi đáp kỹ thuật (FAQ)</div>
+                    <div className="text-xs text-slate-400 mt-0.5">Giải đáp 15 thắc mắc PCCC thường gặp</div>
                   </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">Q&A</span>
                 </Link>
               </div>
             </div>
