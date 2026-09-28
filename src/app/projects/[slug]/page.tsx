@@ -60,13 +60,13 @@ export default async function ProjectDetailPage({ params }: Props) {
     <div className="min-h-screen bg-slate-50">
 
       {/* Hero image */}
-      <div className="relative h-[320px] sm:h-[420px] md:h-[500px] overflow-hidden bg-slate-200">
+      <div className="relative h-[320px] sm:h-[460px] lg:h-[580px] overflow-hidden bg-slate-200">
         <img
           src={project.image}
           alt={project.name}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-slate-900/10" />
 
         {/* Breadcrumb */}
         <div className="absolute top-5 left-0 right-0 max-w-[1440px] mx-auto px-4 lg:px-8">
@@ -116,29 +116,34 @@ export default async function ProjectDetailPage({ params }: Props) {
               <div className={`h-1.5 bg-gradient-to-r ${accent.bar}`} />
               <div className="p-5">
                 <h2 className="text-sm font-bold text-slate-900 mb-4">Thông Số Dự Án</h2>
-                <div className="space-y-3">
-                  {SPECS.map(({ label, key }) => (
+
+                {/* Large stat chips at top */}
+                <div className="grid grid-cols-2 gap-2.5 mb-5">
+                  <div className={`rounded-2xl p-4 ${accent.label}`}>
+                    <div className="flex items-center gap-1 mb-2">
+                      <Ruler size={12} className="opacity-60" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">Diện tích</span>
+                    </div>
+                    <div className="text-base font-black leading-tight">{project.scale}</div>
+                  </div>
+                  <div className="rounded-2xl p-4 bg-[#FEF3EC] text-[#D95314]">
+                    <div className="flex items-center gap-1 mb-2">
+                      <Flame size={12} className="text-[#F26522]" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">Chịu lửa</span>
+                    </div>
+                    <div className="text-base font-black leading-tight">{project.fireRating}</div>
+                  </div>
+                </div>
+
+                <div className="space-y-0">
+                  {SPECS.filter(s => s.key !== 'scale' && s.key !== 'fireRating').map(({ label, key }) => (
                     <div key={key} className="flex flex-col gap-0.5 py-2.5 border-b border-slate-100 last:border-0">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
                       <span className="text-sm font-semibold text-slate-800">
                         {String(project[key])}
                       </span>
                     </div>
                   ))}
-                </div>
-
-                {/* Stat strip */}
-                <div className="grid grid-cols-2 gap-2 mt-5">
-                  <div className="bg-slate-50 rounded-2xl p-3 text-center">
-                    <div className="flex items-center justify-center mb-1"><Ruler size={14} className="text-slate-400" /></div>
-                    <div className="text-sm font-black text-slate-900">{project.scale}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">Diện tích</div>
-                  </div>
-                  <div className="bg-slate-50 rounded-2xl p-3 text-center">
-                    <div className="flex items-center justify-center mb-1"><Flame size={14} className="text-[#F26522]" /></div>
-                    <div className="text-sm font-black text-slate-900">{project.fireRating}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5">Chịu lửa</div>
-                  </div>
                 </div>
 
                 {/* CTA */}
@@ -234,7 +239,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                         href={`/du-an/${rel.slug}`}
                         className={`group bg-white rounded-2xl border border-slate-200 ${relAccent.hover} hover:shadow-lg transition-all overflow-hidden`}
                       >
-                        <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+                        <div className="relative h-40 overflow-hidden bg-slate-100">
                           <img src={rel.image} alt={rel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
                         </div>
