@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import {
   Shield, Award, FlameKindling, Wrench,
-  MapPin, Factory, Warehouse, Building2,
   PhoneCall, Send, Package,
-  CheckCircle2, Zap, Users,
+  Zap, Users,
 } from 'lucide-react';
+import AboutLocations from './AboutLocations';
 
 /* ── Section 2: Company Story ── */
 function CompanyStory() {
@@ -175,58 +175,7 @@ function Values() {
   );
 }
 
-/* ── Section 5: Locations ── */
-const LOCATIONS = [
-  { icon: Warehouse,  type: 'Kho & VP Hà Nội',    addr: 'Cụm CN Lại Yên, Xã Sơn Đồng, TP Hà Nội',                highlight: true },
-  { icon: Building2,  type: 'Văn phòng Trường Chinh', addr: '36, ngõ 120 Trường Chinh, P. Kim Liên, HN',         highlight: false },
-  { icon: Factory,    type: 'Nhà máy',             addr: 'KCN Bình Phú, P. Kỳ Sơn, Tỉnh Phú Thọ',               highlight: false },
-  { icon: Warehouse,  type: 'Kho Đà Nẵng',        addr: '575 Lê Văn Hiến, P. Ngũ Hành Sơn, TP Đà Nẵng',        highlight: false },
-  { icon: Building2,  type: 'Chi nhánh HCM',       addr: '181/7 Đường Công Khi, Ấp 9, Xã Hóc Môn, TP.HCM',     highlight: false },
-];
-
-function Locations() {
-  return (
-    <div className="bg-slate-50 border-b border-slate-100">
-      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-12 lg:py-14">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-3">Văn Phòng & Kho Hàng</h2>
-            <p className="text-sm text-slate-500 leading-relaxed mb-6">
-              5 điểm hiện diện từ Bắc vào Nam — đảm bảo giao hàng đúng tiến độ và hỗ trợ kỹ thuật tại hiện trường.
-            </p>
-            <div className="flex items-center gap-3 text-xs text-slate-500">
-              <div className="w-2 h-2 rounded-full bg-[#7CB305]" />
-              <span>Giờ làm việc: T2–CN · 8:00–12:00 & 13:30–17:30</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {LOCATIONS.map(({ icon: Icon, type, addr, highlight }) => (
-              <div
-                key={type}
-                className={`flex items-start gap-3 p-4 rounded-2xl border transition-all ${
-                  highlight
-                    ? 'border-[#7CB305]/40 bg-[#F4F9E8]'
-                    : 'border-slate-200 bg-white hover:border-slate-300'
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${highlight ? 'bg-[#5F8A03]' : 'bg-slate-100'}`}>
-                  <Icon size={14} className={highlight ? 'text-white' : 'text-slate-500'} />
-                </div>
-                <div className="min-w-0">
-                  <p className={`text-xs font-bold mb-0.5 ${highlight ? 'text-[#5F8A03]' : 'text-slate-700'}`}>{type}</p>
-                  <p className="text-[11px] text-slate-500 leading-snug">{addr}</p>
-                </div>
-                {highlight && (
-                  <span className="ml-auto flex-shrink-0 text-[9px] font-black bg-[#5F8A03] text-white px-1.5 py-0.5 rounded">HQ</span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+/* ── Section 5: Locations — rendered by AboutLocations client component ── */
 
 /* ── Section 6: CTA Banner ── */
 function CtaBanner() {
@@ -274,7 +223,7 @@ export default function AboutContent() {
       <CompanyStory />
       <Certifications />
       <Values />
-      <Locations />
+      <AboutLocations />
       <CtaBanner />
     </>
   );
