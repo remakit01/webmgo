@@ -1,19 +1,12 @@
 import Link from 'next/link';
-import { Shield, FileCheck2, FileCode2, BookOpen, Files, Layers, BadgeCheck, Banknote } from 'lucide-react';
-import { DOCUMENTS } from '@/data/documents';
+import { Shield, FileCheck2, FileCode2, BookOpen } from 'lucide-react';
+import TechLibraryStats from './TechLibraryStats';
 
 const CERT_AUTHORITIES = [
   { name: 'IBST', sub: 'Viện KHCN Xây dựng', color: 'border-[#7CB305] bg-[#F4F9E8]/10 text-[#7CB305]' },
   { name: 'ISO 1182', sub: 'Không cháy lan', color: 'border-amber-400 bg-amber-400/10 text-amber-300' },
   { name: 'QUATEST 3', sub: 'Trung tâm 3', color: 'border-orange-400 bg-orange-400/10 text-orange-300' },
   { name: 'BXD', sub: 'Bộ Xây Dựng', color: 'border-rose-400 bg-rose-400/10 text-rose-300' },
-];
-
-const STATS = [
-  { value: String(DOCUMENTS.length), label: 'Tài liệu',      icon: Files },
-  { value: '6',                       label: 'Mức EI kiểm định', icon: Layers },
-  { value: '4',                       label: 'Chứng chỉ QT',  icon: BadgeCheck },
-  { value: '100%',                    label: 'Miễn phí',      icon: Banknote },
 ];
 
 export default function TechLibraryHero() {
@@ -42,16 +35,8 @@ export default function TechLibraryHero() {
               Hồ sơ IBST · Bản vẽ CAD · Chứng chỉ quốc tế — đầy đủ, có công chứng, miễn phí tải xuống
             </p>
 
-            {/* Stats chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-3">
-              {STATS.map(({ value, label, icon: Icon }) => (
-                <div key={label} className="flex flex-col items-center text-center px-3 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors">
-                  <Icon size={16} className="text-[#7CB305] mb-2" />
-                  <span className="text-xl sm:text-2xl font-black text-white leading-none mb-1">{value}</span>
-                  <span className="text-[10px] text-slate-400 font-medium leading-snug">{label}</span>
-                </div>
-              ))}
-            </div>
+            {/* Animated stats */}
+            <TechLibraryStats />
           </div>
 
           {/* Right — Cert authority grid */}
