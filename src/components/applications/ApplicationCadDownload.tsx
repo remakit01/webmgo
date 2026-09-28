@@ -1,16 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  FileCode2, 
-  Download, 
-  FileCheck2, 
-  FileText, 
-  ShieldCheck, 
-  CheckCircle2, 
-  ExternalLink,
+import {
+  FileCode2,
+  Download,
+  FileCheck2,
+  FileText,
+  ShieldCheck,
+  CheckCircle2,
   FolderArchive,
-  Sparkles
 } from 'lucide-react';
 
 interface CadItem {
@@ -107,8 +105,32 @@ const CAD_LIBRARY: CadItem[] = [
   },
 ];
 
+const CATEGORY_ACCENTS = {
+  cad: {
+    bar: 'bg-gradient-to-r from-blue-500 to-blue-700',
+    iconBg: 'bg-gradient-to-br from-blue-500 to-blue-700 shadow-blue-500/25',
+    Icon: FileCode2,
+    formatBadge: 'bg-blue-50 text-blue-700 border-blue-200',
+    cardHover: 'hover:border-blue-400/50 hover:shadow-blue-50',
+  },
+  cert: {
+    bar: 'bg-gradient-to-r from-[#F26522] to-[#D95314]',
+    iconBg: 'bg-gradient-to-br from-[#F26522] to-[#D95314] shadow-[#F26522]/25',
+    Icon: FileCheck2,
+    formatBadge: 'bg-[#FEF3EC] text-[#D95314] border-[#F26522]/30',
+    cardHover: 'hover:border-[#F26522]/50 hover:shadow-orange-50',
+  },
+  spec: {
+    bar: 'bg-gradient-to-r from-slate-500 to-slate-700',
+    iconBg: 'bg-gradient-to-br from-slate-500 to-slate-700 shadow-slate-500/25',
+    Icon: FileText,
+    formatBadge: 'bg-slate-100 text-slate-600 border-slate-300',
+    cardHover: 'hover:border-slate-400/50 hover:shadow-slate-50',
+  },
+};
+
 export default function ApplicationCadDownload({
-  filterCategory,
+  filterCategory: _filterCategory,
 }: {
   filterCategory?: string;
 }) {
@@ -122,142 +144,151 @@ export default function ApplicationCadDownload({
   const handleDownload = (item: CadItem) => {
     setDownloadSuccessId(item.id);
     setTimeout(() => setDownloadSuccessId(null), 3000);
-    // Có thể mở popup hoặc trigger tải file
   };
 
+  const TABS = [
+    { id: 'all',  label: 'Tất Cả', count: CAD_LIBRARY.length },
+    { id: 'cad',  label: 'Bản Vẽ CAD (.DWG)', count: CAD_LIBRARY.filter(i => i.category === 'cad').length },
+    { id: 'cert', label: 'Chứng Thư IBST',    count: CAD_LIBRARY.filter(i => i.category === 'cert').length },
+    { id: 'spec', label: 'Checklist TVGS',     count: CAD_LIBRARY.filter(i => i.category === 'spec').length },
+  ];
+
   return (
-    <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 my-10 shadow-xs">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+    <section className="rounded-3xl border border-slate-200 bg-white overflow-hidden my-10 shadow-sm">
+
+      {/* Section Header — gradient dark */}
+      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-6 sm:px-10 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+          <h2 className="text-lg sm:text-xl font-extrabold text-white">
             Bản Vẽ CAD (.DWG) & Hồ Sơ Đốt Lò IBST
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             File CAD mặt cắt cấu tạo cho kiến trúc sư và hồ sơ nghiệm thu thực tế cho nhà thầu PCCC
           </p>
         </div>
-
         <a
           href="/bao-gia"
-          className="px-4 py-2 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-xs sm:text-sm transition-all flex items-center gap-1.5 self-start md:self-auto shadow-xs"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-xs sm:text-sm transition-all flex-shrink-0 shadow-md shadow-[#5F8A03]/30 self-start md:self-auto"
         >
-          <FolderArchive size={14} />
+          <FolderArchive size={15} />
           <span>Tải Trọn Bộ (.ZIP)</span>
         </a>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 pt-5 pb-3">
-        {[
-          { id: 'all', label: 'Tất Cả (8)' },
-          { id: 'cad', label: 'Bản Vẽ CAD (.DWG)' },
-          { id: 'cert', label: 'Chứng Thư IBST' },
-          { id: 'spec', label: 'Checklist TVGS' },
-        ].map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
-                isActive
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Grid of Files */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-        {filteredItems.map((item) => {
-          const isDownloaded = downloadSuccessId === item.id;
-          return (
-            <div
-              key={item.id}
-              className="p-4 sm:p-5 rounded-2xl border border-slate-200/90 hover:border-[#7CB305] hover:shadow-xs transition-all bg-white flex flex-col justify-between group"
-            >
-              <div>
-                {/* Badges Bar */}
-                <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <span className={`px-2 py-0.5 rounded text-[11px] font-black uppercase tracking-wider ${
-                    item.format === 'DWG' 
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200' 
-                      : 'bg-red-50 text-red-700 border border-red-200'
-                  }`}>
-                    {item.format} • {item.size}
-                  </span>
-                  <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30">
-                    {item.ratingBadge}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#5F8A03] transition-colors leading-snug">
-                  {item.title}
-                </h4>
-
-                {/* Description */}
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
-                  {item.description}
-                </p>
-              </div>
-
-              {/* Action Button */}
-              <div className="pt-4 mt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[11px] text-slate-400 font-medium">
-                  Cập nhật QCVN 06:2022
+      <div className="p-6 sm:p-10">
+        {/* Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as 'all' | 'cad' | 'cert' | 'spec')}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  isActive
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                {tab.label}
+                <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'
+                }`}>
+                  {tab.count}
                 </span>
-
-                <button
-                  type="button"
-                  onClick={() => handleDownload(item)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isDownloaded
-                      ? 'bg-[#5F8A03] text-white'
-                      : 'bg-slate-100 group-hover:bg-[#F26522] text-slate-700 group-hover:text-white'
-                  }`}
-                >
-                  {isDownloaded ? (
-                    <>
-                      <CheckCircle2 size={13} />
-                      <span>Đang Tải Xuống...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download size={13} />
-                      <span>Tải Về ({item.format})</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Submittal Notice Banner */}
-      <div className="mt-6 p-4 rounded-2xl bg-[#F4F9E8] border border-[#7CB305]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-slate-800">
-          <ShieldCheck size={18} className="text-[#5F8A03] flex-shrink-0" />
-          <span>
-            Quý kỹ sư cần hồ sơ đệ trình mẫu (Submittal Packet) có <strong>dấu đỏ công chứng</strong> của Remak và Viện IBST?
-          </span>
+              </button>
+            );
+          })}
         </div>
-        <a
-          href="tel:0902441981"
-          className="font-extrabold text-[#5F8A03] hover:underline whitespace-nowrap"
-        >
-          Hotline Kỹ Sư: 0902.441.981 →
-        </a>
-      </div>
 
+        {/* Grid of File Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredItems.map((item) => {
+            const accent = CATEGORY_ACCENTS[item.category];
+            const { Icon } = accent;
+            const isDownloaded = downloadSuccessId === item.id;
+            return (
+              <div
+                key={item.id}
+                className={`group bg-white rounded-2xl border border-slate-200 shadow-xs ${accent.cardHover} hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col`}
+              >
+                {/* Top color bar */}
+                <div className={`h-1.5 ${accent.bar}`} />
+
+                <div className="p-4 sm:p-5 flex flex-col flex-1">
+                  {/* Icon + Badges row */}
+                  <div className="flex items-start gap-3 mb-3.5">
+                    <div className={`w-11 h-11 rounded-xl ${accent.iconBg} text-white flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                      <Icon size={19} />
+                    </div>
+                    <div className="flex-1 flex items-center justify-between gap-2 flex-wrap min-w-0">
+                      <span className={`px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider border ${accent.formatBadge}`}>
+                        {item.format} · {item.size}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30 whitespace-nowrap">
+                        {item.ratingBadge}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h4 className="text-sm font-bold text-slate-900 group-hover:text-[#5F8A03] transition-colors leading-snug mb-1.5">
+                    {item.title}
+                  </h4>
+
+                  {/* Description */}
+                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 flex-1">
+                    {item.description}
+                  </p>
+
+                  {/* Footer */}
+                  <div className="pt-3.5 mt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-slate-400 font-medium">QCVN 06:2022</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(item)}
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
+                        isDownloaded
+                          ? 'bg-[#5F8A03] text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-700 group-hover:bg-[#F26522] group-hover:text-white group-hover:shadow-sm'
+                      }`}
+                    >
+                      {isDownloaded ? (
+                        <>
+                          <CheckCircle2 size={13} />
+                          <span>Đang tải…</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download size={13} />
+                          <span>Tải Về ({item.format})</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Submittal Notice Banner */}
+        <div className="mt-6 p-4 sm:p-5 rounded-2xl bg-[#F4F9E8] border border-[#7CB305]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 text-slate-800">
+            <ShieldCheck size={20} className="text-[#5F8A03] flex-shrink-0" />
+            <span className="text-xs sm:text-sm">
+              Quý kỹ sư cần hồ sơ đệ trình mẫu (Submittal Packet) có <strong>dấu đỏ công chứng</strong> của Remak và Viện IBST?
+            </span>
+          </div>
+          <a
+            href="tel:0902441981"
+            className="text-sm font-extrabold text-[#5F8A03] hover:text-[#7CB305] hover:underline whitespace-nowrap transition-colors"
+          >
+            Hotline Kỹ Sư: 0902.441.981 →
+          </a>
+        </div>
+      </div>
     </section>
   );
 }
