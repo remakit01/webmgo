@@ -47,6 +47,10 @@ const nextConfig: NextConfig = {
         source: '/nhan-mau-thu',
         destination: '/sample-request',
       },
+      {
+        source: '/gioi-thieu',
+        destination: '/about',
+      },
     ];
   },
 };

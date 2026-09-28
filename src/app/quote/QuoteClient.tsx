@@ -53,7 +53,7 @@ const REFERENCE_PROJECTS = [
 const inputCls = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7CB305]/40 focus:border-[#7CB305] transition-colors bg-white';
 const labelCls = 'block text-xs font-bold text-slate-700 mb-1.5';
 
-export default function BaoGiaClient() {
+export default function QuoteClient() {
   const [form, setForm] = useState({
     name: '', phone: '', project: '', application: '', area: '', ei: '', note: '',
   });
