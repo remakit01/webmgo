@@ -69,9 +69,9 @@ export default function Header() {
             <Link href="/tin-tuc" className="flex items-center gap-1.5 hover:text-[#5F8A03] transition-colors">
               <Newspaper size={13} /> Tin tức PCCC
             </Link>
-            <Link href="/lien-he" className="flex items-center gap-1.5 hover:text-[#5F8A03] transition-colors">
-              <Mail size={13} /> Liên hệ
-            </Link>
+            <a href="mailto:contact@remak.vn" className="flex items-center gap-1.5 hover:text-[#5F8A03] transition-colors">
+              <Mail size={13} /> contact@remak.vn
+            </a>
             <a 
               href="tel:0902441981" 
               className="flex items-center gap-1.5 text-[#F26522] font-bold hover:text-[#D95314] transition-colors"
