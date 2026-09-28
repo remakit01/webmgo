@@ -9,17 +9,14 @@ import {
   Menu, 
   X, 
   Phone, 
-  FileText, 
-  Building2, 
-  Newspaper, 
-  Mail, 
-  Flame, 
-  Wind, 
-  Layers, 
-  DoorClosed, 
-  Music, 
-  Hammer,
-  HelpCircle,
+  Building2,
+  Newspaper,
+  Mail,
+  Flame,
+  Wind,
+  Layers,
+  DoorClosed,
+  Music,
   Package
 } from 'lucide-react';
 
@@ -35,9 +32,8 @@ export default function Header() {
   const isProductsActive = pathname.startsWith('/san-pham');
   const isAppsActive = pathname.startsWith('/giai-phap-ung-dung');
   const isProjectsActive = pathname.startsWith('/du-an');
-  const isTechActive = pathname.startsWith('/thu-vien-tai-lieu') || 
-                       pathname.startsWith('/huong-dan-thi-cong') || 
-                       pathname.startsWith('/faq');
+  const isLibraryActive = pathname.startsWith('/thu-vien-tai-lieu');
+  const isGuideActive = pathname.startsWith('/huong-dan-thi-cong');
   const isPriceActive = pathname.startsWith('/bao-gia');
   const isAgentsActive = pathname.startsWith('/dai-ly');
 
@@ -308,54 +304,38 @@ export default function Header() {
               </div>
             </div>
 
-            {/* 5. Kỹ thuật & Thi công (Dropdown) */}
-            <div className="group relative h-full flex items-center flex-shrink-0">
-              <button
-                type="button"
-                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 cursor-pointer ${
-                  isTechActive
+            {/* 5. Thư viện tài liệu */}
+            <div className="relative h-full flex items-center flex-shrink-0">
+              <Link
+                href="/thu-vien-tai-lieu"
+                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
+                  isLibraryActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
-                    : 'text-slate-800 group-hover:text-[#5F8A03] group-hover:bg-[#F4F9E8]'
+                    : 'text-slate-800 hover:text-[#5F8A03] hover:bg-[#F4F9E8]'
                 }`}
               >
-                <span>Kỹ thuật & Thi công</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 flex-shrink-0 group-hover:rotate-180 ${
-                  isTechActive ? 'text-[#5F8A03]' : 'text-slate-400'
-                }`} />
-              </button>
-              {isTechActive && (
+                Thư viện
+              </Link>
+              {isLibraryActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-              {/* Dropdown: Kỹ thuật & Thi công */}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-[360px] bg-white rounded-2xl shadow-xl border border-slate-200 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
-                <div className="px-3 py-2 mb-1 border-b border-slate-100">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Tài liệu kỹ thuật</span>
-                </div>
-                <Link href="/thu-vien-tai-lieu" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
-                  <FileText size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-slate-800">Thư viện kiểm định PCCC</div>
-                    <div className="text-xs text-slate-400 mt-0.5">Tải kết quả đốt mẫu IBST, bản vẽ CAD</div>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">PDF</span>
-                </Link>
-                <Link href="/huong-dan-thi-cong" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
-                  <Hammer size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-slate-800">Hướng dẫn thi công chuẩn thợ</div>
-                    <div className="text-xs text-slate-400 mt-0.5">Bắn vít, trét keo, xử lý mối nối</div>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">Video</span>
-                </Link>
-                <Link href="/faq" className="flex items-start gap-3 px-3 py-2.5 rounded-xl border-l-2 border-transparent hover:border-[#7CB305] hover:bg-slate-50 transition-all group/item">
-                  <HelpCircle size={15} className="text-slate-400 group-hover/item:text-[#5F8A03] mt-0.5 flex-shrink-0 transition-colors" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-slate-800">Hỏi đáp kỹ thuật (FAQ)</div>
-                    <div className="text-xs text-slate-400 mt-0.5">Giải đáp 15 thắc mắc PCCC thường gặp</div>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold whitespace-nowrap flex-shrink-0 mt-0.5">Q&A</span>
-                </Link>
-              </div>
+            </div>
+
+            {/* 6. Hướng dẫn thi công */}
+            <div className="relative h-full flex items-center flex-shrink-0">
+              <Link
+                href="/huong-dan-thi-cong"
+                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
+                  isGuideActive
+                    ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
+                    : 'text-slate-800 hover:text-[#5F8A03] hover:bg-[#F4F9E8]'
+                }`}
+              >
+                Hướng dẫn
+              </Link>
+              {isGuideActive && (
+                <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
+              )}
             </div>
 
             {/* 6. Báo giá (Nổi bật) */}
