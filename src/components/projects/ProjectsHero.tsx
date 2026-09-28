@@ -1,12 +1,5 @@
-import React from 'react';
 import Link from 'next/link';
-
-const STATS = [
-  { value: '200+', label: 'Dự Án Hoàn Thành' },
-  { value: '1.2M+', label: 'M² Đã Thi Công' },
-  { value: '32', label: 'Tỉnh Thành' },
-  { value: '10+', label: 'Năm Kinh Nghiệm' },
-];
+import StatsCounter from './StatsCounter';
 
 export default function ProjectsHero() {
   return (
@@ -32,18 +25,12 @@ export default function ProjectsHero() {
           </p>
         </div>
 
-        {/* 4 Stat Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {STATS.map((stat, idx) => (
-            <div
-              key={idx}
-              className="bg-white/10 border border-white/15 rounded-2xl p-4 sm:p-5 text-center backdrop-blur-sm"
-            >
-              <div className="text-2xl sm:text-3xl font-black text-white">{stat.value}</div>
-              <div className="text-xs sm:text-sm text-slate-300 mt-1 font-medium">{stat.label}</div>
-            </div>
-          ))}
-        </div>
+        {/* Animated stat counters */}
+        <StatsCounter />
+
+        <p className="text-xs text-slate-500 mt-4 text-center lg:text-left">
+          KCN · TTTM · Chung cư · Data center · Văn phòng — trên toàn quốc
+        </p>
 
       </div>
     </section>

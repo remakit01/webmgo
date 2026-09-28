@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { PhoneCall, FileCheck } from 'lucide-react';
 import { PROJECTS, PROJECT_CATEGORIES } from '@/data/projects';
-import ProjectCard from './ProjectCard';
+import ProjectCard, { ProjectCardFeatured } from './ProjectCard';
 
 export default function ProjectsClientView() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -13,6 +13,10 @@ export default function ProjectsClientView() {
       ? PROJECTS
       : PROJECTS.filter((p) => p.category === activeCategory);
   }, [activeCategory]);
+
+  const isAll = activeCategory === 'all';
+  const featuredProject = isAll ? filtered[0] : null;
+  const gridProjects = isAll ? filtered.slice(1) : filtered;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -56,23 +60,32 @@ export default function ProjectsClientView() {
           </div>
         </div>
 
+        {/* Featured hero card (chỉ khi "Tất Cả") */}
+        {featuredProject && (
+          <div>
+            <ProjectCardFeatured project={featuredProject} />
+          </div>
+        )}
+
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filtered.map((project, idx) => {
-            const isLoneLastItem =
-              idx === filtered.length - 1 && filtered.length % 2 !== 0;
-            return (
-              <div
-                key={project.id}
-                className={isLoneLastItem ? 'lg:col-span-2 lg:flex lg:justify-center' : ''}
-              >
-                <div className={isLoneLastItem ? 'w-full lg:max-w-[calc(50%-0.75rem)]' : ''}>
-                  <ProjectCard project={project} />
+        {gridProjects.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {gridProjects.map((project, idx) => {
+              const isLoneLastItem =
+                idx === gridProjects.length - 1 && gridProjects.length % 2 !== 0;
+              return (
+                <div
+                  key={project.id}
+                  className={isLoneLastItem ? 'lg:col-span-2 lg:flex lg:justify-center' : ''}
+                >
+                  <div className={isLoneLastItem ? 'w-full lg:max-w-[calc(50%-0.75rem)]' : ''}>
+                    <ProjectCard project={project} />
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
       </section>
 
