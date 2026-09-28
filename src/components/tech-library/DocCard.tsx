@@ -10,12 +10,12 @@ export default function DocCard({ doc }: { doc: DocumentItem }) {
 
   return (
     <div className="group bg-white rounded-2xl border-2 border-slate-100 shadow-sm hover:shadow-lg hover:border-slate-200 transition-all duration-300 flex flex-col overflow-hidden">
-      {/* Top accent stripe */}
-      <div className={`h-[3px] w-full transition-colors duration-300 ${
-        doc.type === 'cad'   ? 'bg-blue-400/0 group-hover:bg-blue-400' :
-        doc.type === 'ibst'  ? 'bg-[#7CB305]/0 group-hover:bg-[#7CB305]' :
-        doc.type === 'cert'  ? 'bg-amber-400/0 group-hover:bg-amber-400' :
-        'bg-purple-400/0 group-hover:bg-purple-400'
+      {/* Top accent stripe — 25% always, full on hover */}
+      <div className={`h-1 w-full transition-all duration-300 ${
+        doc.type === 'cad'   ? 'bg-blue-400/25 group-hover:bg-blue-400' :
+        doc.type === 'ibst'  ? 'bg-[#7CB305]/25 group-hover:bg-[#7CB305]' :
+        doc.type === 'cert'  ? 'bg-amber-400/25 group-hover:bg-amber-400' :
+        'bg-purple-400/25 group-hover:bg-purple-400'
       }`} />
 
       <div className="p-5 flex flex-col flex-1">

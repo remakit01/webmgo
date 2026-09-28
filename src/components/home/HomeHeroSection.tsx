@@ -17,7 +17,7 @@ export default function HomeHeroSection() {
 
 
             {/* 2. Tiêu đề chính lớn */}
-            <h1 className="animate-hero-fade-up delay-200 text-3xl sm:text-4xl lg:text-[46px] font-bold text-slate-900 leading-[1.18] tracking-tight">
+            <h1 className="animate-hero-fade-up delay-200 text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight">
               Tấm Chống Cháy MGO Remak®
               <span className="block text-xl sm:text-2xl lg:text-3xl font-semibold text-slate-600 mt-2">
                 Bảo vệ kết cấu PCCC chuyên sâu

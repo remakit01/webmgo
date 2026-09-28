@@ -8,6 +8,20 @@ interface TechLibraryCategoryCardsProps {
   onSelect: (type: DocType | 'all') => void;
 }
 
+const TYPE_HOVER_BORDER: Record<DocType, string> = {
+  cad:   'hover:border-blue-300',
+  ibst:  'hover:border-[#7CB305]',
+  cert:  'hover:border-amber-300',
+  guide: 'hover:border-purple-300',
+};
+
+const TYPE_TOP_BAR: Record<DocType, string> = {
+  cad:   'bg-blue-400',
+  ibst:  'bg-[#7CB305]',
+  cert:  'bg-amber-400',
+  guide: 'bg-purple-400',
+};
+
 export default function TechLibraryCategoryCards({ activeType, counts, onSelect }: TechLibraryCategoryCardsProps) {
   return (
     <section>
@@ -37,22 +51,29 @@ export default function TechLibraryCategoryCards({ activeType, counts, onSelect 
               key={t.id}
               type="button"
               onClick={() => onSelect(isActive ? 'all' : t.id)}
-              className={`group text-left p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 cursor-pointer ${
+              className={`group text-left rounded-2xl border-2 overflow-hidden transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'border-[#5F8A03] bg-[#F4F9E8] shadow-md'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-md'
+                  : `border-slate-200 bg-white hover:shadow-md ${TYPE_HOVER_BORDER[t.id]}`
               }`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
-                isActive ? 'bg-[#5F8A03]' : cfg.iconBg
-              }`}>
-                <Icon size={18} className={isActive ? 'text-white' : cfg.iconColor} />
+              {/* Colored top accent — always visible */}
+              <div className={`h-1 w-full transition-opacity duration-200 ${TYPE_TOP_BAR[t.id]} ${
+                isActive ? 'opacity-0' : 'opacity-40 group-hover:opacity-100'
+              }`} />
+
+              <div className="p-4 sm:p-5">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+                  isActive ? 'bg-[#5F8A03]' : cfg.iconBg
+                }`}>
+                  <Icon size={18} className={isActive ? 'text-white' : cfg.iconColor} />
+                </div>
+                <div className="font-bold text-slate-900 text-sm leading-snug mb-0.5">{cfg.label}</div>
+                <div className={`text-[11px] font-black mb-2 ${isActive ? 'text-[#5F8A03]' : 'text-slate-400'}`}>
+                  {counts[t.id] ?? 0} tài liệu
+                </div>
+                <div className="text-[11px] text-slate-500 leading-snug hidden sm:block">{cfg.description}</div>
               </div>
-              <div className="font-bold text-slate-900 text-sm leading-snug mb-0.5">{cfg.label}</div>
-              <div className={`text-[11px] font-black mb-2 ${isActive ? 'text-[#5F8A03]' : 'text-slate-400'}`}>
-                {counts[t.id] ?? 0} tài liệu
-              </div>
-              <div className="text-[11px] text-slate-500 leading-snug hidden sm:block">{cfg.description}</div>
             </button>
           );
         })}

@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  ChevronDown, 
-  Search, 
-  Menu, 
-  X, 
-  Phone, 
+import {
+  ChevronDown,
+  Search,
+  Menu,
+  X,
+  Phone,
   Building2,
   Newspaper,
   Mail,
@@ -19,6 +19,7 @@ import {
   Music,
   Package
 } from 'lucide-react';
+import SearchModal from './SearchModal';
 
 export default function Header() {
   const pathname = usePathname();
@@ -386,7 +387,7 @@ export default function Header() {
             </button>
 
             <Link
-              href="#nhan-mau-thu"
+              href="/nhan-mau-thu"
               className="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all whitespace-nowrap flex-shrink-0"
             >
               <Package size={16} className="flex-shrink-0" />
@@ -565,35 +566,8 @@ export default function Header() {
         </div>
       )}
 
-      {/* 4. MODAL TÌM KIẾM THÔNG MINH */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-xl rounded-2xl p-5 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="font-bold text-slate-800">Tìm kiếm sản phẩm & giải pháp MGO</h3>
-              <button onClick={() => setSearchOpen(false)} className="text-slate-400 hover:text-slate-600">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="mt-4 flex items-center gap-3 border-2 border-[#7CB305] rounded-xl px-4 py-2.5">
-              <Search size={18} className="text-[#7CB305]" />
-              <input 
-                type="text" 
-                placeholder="Nhập độ dày (10mm, 12mm), ống gió, kết quả đốt mẫu..." 
-                className="w-full outline-none text-slate-800 text-sm" 
-                autoFocus
-              />
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs">
-              <span className="text-slate-400 py-1">Gợi ý:</span>
-              <span className="bg-slate-100 hover:bg-[#F4F9E8] hover:text-[#5F8A03] px-2.5 py-1 rounded-full cursor-pointer">Bọc ống gió 10mm</span>
-              <span className="bg-slate-100 hover:bg-[#F4F9E8] hover:text-[#5F8A03] px-2.5 py-1 rounded-full cursor-pointer">Vách chống cháy EI 60</span>
-              <span className="bg-slate-100 hover:bg-[#F4F9E8] hover:text-[#5F8A03] px-2.5 py-1 rounded-full cursor-pointer">Tấm sàn 18mm</span>
-              <span className="bg-slate-100 hover:bg-[#F4F9E8] hover:text-[#5F8A03] px-2.5 py-1 rounded-full cursor-pointer">Kết quả thử nghiệm IBST</span>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* 4. MODAL TÌM KIẾM */}
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }
