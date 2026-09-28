@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
         source: '/giai-phap-ung-dung/:slug',
         destination: '/applications/:slug',
       },
+      {
+        source: '/du-an',
+        destination: '/projects',
+      },
+      {
+        source: '/du-an/:slug',
+        destination: '/projects/:slug',
+      },
     ];
   },
 };
