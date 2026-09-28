@@ -11,7 +11,7 @@ export default function DocCardFeatured({ doc }: { doc: DocumentItem }) {
   return (
     <div className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col overflow-hidden">
       {/* Top accent */}
-      <div className={`h-1 ${TYPE_ACCENT_BAR[doc.type] ?? 'bg-slate-300'}`} />
+      <div className={`h-1.5 ${TYPE_ACCENT_BAR[doc.type] ?? 'bg-slate-300'}`} />
 
       <div className="p-5 flex flex-col flex-1">
         {/* Icon + format badge */}

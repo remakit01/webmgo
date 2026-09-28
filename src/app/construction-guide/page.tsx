@@ -88,19 +88,15 @@ export default function ConstructionGuidePage() {
             <ChevronRight size={12} />
             <span className="text-white">Hướng Dẫn Thi Công</span>
           </nav>
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#5F8A03] flex items-center justify-center flex-shrink-0">
-              <Hammer size={22} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight">
-                Hướng Dẫn Thi Công Chuẩn Thợ
-              </h1>
-              <p className="text-sm text-slate-300 mt-2 max-w-2xl leading-relaxed">
-                Quy trình từng bước cho 3 hệ thi công chính — bọc ống gió, vách ngăn cháy và sàn kỹ thuật.
-                Đúng kỹ thuật, đạt nghiệm thu PCCC ngay lần đầu.
-              </p>
-            </div>
+          <div className="mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+              Hướng Dẫn Thi Công
+              <span className="block text-[#7CB305]">Chuẩn Thợ</span>
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+              Quy trình từng bước cho 3 hệ thi công chính — bọc ống gió, vách ngăn cháy và sàn kỹ thuật.
+              Đúng kỹ thuật, đạt nghiệm thu PCCC ngay lần đầu.
+            </p>
           </div>
           <div className="flex flex-wrap gap-3 mt-6">
             {GUIDES.map((g) => (

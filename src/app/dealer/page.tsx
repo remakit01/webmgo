@@ -89,19 +89,15 @@ export default function DaiLyPage() {
             <ChevronRight size={12} />
             <span className="text-white">Chính Sách Đại Lý</span>
           </nav>
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-[#5F8A03] flex items-center justify-center flex-shrink-0">
-              <Star size={22} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight">
-                Trở Thành Đại Lý Remak® MGO FireOFF
-              </h1>
-              <p className="text-sm text-slate-300 mt-2 max-w-2xl leading-relaxed">
-                Tham gia mạng lưới phân phối vật liệu chống cháy hàng đầu Việt Nam.
-                Chiết khấu cạnh tranh, hỗ trợ kỹ thuật và marketing đầy đủ.
-              </p>
-            </div>
+          <div className="mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+              Trở Thành Đại Lý
+              <span className="block text-[#7CB305]">Remak® MGO FireOFF</span>
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+              Tham gia mạng lưới phân phối vật liệu chống cháy hàng đầu Việt Nam.
+              Chiết khấu cạnh tranh, hỗ trợ kỹ thuật và marketing đầy đủ.
+            </p>
           </div>
 
           <DealerStats />

@@ -165,11 +165,9 @@ export default function ProductsPage() {
 
         <div className="relative max-w-[1440px] mx-auto px-4 lg:px-8">
           <div className="max-w-3xl">   
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-5 leading-tight">
-              Hệ Thống Tấm Magie Oxit (MGO) <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#A0D911] via-lime-300 to-[#F26522]">
-                Remak® FireOFF Đã Kiểm Chứng
-              </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+              Hệ Thống Tấm Magie Oxit (MGO)
+              <span className="block text-[#7CB305]">Remak® FireOFF Đã Kiểm Chứng</span>
             </h1>
 
             <p className="text-base lg:text-lg text-slate-300 mb-8 leading-relaxed">

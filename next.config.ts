@@ -43,6 +43,10 @@ const nextConfig: NextConfig = {
         source: '/dai-ly',
         destination: '/dealer',
       },
+      {
+        source: '/nhan-mau-thu',
+        destination: '/sample-request',
+      },
     ];
   },
 };

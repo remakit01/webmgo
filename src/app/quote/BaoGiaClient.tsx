@@ -77,18 +77,13 @@ export default function BaoGiaClient() {
             <ChevronRight size={12} />
             <span className="text-white font-semibold">Báo Giá</span>
           </nav>
-
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div className="flex-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#5F8A03]/20 border border-[#7CB305]/30 text-[#A3D300] text-xs font-bold mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#7CB305] animate-pulse" />
-                Đang nhận yêu cầu báo giá
-              </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight mb-3">
-                Nhận Báo Giá<br />
-                <span className="text-[#7CB305]">Ngay Hôm Nay</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
+                Nhận Báo Giá
+                <span className="block text-[#7CB305]">Ngay Hôm Nay</span>
               </h1>
-              <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
                 Điền thông tin dự án — kỹ sư Remak tính toán và gửi báo giá chi tiết kèm hồ sơ kỹ thuật trong vòng 2 giờ làm việc.
               </p>
             </div>
