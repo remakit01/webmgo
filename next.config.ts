@@ -27,6 +27,22 @@ const nextConfig: NextConfig = {
         source: '/du-an/:slug',
         destination: '/projects/:slug',
       },
+      {
+        source: '/thu-vien-tai-lieu',
+        destination: '/tech-library',
+      },
+      {
+        source: '/huong-dan-thi-cong',
+        destination: '/construction-guide',
+      },
+      {
+        source: '/bao-gia',
+        destination: '/quote',
+      },
+      {
+        source: '/dai-ly',
+        destination: '/dealer',
+      },
     ];
   },
 };
