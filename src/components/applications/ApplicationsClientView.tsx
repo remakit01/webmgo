@@ -141,9 +141,21 @@ export default function ApplicationsClientView() {
           <>
             {/* Applications Grid: 4 items (2x2) per batch */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {displayedApplications.map((app) => (
-                <ApplicationCard key={app.id} application={app} />
-              ))}
+              {displayedApplications.map((app, idx) => {
+                const isLoneLastItem =
+                  idx === displayedApplications.length - 1 &&
+                  displayedApplications.length % 2 !== 0;
+                return (
+                  <div
+                    key={app.id}
+                    className={isLoneLastItem ? 'lg:col-span-2 lg:flex lg:justify-center' : ''}
+                  >
+                    <div className={isLoneLastItem ? 'w-full lg:max-w-[calc(50%-1rem)]' : ''}>
+                      <ApplicationCard application={app} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Progressive Disclosure / Load More Section */}
