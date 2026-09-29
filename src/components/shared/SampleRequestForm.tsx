@@ -1,134 +1,158 @@
 'use client';
 
-import React, { useState } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { CheckCircle2, Package, ArrowRight, Phone, FileText } from 'lucide-react';
 
 interface SampleRequestFormProps {
   id?: string;
-  title?: string;
-  subtitle?: string;
+  href?: string;
+}
+
+const TRUST_ITEMS = [
+  'Miễn phí 100% mẫu thử & cước vận chuyển',
+  'Giao hỏa tốc 24h toàn quốc',
+  'Kèm catalogue kỹ thuật & kết quả đốt mẫu IBST',
+];
+
+const STATS = [
+  { target: 200, suffix: '+', label: 'Công trình' },
+  { target: 32,  suffix: '',  label: 'Tỉnh/TP' },
+  { target: 100, suffix: '%', label: 'Nghiệm thu' },
+];
+
+function useCountUp(target: number, duration = 1400, triggered = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!triggered) return;
+    let start: number | null = null;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration, triggered]);
+  return count;
+}
+
+function AnimatedStat({ target, suffix, label, triggered }: { target: number; suffix: string; label: string; triggered: boolean }) {
+  const count = useCountUp(target, 1400, triggered);
+  return (
+    <div>
+      <div className="text-xl font-black text-white tabular-nums">
+        {count}{suffix}
+      </div>
+      <div className="text-[11px] text-slate-400">{label}</div>
+    </div>
+  );
 }
 
 export default function SampleRequestForm({
   id = 'mau-thu',
-  title = 'Đăng Ký Nhận Hộp Mẫu Thử',
-  subtitle = 'Hộp mẫu gồm đủ các độ dày (5mm – 18mm), catalogue kỹ thuật và kết quả đốt mẫu IBST gửi tận tay bạn.',
+  href = '/nhan-mau-thu',
 }: SampleRequestFormProps) {
-  const [submitted, setSubmitted] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [triggered, setTriggered] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setTriggered(true); observer.disconnect(); } },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section id={id} className="max-w-[1440px] mx-auto px-4 lg:px-8">
-      <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
-        
-        {/* Background glow effects */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#7CB305]/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#F26522]/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-2xl">
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
-          
-          <div className="lg:col-span-7 space-y-4">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-              {title} <br />
-              <span className="text-[#F26522]">Tấm MGO Remak® Miễn Phí</span>
+        {/* Ambient glows */}
+        <div className="pointer-events-none absolute -top-24 right-0 w-[480px] h-[480px] rounded-full bg-[#7CB305]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-0 w-[480px] h-[480px] rounded-full bg-[#F26522]/10 blur-3xl" />
+
+        <div className="relative z-10 px-8 py-14 sm:px-12 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+          {/* ── LEFT: Copy ── */}
+          <div className="space-y-6">
+            <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
+              Nhận Mẫu Thực Tế<br />
+              <span className="text-[#F26522]">Tấm MGO Remak®</span>
             </h2>
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
-              {subtitle}
+
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-md">
+              Bộ mẫu gồm đủ các độ dày 5mm – 18mm, catalogue kỹ thuật đầy đủ và kết quả đốt thử nghiệm IBST — gửi tận tay trong 24h.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-2 text-xs text-slate-300">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-[#7CB305]" />
-                <span>Miễn phí 100% mẫu thử & cước vận chuyển</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 size={16} className="text-[#7CB305]" />
-                <span>Giao hỏa tốc 24h toàn quốc</span>
-              </div>
+            {/* Trust list */}
+            <ul className="space-y-2.5">
+              {TRUST_ITEMS.map(item => (
+                <li key={item} className="flex items-center gap-2.5 text-sm text-slate-300">
+                  <CheckCircle2 size={15} className="flex-shrink-0 text-[#7CB305]" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Animated stat row */}
+            <div ref={statsRef} className="flex items-center gap-6 pt-2 border-t border-white/10">
+              {STATS.map(s => (
+                <AnimatedStat key={s.label} {...s} triggered={triggered} />
+              ))}
             </div>
           </div>
 
-          <div
-            className="lg:col-span-5 bg-white text-slate-800 p-6 sm:p-8 rounded-2xl shadow-xl"
-            aria-live="polite"
-            role="status"
-          >
-            {submitted ? (
-              <div className="text-center py-8 space-y-3">
-                <div className="w-16 h-16 bg-[#F4F9E8] text-[#5F8A03] rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle2 size={36} />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900">Đăng Ký Thành Công!</h3>
-                <p className="text-xs text-slate-600">
-                  Chuyên viên kỹ thuật Remak sẽ liên hệ xác nhận địa chỉ và gửi mẫu thử trong vòng 24h.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="sample-name" className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Họ và tên người nhận *
-                  </label>
-                  <input
-                    id="sample-name"
-                    type="text"
-                    required
-                    placeholder="Nguyễn Văn A"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305]"
-                  />
-                </div>
+          {/* ── RIGHT: CTA Card ── */}
+          <div className="bg-white/5 border border-white/10 backdrop-blur-sm rounded-2xl p-8 flex flex-col gap-5">
+            <div className="text-center space-y-1.5">
+              <div className="text-base font-bold text-white">Đăng ký nhận mẫu ngay</div>
+            </div>
 
-                <div>
-                  <label htmlFor="sample-phone" className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Số điện thoại nhận hàng *
-                  </label>
-                  <input
-                    id="sample-phone"
-                    type="tel"
-                    required
-                    placeholder="0902 xxx xxx"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305]"
-                  />
-                </div>
+            {/* Primary CTA */}
+            <Link
+              href={href}
+              className="group flex items-center justify-center gap-2.5 w-full py-4 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white font-bold text-base shadow-lg shadow-orange-600/30 hover:shadow-orange-600/50 hover:-translate-y-0.5 transition-all duration-200"
+            >
+              <Package size={18} />
+              <span>Nhận Mẫu Thử Miễn Phí</span>
+              <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+            </Link>
 
-                <div>
-                  <label htmlFor="sample-address" className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Địa chỉ nhận mẫu *
-                  </label>
-                  <input
-                    id="sample-address"
-                    type="text"
-                    required
-                    placeholder="Số nhà, tên đường, Quận/Huyện, Tỉnh/TP"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305]"
-                  />
-                </div>
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-[11px] text-slate-500">hoặc</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
 
-                <div>
-                  <label htmlFor="sample-purpose" className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    Mục đích sử dụng chính
-                  </label>
-                  <select id="sample-purpose" className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-[#7CB305] text-slate-600">
-                    <option value="duct">Bọc ống gió PCCC</option>
-                    <option value="wall">Vách ngăn cách âm chống cháy</option>
-                    <option value="floor">Lót sàn chịu lực gác lửng</option>
-                    <option value="door">Lõi cửa chống cháy</option>
-                    <option value="other">KTS / Nhà thầu xem mẫu nghiên cứu</option>
-                  </select>
-                </div>
+            {/* Secondary actions */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="tel:0901000000"
+                className="flex items-center justify-center gap-2 flex-1 py-3 rounded-xl border border-white/20 text-slate-300 hover:border-white/40 hover:text-white text-xs font-bold transition-all"
+              >
+                <Phone size={13} />
+                <span>Gọi tư vấn</span>
+              </a>
+              <Link
+                href="/catalogue"
+                className="flex items-center justify-center gap-2 flex-1 py-3 rounded-xl border border-white/20 text-slate-300 hover:border-white/40 hover:text-white text-xs font-bold transition-all"
+              >
+                <FileText size={13} />
+                <span>Tải Catalogue</span>
+              </Link>
+            </div>
 
-                <button 
-                  type="submit"
-                  className="w-full py-3.5 bg-[#F26522] hover:bg-[#D95314] text-white font-bold rounded-xl shadow-lg transition-colors text-sm"
-                >
-                  Gửi Yêu Cầu Nhận Mẫu Ngay
-                </button>
-              </form>
-            )}
+            {/* Security note */}
+            <p className="text-center text-[11px] text-slate-500 leading-relaxed">
+              Thông tin được bảo mật. Chuyên viên kỹ thuật liên hệ xác nhận trong 2h làm việc.
+            </p>
           </div>
 
         </div>
