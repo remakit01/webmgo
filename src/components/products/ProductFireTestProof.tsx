@@ -138,7 +138,7 @@ export default function ProductFireTestProof() {
         </div>
 
         {/* BẢNG TỔNG HỢP CÁC KẾT QUẢ THỬ NGHIỆM THỰC TẾ */}
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm mb-10">
+        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg mb-10">
           <div className="p-5 sm:p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h3 className="text-lg sm:text-xl font-bold mt-1 text-white">
@@ -154,54 +154,79 @@ export default function ProductFireTestProof() {
             </Link>
           </div>
 
-          <div className="relative">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse" style={{ minWidth: 700 }}>
               <thead>
-                <tr className="bg-slate-100/90 text-slate-700 font-bold border-b border-slate-200">
-                  <th scope="col" className="py-3.5 px-4 sm:px-6 whitespace-nowrap">Hạng Mục Cấu Kiện</th>
-                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Chỉ Số Chịu Lửa</th>
-                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Tiêu Chuẩn Áp Dụng</th>
-                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Độ Dày Tấm MGO</th>
-                  <th scope="col" className="py-3.5 px-4 whitespace-nowrap">Đơn Vị Đo Kiểm</th>
-                  <th scope="col" className="py-3.5 px-4 sm:px-6">Đánh Giá Thực Tế</th>
+                <tr className="border-b-2 border-slate-300">
+                  <th scope="col" className="sticky left-0 z-20 bg-slate-50 px-5 py-4 w-[220px] text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                    Hạng Mục Cấu Kiện
+                  </th>
+                  <th scope="col" className="px-5 py-4 bg-[#FEF3EC] border-l-2 border-r-2 border-[#F26522]/30 text-center w-[14%]">
+                    <span className="font-extrabold text-[#F26522] text-sm whitespace-nowrap">Chỉ Số Chịu Lửa</span>
+                  </th>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300 whitespace-nowrap">
+                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Tiêu Chuẩn Áp Dụng</span>
+                  </th>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300 whitespace-nowrap">
+                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Độ Dày Tấm MGO</span>
+                  </th>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300 whitespace-nowrap">
+                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Đơn Vị Đo Kiểm</span>
+                  </th>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300">
+                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Đánh Giá Thực Tế</span>
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {TEST_REPORTS.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-[#F4F9E8]/30 transition-colors">
-                    <td className="py-4 px-4 sm:px-6 font-bold text-slate-900">
+                  <tr key={idx} className="group hover:bg-slate-50/80 transition-colors duration-100">
+                    <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 px-5 py-4 align-top border-r border-b border-slate-300 transition-colors duration-100">
                       <div className="flex items-start gap-2">
                         <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
                         <div>
-                          <div>{item.assembly}</div>
+                          <div className="font-bold text-[13px] text-slate-900">{item.assembly}</div>
                           <div className="text-[10px] font-semibold text-[#5F8A03] mt-0.5">{item.status}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4 whitespace-nowrap">
-                      <span className="inline-block px-2.5 py-1 rounded-md bg-[#FEF3EC] text-[#F26522] font-bold text-[11px]">
+                    <td className="px-5 py-4 bg-[#FEF3EC]/60 group-hover:bg-[#FEF3EC] border-l-2 border-r-2 border-b border-b-slate-300 border-[#F26522]/20 align-top text-center transition-colors duration-100 whitespace-nowrap">
+                      <span className="inline-block px-2.5 py-1 rounded-md bg-[#F26522] text-white font-bold text-[11px] shadow-sm">
                         {item.rating}
                       </span>
                     </td>
-                    <td className="py-4 px-4 font-semibold text-[11px] text-slate-700 whitespace-nowrap">
+                    <td className="px-5 py-4 align-top border-b border-slate-300 text-[11px] font-semibold text-slate-700">
                       {item.standard}
                     </td>
-                    <td className="py-4 px-4 font-semibold text-slate-800 whitespace-nowrap">
+                    <td className="px-5 py-4 align-top border-b border-slate-300 font-semibold text-slate-800 whitespace-nowrap">
                       {item.thickness}
                     </td>
-                    <td className="py-4 px-4 text-slate-600 whitespace-nowrap">
+                    <td className="px-5 py-4 align-top border-b border-slate-300 text-slate-600 whitespace-nowrap">
                       {item.laboratory}
                     </td>
-                    <td className="py-4 px-4 sm:px-6 text-slate-600 leading-relaxed">
+                    <td className="px-5 py-4 align-top border-b border-slate-300 text-slate-600 leading-relaxed">
                       {item.note}
                     </td>
                   </tr>
                 ))}
+
+                {/* Verdict row */}
+                <tr className="border-t-2 border-slate-300 bg-slate-800">
+                  <td className="sticky left-0 z-10 bg-slate-800 px-5 py-4 text-xs font-black uppercase tracking-wider text-white">
+                    Kết quả nghiệm thu
+                  </td>
+                  <td className="px-5 py-4 bg-[#F26522] text-center border-l-2 border-r-2 border-[#F26522]">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <ShieldCheck size={16} className="text-white" />
+                      <span className="font-black text-white text-sm">5/5 Đạt</span>
+                    </div>
+                  </td>
+                  <td colSpan={4} className="px-5 py-4 text-center">
+                    <span className="text-white text-sm font-medium">100% Hồ Sơ Nghiệm Thu QCVN 06:2022/BXD</span>
+                  </td>
+                </tr>
               </tbody>
             </table>
-          </div>
-          <div className="hidden md:block absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent pointer-events-none" aria-hidden="true" />
           </div>
         </div>
 
