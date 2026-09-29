@@ -11,86 +11,102 @@ interface FeaturedProjectsProps {
   showHeading?: boolean;
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  'Khu Công Nghiệp':       '#F26522',
+  'Thương Mại & Dịch Vụ': '#5F8A03',
+  'Hạ Tầng Dữ Liệu':      '#475569',
+  'Cao Ốc Đô Thị':         '#7CB305',
+};
+
+const CATEGORY_ACCENT_TEXT: Record<string, string> = {
+  'Khu Công Nghiệp':       'text-[#F26522]',
+  'Thương Mại & Dịch Vụ': 'text-[#5F8A03]',
+  'Hạ Tầng Dữ Liệu':      'text-slate-600',
+  'Cao Ốc Đô Thị':         'text-[#7CB305]',
+};
+
 export default function FeaturedProjects({
   id = 'du-an-tieu-bieu',
   projects = FEATURED_PROJECTS,
   showHeading = true,
 }: FeaturedProjectsProps) {
   return (
-    <section 
+    <section
       id={id}
       aria-label="Dự Án Tiêu Biểu Sử Dụng Tấm MGO Remak"
       className="max-w-[1440px] mx-auto px-4 lg:px-8"
     >
-      {showHeading && (
-        <SectionHeading 
-          title="Dự Án Tiêu Biểu Đã Nghiệm Thu PCCC"
-        />
-      )}
+      {showHeading && <SectionHeading title="Dự Án Tiêu Biểu" />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {projects.map((project) => (
-          <div 
-            key={project.id}
-            className="group bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between"
-          >
-            <div>
-              {/* Ảnh công trình */}
-              <div className="relative h-48 w-full overflow-hidden bg-slate-100">
-                <img 
-                  src={project.image} 
+        {[...projects].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)).map((project) => {
+          const accentText = CATEGORY_ACCENT_TEXT[project.category] ?? 'text-[#5F8A03]';
+          return (
+            <div
+              key={project.id}
+              className="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+            >
+              {/* Colored accent bar */}
+              <div className="h-1 w-full" style={{ backgroundColor: CATEGORY_COLORS[project.category] ?? '#5F8A03' }} />
+
+              {/* Image */}
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                <img
+                  src={project.image}
                   alt={project.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
-                
-                {/* Badge phân loại */}
-                <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-white/95 backdrop-blur-md text-xs font-bold text-slate-800 shadow-sm">
-                  {project.category}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
+
+                {/* MỚI + category — top left */}
+                <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                  {project.isNew && (
+                    <div className="flex items-center gap-1.5 bg-[#5F8A03] text-white px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide shadow-md">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
+                      </span>
+                      MỚI
+                    </div>
+                  )}
+                  <div className="px-2.5 py-1 rounded-lg bg-white/95 backdrop-blur-md text-xs font-bold text-slate-800 shadow-sm">
+                    {project.category}
+                  </div>
                 </div>
 
-                {/* Badge EI */}
-                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-[#F26522] text-white text-xs font-bold shadow-md flex items-center gap-1">
+                {/* EI badge — bottom right, orange */}
+                <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-[#F26522] text-white text-xs font-black shadow-md flex items-center gap-1">
                   <ShieldCheck size={13} />
                   <span>{project.fireRating}</span>
                 </div>
               </div>
 
-              {/* Chi tiết dự án */}
-              <div className="p-5 space-y-3">
-                <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-snug group-hover:text-[#F26522] transition-colors">
-                  {project.name}
-                </h3>
-
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-                  <MapPin size={14} className="text-[#7CB305] flex-shrink-0" />
-                  <span className="truncate">{project.location}</span>
+              {/* Body — giống ApplicationGrid */}
+              <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
+                <div>
+                  <h3 className={`font-bold text-slate-900 text-base group-hover:${accentText} transition-colors leading-snug`}>
+                    {project.name}
+                  </h3>
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-2">
+                    <MapPin size={13} className="flex-shrink-0 text-[#7CB305]" />
+                    <span className="truncate">{project.location}</span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+                    {project.scale} · {project.application}
+                  </p>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-xs">
-                  <div className="flex items-center justify-between text-slate-500">
-                    <span>Quy mô:</span>
-                    <span className="font-bold text-[#5F8A03]">{project.scale}</span>
-                  </div>
-                  <div className="text-xs text-slate-600 line-clamp-2 pt-1 border-t border-slate-200/60 font-medium">
-                    {project.application}
-                  </div>
-                </div>
+                <Link
+                  href={project.link}
+                  className={`text-xs font-bold ${accentText} flex items-center gap-1.5 group-hover:translate-x-1 transition-transform pt-2`}
+                >
+                  <span>Xem Chi Tiết Dự Án</span>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             </div>
-
-            {/* Footer card */}
-            <div className="p-5 pt-0">
-              <Link
-                href={project.link}
-                className="w-full py-3 rounded-xl bg-slate-100 hover:bg-[#F4F9E8] text-slate-700 hover:text-[#5F8A03] text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span>Xem giải pháp</span>
-                <ArrowRight size={13} />
-              </Link>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-8 text-center">

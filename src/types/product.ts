@@ -19,6 +19,7 @@ export interface FeaturedProject {
   fireRating: string;
   image: string;
   link: string;
+  isNew?: boolean;
 }
 
 export interface MaterialComparisonItem {
@@ -27,6 +28,7 @@ export interface MaterialComparisonItem {
   cemboard: string;
   gypsum: string;
   winner: 'mgo' | 'tie' | 'cemboard' | 'gypsum';
+  category: 'fire' | 'mechanical' | 'chemical' | 'compliance';
 }
 
 export interface FaqItem {

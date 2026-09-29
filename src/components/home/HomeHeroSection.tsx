@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { Flame, Droplets, Feather, ShieldCheck, Sparkles, Package, Calculator, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Flame, Droplets, Feather, ShieldCheck, Package, Calculator } from 'lucide-react';
 
 export default function HomeHeroSection() {
-  const [showIntro, setShowIntro] = useState(false);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-[#F8FAFC] pt-6 pb-16">
@@ -25,62 +24,28 @@ export default function HomeHeroSection() {
             </h1>
 
             {/* 3. Đoạn mô tả kỹ thuật */}
-            <p className="animate-hero-fade-up delay-300 text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
-              Khoáng vô cơ Magie Oxit chịu lửa <strong>1.200°C</strong>, kháng ẩm tuyệt đối và chống ăn mòn. Đốt thử nghiệm đạt chuẩn kiểm định IBST cho ống gió, vách ngăn và sàn chịu tải.
-            </p>
-
-            {/* 3b. Giới thiệu chi tiết (accordion, mặc định thu gọn) */}
-            <div className="animate-hero-fade-up delay-300">
-              <h2 className="inline-block m-0 p-0 text-sm font-bold">
-                <button
-                  type="button"
-                  id="hero-intro-trigger"
-                  onClick={() => setShowIntro((v) => !v)}
-                  aria-expanded={showIntro}
-                  aria-controls="hero-intro-panel"
-                  className="inline-flex items-center gap-1.5 text-[#5F8A03] hover:text-[#3E5C02] transition-colors cursor-pointer"
-                >
-                  <span>Tấm MGO Remak® FireOFF là gì?</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform ${showIntro ? 'rotate-180' : ''}`}
-                  />
-                </button>
-              </h2>
-              <div
-                id="hero-intro-panel"
-                role="region"
-                aria-labelledby="hero-intro-trigger"
-                aria-hidden={!showIntro}
-                className={`grid transition-all duration-300 ease-out ${
-                  showIntro ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0'
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="space-y-3 text-sm text-slate-600 leading-relaxed max-w-2xl border-l-2 border-[#7CB305]/30 pl-4">
-                    <p>
-                      Tấm chống cháy MGO Remak® FireOFF được sản xuất từ khoáng Magie Oxit (MgO) gốc Sulfate (MgSO4), gia cường lưới sợi thủy tinh đa lớp và ép nén thành tấm phẳng. Khác với dòng MGO gốc Clorua (MgCl2) phổ biến trên thị trường — dễ hút ẩm, ăn mòn ốc vít và &quot;chảy nước&quot; mùa nồm ẩm — công thức gốc Sulfate của Remak loại bỏ hoàn toàn rủi ro này.
-                    </p>
-                    <p>
-                      Vật liệu đạt chuẩn chống cháy A1 (không cháy, chịu nhiệt 1.200°C), kháng nước tuyệt đối (độ giãn nở ẩm ≤0.05%), nhẹ hơn Cemboard 30%, dễ cắt khoan thi công, chịu lực và chịu va đập tốt.
-                    </p>
-                    <p>
-                      Ứng dụng rộng rãi trong bọc ống gió PCCC, vách ngăn chống cháy, trần, sàn chịu lực và lõi cửa thép. Không chứa Amiăng, không phát thải VOC, an toàn cho người thi công, đạt chuẩn PCCC QCVN 06:2022/BXD.
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="animate-hero-fade-up delay-300 max-w-2xl text-base text-slate-600 leading-relaxed space-y-3">
+              <p>
+                Khoáng vô cơ Magie Oxit chịu lửa <strong>1.200°C</strong>, kháng ẩm tuyệt đối và chống ăn mòn. Đốt thử nghiệm đạt chuẩn kiểm định IBST cho ống gió, vách ngăn và sàn chịu tải.
+              </p>
+              <p>
+                Sản xuất từ MgO gốc Sulfate (MgSO₄) — loại bỏ hoàn toàn ăn mòn vít ốc và hiện tượng &quot;chảy nước&quot; mùa nồm ẩm của MGO gốc Clorua truyền thống. Nhẹ hơn Cemboard 30%, dễ cắt khoan, không chứa Amiăng, không phát thải VOC.
+              </p>
+              <p>
+                Ứng dụng: bọc ống gió PCCC, vách ngăn chống cháy, lót sàn chịu tải và lõi cửa thép. Đạt chuẩn PCCC QCVN 06:2022/BXD, hồ sơ nghiệm thu đầy đủ.
+              </p>
             </div>
+
 
             {/* 4. Nút Call-To-Action xuất hiện đồng bộ */}
             <div className="animate-hero-fade-up delay-400 flex flex-wrap gap-4 pt-2">
-              <a 
-                href="#mau-thu" 
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white font-bold text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
+              <Link
+                href="/nhan-mau-thu"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white font-bold text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all flex items-center gap-2"
               >
                 <Package size={18} />
                 <span>Nhận Mẫu Thử Miễn Phí</span>
-              </a>
+              </Link>
 
               <a 
                 href="#du-toan" 
@@ -91,46 +56,42 @@ export default function HomeHeroSection() {
               </a>
             </div>
 
-            {/* 5. 4 Trust Badges xuất hiện tiếp nối */}
-            <div className="animate-hero-fade-up delay-500 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-200">
-              <div className="flex items-center gap-2.5 group">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110">
-                  <Flame size={18} />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Chống Cháy A1</div>
-                  <div className="text-xs text-slate-500">Chịu lửa 1.200°C</div>
-                </div>
-              </div>
+            {/* 5. 4 Trust Stat Cards */}
+            <div className="animate-hero-fade-up delay-500 pt-6 border-t border-slate-200">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-              <div className="flex items-center gap-2.5 group">
-                <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110">
-                  <Droplets size={18} />
+                {/* Card 1 — Chống Cháy */}
+                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-[#F26522] p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#F26522' }}>
+                  <Flame size={16} className="mb-2.5 text-[#F26522]" />
+                  <div className="text-2xl font-black leading-none tracking-tight text-[#F26522]">1.200°C</div>
+                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Chịu nhiệt</div>
+                  <div className="text-[10px] mt-0.5 text-slate-400">Chống Cháy A1</div>
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Kháng Nước</div>
-                  <div className="text-xs text-slate-500">0% trương nở ẩm</div>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2.5 group">
-                <div className="w-8 h-8 rounded-lg bg-[#FEF3EC] text-[#F26522] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110">
-                  <Feather size={18} />
+                {/* Card 2 — Kháng Nước */}
+                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-[#5F8A03] p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#5F8A03' }}>
+                  <Droplets size={16} className="mb-2.5 text-[#5F8A03]" />
+                  <div className="text-2xl font-black leading-none tracking-tight text-[#5F8A03]">0%</div>
+                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Trương nở ẩm</div>
+                  <div className="text-[10px] mt-0.5 text-slate-400">Kháng nước tuyệt đối</div>
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Siêu Nhẹ</div>
-                  <div className="text-xs text-slate-500">Nhẹ hơn Cemboard 30%</div>
-                </div>
-              </div>
 
-              <div className="flex items-center gap-2.5 group">
-                <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-110">
-                  <ShieldCheck size={18} />
+                {/* Card 3 — Siêu Nhẹ */}
+                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-slate-600 p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#475569' }}>
+                  <Feather size={16} className="mb-2.5 text-slate-500" />
+                  <div className="text-2xl font-black leading-none tracking-tight text-slate-800">-30%</div>
+                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Nhẹ hơn Cemboard</div>
+                  <div className="text-[10px] mt-0.5 text-slate-400">Thi công nhanh hơn</div>
                 </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-900">Gốc Sulfate</div>
-                  <div className="text-xs text-slate-500">0% rỉ sét đinh vít</div>
+
+                {/* Card 4 — Zero Chloride */}
+                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-[#7CB305] p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#7CB305' }}>
+                  <ShieldCheck size={16} className="mb-2.5 text-[#7CB305]" />
+                  <div className="text-2xl font-black leading-none tracking-tight text-[#7CB305]">Zero</div>
+                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Chloride</div>
+                  <div className="text-[10px] mt-0.5 text-slate-400">0% rỉ sét đinh vít</div>
                 </div>
+
               </div>
             </div>
 
