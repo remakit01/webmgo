@@ -50,7 +50,7 @@ export const MGO_SPECS: MgoThicknessSpec[] = [
   },
   {
     thickness: '15mm',
-    weightPerSheet: '53.0 kg/tấm',
+    weightPerSheet: '52.0 kg/tấm',
     density: '963 kg/m³',
     fireRating: 'EI 180 (3 Giờ)',
     standardApplication: 'Lót sàn chịu lực gác lửng • Vách chống va đập • Vách kho hóa chất',
@@ -60,7 +60,7 @@ export const MGO_SPECS: MgoThicknessSpec[] = [
   },
   {
     thickness: '18mm',
-    weightPerSheet: '64.0 kg/tấm',
+    weightPerSheet: '62.0 kg/tấm',
     density: '963 kg/m³',
     fireRating: 'EI 180 (3 Giờ)',
     standardApplication: 'Lót sàn chịu tải (>800kg/m²) • Sàn nâng Data Center • Sàn nhà xưởng lắp ghép',

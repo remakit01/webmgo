@@ -7,6 +7,8 @@ import { CheckCircle2, Package, ArrowRight, Phone, FileText } from 'lucide-react
 interface SampleRequestFormProps {
   id?: string;
   href?: string;
+  title?: string;
+  subtitle?: string;
 }
 
 const TRUST_ITEMS = [
@@ -54,6 +56,8 @@ function AnimatedStat({ target, suffix, label, triggered }: { target: number; su
 export default function SampleRequestForm({
   id = 'mau-thu',
   href = '/nhan-mau-thu',
+  title,
+  subtitle,
 }: SampleRequestFormProps) {
   const statsRef = useRef<HTMLDivElement>(null);
   const [triggered, setTriggered] = useState(false);
@@ -82,12 +86,18 @@ export default function SampleRequestForm({
           {/* ── LEFT: Copy ── */}
           <div className="space-y-6">
             <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
-              Nhận Mẫu Thực Tế<br />
-              <span className="text-[#F26522]">Tấm MGO Remak®</span>
+              {title ? (
+                title
+              ) : (
+                <>
+                  Nhận Mẫu Thực Tế<br />
+                  <span className="text-[#F26522]">Tấm MGO Remak®</span>
+                </>
+              )}
             </h2>
 
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-md">
-              Bộ mẫu gồm đủ các độ dày 5mm – 18mm, catalogue kỹ thuật đầy đủ và kết quả đốt thử nghiệm IBST — gửi tận tay trong 24h.
+              {subtitle || 'Bộ mẫu gồm đủ các độ dày 5mm – 18mm, catalogue kỹ thuật đầy đủ và kết quả đốt thử nghiệm IBST — gửi tận tay trong 24h.'}
             </p>
 
             {/* Trust list */}

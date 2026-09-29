@@ -110,7 +110,7 @@ export default function HomePage() {
 
       <div className="space-y-16 pb-20">
         {/* 1. AUTO BANNER SWIPER (TỰ ĐỘNG CHẠY, KHÔNG ACTION TRÁI PHẢI, KHÔNG PROGRESS BAR) */}
-        <HomeBannerSwiper showDots />
+        <HomeBannerSwiper />
 
         {/* 2. HERO INTRO & TRUST BADGES (CLIENT COMPONENT - accordion giới thiệu) */}
         <HomeHeroSection />

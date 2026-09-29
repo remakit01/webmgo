@@ -16,15 +16,15 @@ import {
   Download,
   Filter,
 } from 'lucide-react';
-import { PRODUCTS, MGO_SPECS, getThicknessData } from '@/data/products';
+import { PRODUCTS, getThicknessData } from '@/data/products';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { 
-  ProductCard, 
-  ProductTabsFilter, 
+import {
+  ProductCard,
+  ProductTabsFilter,
   ProductFireTestProof,
-  ProductSolutionFinder,
+  ProductThicknessTable,
   ProductCompareBar,
-  ProductCompareModal 
+  ProductCompareModal
 } from '@/components/products';
 import { FilterState } from '@/components/products/ProductTabsFilter';
 import { ComparisonTable, MaterialCalculator, SampleRequestForm } from '@/components/shared';
@@ -221,20 +221,19 @@ export default function ProductsPage() {
         </div>
       </section>
 
-      {/* 3. BỘ TÌM GIẢI PHÁP NHANH 3S (SOLUTION FINDER CHUẨN QUỐC TẾ) */}
-      <ProductSolutionFinder />
+      {/* 3 & 4. KHU VỰC DANH MỤC & LƯỚI SẢN PHẨM (GIỚI HẠN PHẠM VI STICKY CỦA BỘ LỌC CHỈ TRONG KHU VỰC NÀY) */}
+      <div id="khu-vuc-san-pham" className="relative">
+        {/* 3. BỘ LỌC TƯƠNG TÁC (CATEGORY TABS & QUICK FILTER PILLS) */}
+        <ProductTabsFilter
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onResetFilters={handleResetFilters}
+          counts={counts}
+          totalResults={filteredProducts.length}
+        />
 
-      {/* 4. BỘ LỌC TƯƠNG TÁC (CATEGORY TABS & QUICK FILTER PILLS) */}
-      <ProductTabsFilter
-        filters={filters}
-        onFilterChange={handleFilterChange}
-        onResetFilters={handleResetFilters}
-        counts={counts}
-        totalResults={filteredProducts.length}
-      />
-
-      {/* 5. LƯỚI SẢN PHẨM CHÍNH (PRODUCT GRID CÂN ĐỐI 2 HÀNG X 3 CỘT) */}
-      <section className="py-12 max-w-[1440px] mx-auto px-4 lg:px-8">
+        {/* 5. LƯỚI SẢN PHẨM CHÍNH (PRODUCT GRID CÂN ĐỐI 2 HÀNG X 3 CỘT) */}
+        <section className="py-12 max-w-[1440px] mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">
@@ -412,6 +411,7 @@ export default function ProductsPage() {
           </div>
         )}
       </section>
+      </div>
 
       {/* 6. BẢNG ĐỐI CHUẨN KỸ THUẬT: TẤM MGO VS CÁC VẬT LIỆU TRUYỀN THỐNG (ĐẨY LÊN VỊ TRÍ CHIẾN LƯỢC) */}
       <section className="py-14 bg-white border-y border-slate-200">
@@ -425,65 +425,7 @@ export default function ProductsPage() {
 
       {/* 8. BẢNG TRA CỨU ĐỘ DÀY & QUY CÁCH CHUẨN THI CÔNG */}
       <section className="py-14 bg-white border-b border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 mt-3">
-              Bảng Thông Số Độ Dày & Khối Lượng Tiêu Chuẩn
-            </h2>
-            <p className="text-sm text-slate-500 mt-2">
-              Kích thước tấm tiêu chuẩn: 1.220mm x 2.440mm (Diện tích 2.977 m²/tấm) – Tỷ trọng 963 kg/m³
-            </p>
-          </div>
-
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-xs">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
-                  <th className="py-3.5 px-4 whitespace-nowrap">Độ dày</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Trọng lượng/tấm</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Giới hạn chịu lửa</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">Độ bền uốn</th>
-                  <th className="py-3.5 px-4">Ứng dụng tiêu chuẩn khuyến nghị</th>
-                  <th className="py-3.5 px-4 text-center whitespace-nowrap">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {MGO_SPECS.map((spec) => (
-                  <tr key={spec.thickness} className="hover:bg-[#F4F9E8]/40 transition-colors">
-                    <td className="py-3.5 px-4 font-bold text-slate-900">
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 text-xs font-bold">
-                        {spec.thickness}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-700 whitespace-nowrap">
-                      {spec.weightPerSheet}
-                    </td>
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FEF3EC] text-[#F26522] font-bold text-[11px]">
-                        <Flame size={12} />
-                        {spec.fireRating}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-medium text-slate-600 whitespace-nowrap">
-                      {spec.flexuralStrength || '18 MPa'}
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-600">
-                      {spec.standardApplication}
-                    </td>
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <Link 
-                        href="/bao-gia"
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-[11px] transition-colors"
-                      >
-                        Báo giá tấm {spec.thickness}
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ProductThicknessTable />
       </section>
 
       {/* 9. DỰ TOÁN BÓC TÁCH KHỐI LƯỢNG & SỐ TẤM MGO THEO DIỆN TÍCH (M²) */}
