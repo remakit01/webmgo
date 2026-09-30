@@ -14,9 +14,7 @@ export default function ProductSpecsTable({ specsTable }: ProductSpecsTableProps
         <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
           Bảng Thông Số Kỹ Thuật Chi Tiết
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Kết quả đo kiểm nghiệm thu mẫu tại phòng thí nghiệm chuyên ngành LAS-XD
-        </p>
+
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">

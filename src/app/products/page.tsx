@@ -239,9 +239,7 @@ export default function ProductsPage() {
             <h2 className="text-2xl font-bold text-slate-900">
               Danh Mục Sản Phẩm Tấm MGO ({filteredProducts.length})
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
-              Tất cả sản phẩm đều có đầy đủ biên bản thử nghiệm đốt mẫu và chứng nhận xuất xưởng CO/CQ
-            </p>
+
           </div>
           <Link
             href="/bao-gia"

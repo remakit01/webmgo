@@ -25,6 +25,14 @@ function formatPrice(n: number) {
   return new Intl.NumberFormat('vi-VN').format(n) + 'đ';
 }
 
+const ROW_LABELS = [
+  { icon: ShieldCheck, iconColor: '#F26522', label: 'Chịu lửa (EI)',    highlight: true  },
+  { icon: Scale,       iconColor: '#94A3B8', label: 'Khối lượng / tấm', highlight: false },
+  { icon: Layers,      iconColor: '#94A3B8', label: 'Tỷ trọng',         highlight: false },
+  { icon: Activity,    iconColor: '#5F8A03', label: 'Cường độ uốn',     highlight: false },
+  { icon: Wrench,      iconColor: '#94A3B8', label: 'Ứng dụng chính',   highlight: false },
+];
+
 export default function HomeSpecMatrix() {
   const [activeCategory, setActiveCategory] = useState<FilterCategory>('all');
   const [hoveredCol, setHoveredCol] = useState<number | null>(null);
@@ -32,8 +40,6 @@ export default function HomeSpecMatrix() {
   const specs = activeCategory === 'all'
     ? MGO_SPECS
     : MGO_SPECS.filter(s => s.category === activeCategory);
-
-  const colCount = specs.length + 1;
 
   return (
     <section
@@ -57,7 +63,7 @@ export default function HomeSpecMatrix() {
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 border ${
                 isActive
                   ? 'bg-[#5F8A03] text-white border-[#5F8A03] shadow-md shadow-green-600/20 scale-[1.02]'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  : 'bg-white text-slate-600 border-slate-300 hover:border-slate-400 hover:bg-slate-50'
               }`}
             >
               <span>{tab.label}</span>
@@ -73,182 +79,166 @@ export default function HomeSpecMatrix() {
 
       {/* Table */}
       <div className="relative">
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent z-30 rounded-r-2xl sm:hidden" />
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
-          <table className="w-full border-collapse" style={{ minWidth: specs.length * 130 + 160 }}>
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-white to-transparent z-30 rounded-r-3xl sm:hidden" />
+        <div className="bg-white rounded-3xl border border-slate-300 overflow-hidden shadow-lg">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse" style={{ minWidth: specs.length * 130 + 180 }}>
 
-            {/* HEADER */}
-            <thead>
-              <tr className="border-b-2 border-slate-200">
-                {/* Sticky label column */}
-                <th scope="col" className="sticky left-0 z-20 bg-white p-0 w-44 border-r border-slate-200">
-                  <div className="h-1.5 w-full bg-slate-100" />
-                  <div className="px-5 py-3">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Độ dày</span>
-                  </div>
-                </th>
+              {/* HEADER */}
+              <thead>
+                <tr className="border-b-2 border-slate-300">
+                  {/* Sticky label column */}
+                  <th scope="col" className="sticky left-0 z-20 bg-slate-50 w-[180px] border-r border-slate-300 align-top px-5 py-4">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Thông số</span>
+                  </th>
 
-                {specs.map((spec, i) => {
-                  const priceData = THICKNESS_DATA[spec.thickness];
-                  const catColor = CATEGORY_COLOR[spec.category] ?? '#5F8A03';
-                  return (
-                    <th
-                      key={spec.thickness}
-                      scope="col"
-                      onMouseEnter={() => setHoveredCol(i)}
-                      onMouseLeave={() => setHoveredCol(null)}
-                      className={`text-center p-0 border-l border-slate-200 transition-colors duration-150 min-w-[120px] ${
-                        hoveredCol === i ? 'bg-[#F4F9E8]' : 'bg-slate-50'
-                      }`}
-                    >
-                      {/* Category color bar */}
-                      <div className="h-1.5 w-full" style={{ backgroundColor: catColor }} />
-                      <div className="px-4 py-3">
-                        <div className="text-2xl font-black text-slate-900 leading-none">
-                          {spec.thickness.replace('mm', '')}
-                          <span className="text-sm font-bold text-slate-400">mm</span>
-                        </div>
-                        <div className="mt-2">
-                          <span className="inline-block bg-[#F26522] text-white text-[10px] font-black px-2 py-0.5 rounded-full whitespace-nowrap">
-                            {spec.fireRating}
-                          </span>
-                        </div>
-                        {priceData && (
-                          <div className="text-[11px] mt-1.5 font-semibold text-slate-500 whitespace-nowrap">
-                            từ {formatPrice(priceData.price)}/tấm
+                  {specs.map((spec, i) => {
+                    const priceData = THICKNESS_DATA[spec.thickness];
+                    const catColor = CATEGORY_COLOR[spec.category] ?? '#5F8A03';
+                    return (
+                      <th
+                        key={spec.thickness}
+                        scope="col"
+                        onMouseEnter={() => setHoveredCol(i)}
+                        onMouseLeave={() => setHoveredCol(null)}
+                        className={`text-center p-0 border-l border-slate-300 transition-colors duration-150 min-w-[130px] align-top ${
+                          hoveredCol === i ? 'bg-[#F4F9E8]' : 'bg-slate-50'
+                        }`}
+                      >
+                        <div className="px-4 py-4">
+                          <div className={`text-2xl font-black leading-none transition-colors duration-150 ${hoveredCol === i ? 'text-[#5F8A03]' : 'text-slate-900'}`}>
+                            {spec.thickness.replace('mm', '')}
+                            <span className={`text-sm font-bold transition-colors duration-150 ${hoveredCol === i ? 'text-[#7CB305]' : 'text-slate-400'}`}>mm</span>
                           </div>
-                        )}
-                        {spec.isPopular && (
-                          <div className="inline-block text-[9px] font-black text-[#F26522] bg-[#FEF3EC] px-2 py-0.5 rounded-full mt-1.5">
-                            BÁN CHẠY
-                          </div>
-                        )}
-                      </div>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
+                          {priceData && (
+                            <div className="text-xs mt-2 font-semibold text-slate-500 whitespace-nowrap">
+                              từ {formatPrice(priceData.price)}/tấm
+                            </div>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
 
-            <tbody>
-              {/* ROW 1: Chịu lửa */}
-              <tr className="bg-[#FEF3EC]/20">
-                <td className="sticky left-0 z-10 bg-[#FEF3EC]/80 px-5 py-3.5 text-xs font-bold text-slate-700 whitespace-nowrap border-r border-b border-slate-200">
-                  <div className="flex items-center gap-1.5">
-                    <ShieldCheck size={13} className="text-[#F26522]" />
-                    Chịu lửa (EI)
-                  </div>
-                </td>
-                {specs.map((spec, i) => (
-                  <td key={spec.thickness}
-                    onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                    className={`px-3 py-3.5 text-center border-l border-b border-slate-200 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
-                    <span className="inline-block bg-[#F26522] text-white text-[11px] font-black px-2.5 py-1 rounded-full whitespace-nowrap">
-                      {spec.fireRating}
-                    </span>
+              <tbody>
+                {/* ROW 1: Chịu lửa */}
+                <tr className="group">
+                  <td className="sticky left-0 z-10 bg-[#FEF3EC]/60 px-5 py-4 border-r border-b border-slate-300">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck size={14} className="text-[#F26522] flex-shrink-0" />
+                      <span className="text-[13px] font-bold text-slate-800 whitespace-nowrap">Chịu lửa (EI)</span>
+                    </div>
                   </td>
-                ))}
-              </tr>
-
-              {/* ROW 2: Khối lượng */}
-              <tr className="bg-white">
-                <td className="sticky left-0 z-10 bg-white px-5 py-3 text-xs font-semibold text-slate-600 whitespace-nowrap border-r border-b border-slate-200">
-                  <div className="flex items-center gap-1.5">
-                    <Scale size={13} className="text-slate-400" />
-                    Khối lượng / tấm
-                  </div>
-                </td>
-                {specs.map((spec, i) => (
-                  <td key={spec.thickness}
-                    onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                    className={`px-3 py-3 text-center text-xs font-bold text-slate-800 border-l border-b border-slate-200 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
-                    {spec.weightPerSheet}
-                  </td>
-                ))}
-              </tr>
-
-              {/* ROW 3: Tỷ trọng */}
-              <tr className="bg-slate-50/60">
-                <td className="sticky left-0 z-10 bg-slate-50 px-5 py-3 text-xs font-semibold text-slate-600 whitespace-nowrap border-r border-b border-slate-200">
-                  <div className="flex items-center gap-1.5">
-                    <Layers size={13} className="text-slate-400" />
-                    Tỷ trọng
-                  </div>
-                </td>
-                {specs.map((spec, i) => (
-                  <td key={spec.thickness}
-                    onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                    className={`px-3 py-3 text-center text-xs text-slate-700 border-l border-b border-slate-200 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
-                    {spec.density}
-                  </td>
-                ))}
-              </tr>
-
-              {/* ROW 4: Cường độ uốn */}
-              <tr className="bg-white">
-                <td className="sticky left-0 z-10 bg-white px-5 py-3 text-xs font-semibold text-slate-600 whitespace-nowrap border-r border-b border-slate-200">
-                  <div className="flex items-center gap-1.5">
-                    <Activity size={13} className="text-[#5F8A03]" />
-                    Cường độ uốn
-                  </div>
-                </td>
-                {specs.map((spec, i) => (
-                  <td key={spec.thickness}
-                    onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                    className={`px-3 py-3 text-center text-xs font-bold text-[#5F8A03] border-l border-b border-slate-200 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
-                    {spec.flexuralStrength || '≥ 18 MPa'}
-                  </td>
-                ))}
-              </tr>
-
-              {/* Divider between tech specs and application */}
-              <tr><td colSpan={colCount} className="h-px bg-slate-200 p-0" /></tr>
-
-              {/* ROW 5: Ứng dụng */}
-              <tr className="bg-slate-50/60">
-                <td className="sticky left-0 z-10 bg-slate-50 px-5 py-3.5 text-xs font-semibold text-slate-600 whitespace-nowrap border-r border-b border-slate-200 align-top">
-                  <div className="flex items-center gap-1.5">
-                    <Wrench size={13} className="text-slate-400" />
-                    Ứng dụng chính
-                  </div>
-                </td>
-                {specs.map((spec, i) => {
-                  const apps = spec.standardApplication.split('•').map(a => a.trim()).filter(Boolean);
-                  return (
+                  {specs.map((spec, i) => (
                     <td key={spec.thickness}
                       onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                      className={`px-3 py-3.5 align-top border-l border-b border-slate-200 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
-                      <ul className="space-y-1.5">
-                        {apps.slice(0, 2).map((a, j) => (
-                          <li key={j} className="flex items-start gap-1 text-[11px] text-slate-700 leading-snug">
-                            <span className="text-[#5F8A03] font-bold mt-0.5 flex-shrink-0">•</span>
-                            <span>{a}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      className={`px-3 py-4 text-center border-l border-b border-slate-300 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : 'bg-[#FEF3EC]/20'}`}>
+                      <span className="inline-block bg-[#F26522] text-white text-[11px] font-black px-2.5 py-1 rounded-full whitespace-nowrap">
+                        {spec.fireRating}
+                      </span>
                     </td>
-                  );
-                })}
-              </tr>
+                  ))}
+                </tr>
 
-              {/* ROW 6: CTA */}
-              <tr className="bg-slate-50">
-                <td className="sticky left-0 z-10 bg-slate-50 px-5 py-4 border-r border-slate-200" />
-                {specs.map((spec, i) => (
-                  <td key={spec.thickness}
-                    onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                    className={`px-3 py-4 border-l border-slate-200 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
-                    <Link
-                      href="/bao-gia"
-                      className="flex items-center justify-center gap-1 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#4A7002] text-white text-[11px] font-bold w-full transition-all"
-                    >
-                      Báo Giá <ArrowRight size={11} />
-                    </Link>
+                {/* ROW 2: Khối lượng */}
+                <tr>
+                  <td className="sticky left-0 z-10 bg-white px-5 py-4 border-r border-b border-slate-300">
+                    <div className="flex items-center gap-2">
+                      <Scale size={14} className="text-slate-400 flex-shrink-0" />
+                      <span className="text-[13px] font-bold text-slate-800 whitespace-nowrap">Khối lượng / tấm</span>
+                    </div>
                   </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+                  {specs.map((spec, i) => (
+                    <td key={spec.thickness}
+                      onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
+                      className={`px-3 py-4 text-center border-l border-b border-slate-300 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
+                      <span className="text-[13px] font-semibold text-slate-800">{spec.weightPerSheet}</span>
+                    </td>
+                  ))}
+                </tr>
+
+                {/* ROW 3: Tỷ trọng */}
+                <tr>
+                  <td className="sticky left-0 z-10 bg-slate-50/60 px-5 py-4 border-r border-b border-slate-300">
+                    <div className="flex items-center gap-2">
+                      <Layers size={14} className="text-slate-400 flex-shrink-0" />
+                      <span className="text-[13px] font-bold text-slate-800 whitespace-nowrap">Tỷ trọng</span>
+                    </div>
+                  </td>
+                  {specs.map((spec, i) => (
+                    <td key={spec.thickness}
+                      onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
+                      className={`px-3 py-4 text-center border-l border-b border-slate-300 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : 'bg-slate-50/60'}`}>
+                      <span className="text-[13px] font-semibold text-slate-700">{spec.density}</span>
+                    </td>
+                  ))}
+                </tr>
+
+                {/* ROW 4: Cường độ uốn */}
+                <tr>
+                  <td className="sticky left-0 z-10 bg-white px-5 py-4 border-r border-b border-slate-300">
+                    <div className="flex items-center gap-2">
+                      <Activity size={14} className="text-[#5F8A03] flex-shrink-0" />
+                      <span className="text-[13px] font-bold text-slate-800 whitespace-nowrap">Cường độ uốn</span>
+                    </div>
+                  </td>
+                  {specs.map((spec, i) => (
+                    <td key={spec.thickness}
+                      onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
+                      className={`px-3 py-4 text-center border-l border-b border-slate-300 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : ''}`}>
+                      <span className="text-[13px] font-semibold text-[#5F8A03]">{spec.flexuralStrength || '≥ 18 MPa'}</span>
+                    </td>
+                  ))}
+                </tr>
+
+                {/* ROW 5: Ứng dụng */}
+                <tr>
+                  <td className="sticky left-0 z-10 bg-slate-50/60 px-5 py-4 border-r border-b border-slate-300 align-top">
+                    <div className="flex items-center gap-2">
+                      <Wrench size={14} className="text-slate-400 flex-shrink-0" />
+                      <span className="text-[13px] font-bold text-slate-800 whitespace-nowrap">Ứng dụng chính</span>
+                    </div>
+                  </td>
+                  {specs.map((spec, i) => {
+                    const apps = spec.standardApplication.split('•').map(a => a.trim()).filter(Boolean);
+                    return (
+                      <td key={spec.thickness}
+                        onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
+                        className={`px-3 py-4 align-top border-l border-b border-slate-300 transition-colors duration-100 ${hoveredCol === i ? 'bg-[#F4F9E8]' : 'bg-slate-50/60'}`}>
+                        <ul className="space-y-1.5">
+                          {apps.slice(0, 2).map((a, j) => (
+                            <li key={j} className="flex items-start gap-1 text-xs text-slate-600 leading-snug">
+                              <span className="text-[#5F8A03] font-bold mt-0.5 flex-shrink-0">•</span>
+                              <span>{a}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </td>
+                    );
+                  })}
+                </tr>
+
+                {/* ROW 6: CTA — verdict style */}
+                <tr className="border-t-2 border-slate-300 bg-slate-800">
+                  <td className="sticky left-0 z-10 bg-slate-800 px-5 py-4 border-r border-slate-700" />
+                  {specs.map((spec, i) => (
+                    <td key={spec.thickness}
+                      onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
+                      className={`px-3 py-4 border-l border-slate-700 transition-colors duration-100 ${hoveredCol === i ? 'bg-slate-700' : ''}`}>
+                      <Link
+                        href="/bao-gia"
+                        className="flex items-center justify-center gap-1 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#4A7002] text-white text-[11px] font-bold w-full transition-all"
+                      >
+                        Báo Giá <ArrowRight size={11} />
+                      </Link>
+                    </td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -265,7 +255,7 @@ export default function HomeSpecMatrix() {
           </div>
           <div>
             <div className="text-xs font-bold text-slate-900">Gia công theo yêu cầu thiết kế</div>
-            <div className="text-[11px] text-slate-500 mt-0.5">
+            <div className="text-xs text-slate-600 mt-0.5 leading-snug">
               Cắt kích thước đặc thù, phay cạnh âm dương, soi rãnh theo bản vẽ công trình.
             </div>
           </div>

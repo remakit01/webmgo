@@ -7,7 +7,7 @@ export default function ProductThicknessTable() {
   return (
     <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
       <SectionHeading title="Bảng Thông Số Độ Dày & Quy Cách Chuẩn Thi Công" />
-      <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg">
+      <div className="bg-white rounded-3xl border border-slate-300 overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" style={{ minWidth: 700 }}>
 
