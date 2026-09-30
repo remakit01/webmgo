@@ -2,39 +2,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { 
+  BannerSlide, 
+  DEFAULT_BANNERS, 
+  DEFAULT_SWIPER_CONFIG,
+  getBannerSlides, 
+  getSwiperConfig 
+} from '@/lib/banner-store';
 
-export interface BannerSlide {
-  id: number;
-  image: string;
-  alt: string;
-  link?: string;
-  title: string;
-}
-
-// Danh sách banner lấy từ thư mục public/images/banners/
-export const defaultBanners: BannerSlide[] = [
-  {
-    id: 1,
-    image: '/images/banners/banner-1-tam-op.png',
-    alt: 'Tấm ốp chống cháy MGO - Nhanh chóng, Dễ dàng, Bền bỉ, Tiết kiệm năng lượng',
-    link: '/san-pham/tam-mgo',
-    title: 'Tấm ốp chống cháy MGO',
-  },
-  {
-    id: 2,
-    image: '/images/banners/banner-2-chiu-lua.png',
-    alt: 'Tấm chống cháy chịu lửa 3 giờ - 100% không amiăng - Vật liệu không cháy',
-    link: '/san-pham/tam-mgo',
-    title: 'Tấm chống cháy chịu lửa 3 giờ',
-  },
-  {
-    id: 3,
-    image: '/images/banners/banner-3-lot-san.png',
-    alt: 'Tấm MGO lót sàn - Độ bền vượt trội và chi phí hiệu quả - Nền sàn hèm khóa độc đáo',
-    link: '/giai-phap-ung-dung#san-mgo',
-    title: 'Tấm MGO lót sàn',
-  },
-];
+export type { BannerSlide };
+export const defaultBanners = DEFAULT_BANNERS;
 
 interface HomeBannerSwiperProps {
   banners?: BannerSlide[];
@@ -44,16 +21,31 @@ interface HomeBannerSwiperProps {
 
 /**
  * Component HomeBannerSwiper:
+ * - Đọc dữ liệu động từ CMS (Banner Store)
  * - Tự động trượt (Auto Sliding / Infinite Loop)
  * - KHÔNG CÓ nút bấm trái/phải (No left/right action buttons)
  * - KHÔNG CÓ thanh tiến trình (No progress bar)
  * - Tương thích mượt mà kéo/vuốt trên điện thoại (Touch Swipe)
  */
 export default function HomeBannerSwiper({
-  banners = defaultBanners,
-  autoPlayInterval = 3500,
-  showDots = false,
+  banners: propBanners,
+  autoPlayInterval: propAutoPlayInterval,
+  showDots: propShowDots,
 }: HomeBannerSwiperProps) {
+  // Khởi tạo ban đầu với prop hoặc mặc định để SSR không bị lệch hydration
+  const [activeBanners, setActiveBanners] = useState<BannerSlide[]>(
+    propBanners || DEFAULT_BANNERS
+  );
+  const [intervalTime, setIntervalTime] = useState<number>(
+    propAutoPlayInterval || DEFAULT_SWIPER_CONFIG.autoPlayInterval
+  );
+  const [isPauseOnHover, setIsPauseOnHover] = useState<boolean>(
+    DEFAULT_SWIPER_CONFIG.pauseOnHover
+  );
+  const [displayDots, setDisplayDots] = useState<boolean>(
+    propShowDots !== undefined ? propShowDots : DEFAULT_SWIPER_CONFIG.showDots
+  );
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -62,16 +54,66 @@ export default function HomeBannerSwiper({
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
+  // Đọc dữ liệu CMS và đăng ký lắng nghe sự kiện đồng bộ từ CMS
+  useEffect(() => {
+    if (!propBanners) {
+      const stored = getBannerSlides();
+      const filtered = stored.filter(b => b.active !== false);
+      if (filtered.length > 0) {
+        setActiveBanners(filtered);
+      }
+    }
+
+    if (!propAutoPlayInterval) {
+      const storedConfig = getSwiperConfig();
+      setIntervalTime(storedConfig.autoPlayInterval);
+      setIsPauseOnHover(storedConfig.pauseOnHover);
+      if (propShowDots === undefined) {
+        setDisplayDots(storedConfig.showDots);
+      }
+    }
+
+    // Lắng nghe cập nhật tức thời khi Admin lưu trong CMS
+    const handleBannersUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<BannerSlide[]>;
+      if (customEvent.detail && Array.isArray(customEvent.detail)) {
+        const filtered = customEvent.detail.filter(b => b.active !== false);
+        setActiveBanners(filtered.length > 0 ? filtered : DEFAULT_BANNERS);
+        setCurrentIndex(0);
+      }
+    };
+
+    const handleConfigUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ autoPlayInterval: number; pauseOnHover: boolean; showDots: boolean }>;
+      if (customEvent.detail) {
+        setIntervalTime(customEvent.detail.autoPlayInterval);
+        setIsPauseOnHover(customEvent.detail.pauseOnHover);
+        if (propShowDots === undefined) {
+          setDisplayDots(customEvent.detail.showDots);
+        }
+      }
+    };
+
+    window.addEventListener('remak_banners_updated', handleBannersUpdate);
+    window.addEventListener('remak_swiper_config_updated', handleConfigUpdate);
+
+    return () => {
+      window.removeEventListener('remak_banners_updated', handleBannersUpdate);
+      window.removeEventListener('remak_swiper_config_updated', handleConfigUpdate);
+    };
+  }, [propBanners, propAutoPlayInterval, propShowDots]);
+
   // Tự động chạy slider (Auto play)
   useEffect(() => {
-    if (banners.length <= 1 || isHovered || isFocused) return;
+    if (activeBanners.length <= 1) return;
+    if (isPauseOnHover && (isHovered || isFocused)) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % banners.length);
-    }, autoPlayInterval);
+      setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
+    }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [banners.length, autoPlayInterval, isHovered, isFocused]);
+  }, [activeBanners.length, intervalTime, isPauseOnHover, isHovered, isFocused]);
 
   // Touch Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -88,11 +130,11 @@ export default function HomeBannerSwiper({
 
     // Vuốt sang trái (next slide)
     if (diff > 45) {
-      setCurrentIndex((prev) => (prev + 1) % banners.length);
+      setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
     } 
     // Vuốt sang phải (prev slide)
     else if (diff < -45) {
-      setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+      setCurrentIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
     }
 
     touchStartX.current = null;
@@ -119,7 +161,7 @@ export default function HomeBannerSwiper({
           className="flex w-full transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
-          {banners.map((banner, index) => (
+          {activeBanners.map((banner, index) => (
             <div 
               key={banner.id}
               className="w-full flex-shrink-0 relative aspect-[1024/342]"
@@ -151,10 +193,10 @@ export default function HomeBannerSwiper({
           ))}
         </div>
 
-        {/* CHẤM CHỈ SỐ NHỎ GỌN (TÙY CHỌN, HOÀN TOÀN KHÔNG CÓ PROGRESS BAR & KHÔNG CÓ ACTION TRÁI PHẢI) */}
-        {showDots && banners.length > 1 && (
+        {/* CHẤM CHỈ SỐ NHỎ GỌN (TÙY CHỌN BẬT TẮT QUA CMS) */}
+        {displayDots && activeBanners.length > 1 && (
           <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 z-10 bg-slate-900/40 backdrop-blur-sm px-3 py-1.5 rounded-full pointer-events-auto">
-            {banners.map((_, idx) => (
+            {activeBanners.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentIndex(idx)}

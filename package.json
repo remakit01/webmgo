@@ -1,29 +1,11 @@
 {
-  "name": "mgo_remak",
+  "name": "webmgo-monorepo",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "lucide-react": "^1.47.0",
-    "next": "16.3.6",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.63.0",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.6",
-    "playwright": "^1.63.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "dev:fe": "pnpm --filter mgo_remak dev",
+    "dev:cms": "pnpm --filter webmgo-cms dev",
+    "build:fe": "pnpm --filter mgo_remak build",
+    "build:cms": "pnpm --filter webmgo-cms build"
   }
 }

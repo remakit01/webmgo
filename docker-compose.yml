@@ -1,0 +1,93 @@
+services:
+  # 1. PostgreSQL 18.6 - CSDL quan hệ chính (Single Source of Truth)
+  postgres:
+    image: postgres:18.6
+    container_name: remak_mgo_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-remak_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-remak_secret_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-remak_mgo_db}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-remak_user} -d ${POSTGRES_DB:-remak_mgo_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - remak_network
+
+  # 2. Redis 8.10.2 - Bộ nhớ đệm phân tầng & Queue
+  redis:
+    image: redis:8.10.2
+    container_name: remak_mgo_redis
+    restart: unless-stopped
+    command: >
+      redis-server 
+      --save 60 1 
+      --loglevel warning 
+      --requirepass ${REDIS_PASSWORD:-remak_redis_2026}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-remak_redis_2026}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - remak_network
+
+  # 3. MinIO - Lưu trữ file CAD DWG, PDF kiểm định IBST, ảnh sản phẩm (S3 Compatible)
+  minio:
+    image: quay.io/minio/aistor/minio:RELEASE.2026-09-19T17-05-25Z
+    container_name: remak_mgo_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-remak_minio_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-remak_minio_secret_2026}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"       # S3 API
+      - "${MINIO_CONSOLE_PORT:-9001}:9001" # Web Console UI
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - remak_network
+
+  # 4. Mailpit - SMTP giả lập test hàng đợi email lead & thông báo kinh doanh
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    container_name: remak_mgo_mailpit
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"   # SMTP Server
+      - "${MAILPIT_UI_PORT:-8025}:8025"     # Web UI xem mail
+    networks:
+      - remak_network
+
+networks:
+  remak_network:
+    name: remak_mgo_network
+    driver: bridge
+
+volumes:
+  postgres_data:
+    name: remak_mgo_postgres_data
+  redis_data:
+    name: remak_mgo_redis_data
+  minio_data:
+    name: remak_mgo_minio_data

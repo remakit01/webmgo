@@ -28,6 +28,10 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<string | null>(null);
 
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   // Nhận diện trang đang active
   const isHomeActive = pathname === '/';
   const isProductsActive = pathname.startsWith('/san-pham');
