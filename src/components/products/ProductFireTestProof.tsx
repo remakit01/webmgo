@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -14,6 +13,7 @@ import {
 
 const TEST_REPORTS = [
   {
+    category: 'duct',
     assembly: 'Hệ Bọc Ống Gió Khói Sự Cố (HVAC)',
     rating: 'EI 30 – EI 120',
     standard: 'TCVN 9311-8:2012 / QCVN 06:2022',
@@ -23,6 +23,7 @@ const TEST_REPORTS = [
     note: 'Không nứt vỡ, mặt ngoài duy trì <140°C trong suốt thời gian đốt lò',
   },
   {
+    category: 'wall',
     assembly: 'Hệ Vách Ngăn Cháy Nhà Xưởng & Chung Cư',
     rating: 'EI 60 – EI 150',
     standard: 'TCVN 9311-1:2012 / ISO 834',
@@ -32,6 +33,7 @@ const TEST_REPORTS = [
     note: 'Độ toàn vẹn E và cách nhiệt I đạt vượt thời gian thiết kế',
   },
   {
+    category: 'floor',
     assembly: 'Hệ Sàn Chịu Tải Ngăn Cháy Gác Lửng',
     rating: 'EI 180 (3 Giờ)',
     standard: 'ASTM E119 / BS 476',
@@ -41,6 +43,7 @@ const TEST_REPORTS = [
     note: 'Chịu tải trọng phân bố 850 kg/m² dưới ngọn lửa 1.150°C',
   },
   {
+    category: 'material',
     assembly: 'Thử Nghiệm Tính Không Cháy Vật Liệu',
     rating: 'Euroclass A1',
     standard: 'ISO 1182:2020 / ISO 1716',
@@ -50,6 +53,7 @@ const TEST_REPORTS = [
     note: 'Đốt 750°C không sinh ngọn lửa, độ tăng nhiệt độ lò <15°C',
   },
   {
+    category: 'steel',
     assembly: 'Bọc Bảo Vệ Dầm Cột Thép Chịu Lực',
     rating: 'R30 – R180',
     standard: 'TCVN 9311-6 / TCVN 9311-7:2012',
@@ -64,18 +68,13 @@ export default function ProductFireTestProof() {
   return (
     <section className="py-16 bg-gradient-to-b from-white via-slate-50 to-white border-b border-slate-200">
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-        
+
         {/* HEADING */}
         <div className="text-center max-w-3xl mx-auto mb-12">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight">
             Đốt Mẫu Thực Tế Tại Viện IBST <br className="hidden sm:block" />
-            <span className="text-[#5F8A03]">Đạt Nghiệm Thu 100% Theo QCVN 06:2022</span>
           </h2>
-          <p className="text-sm sm:text-base text-slate-600 mt-3 leading-relaxed">
-            Khác với các dòng vật liệu trôi nổi chỉ thử nghiệm lý thuyết, 
-            <strong> Tấm MGO Remak® FireOFF</strong> đã vượt qua các bài đốt mẫu lò ngang và lò đứng thực tế 
-            tại Viện Khoa học Công nghệ Xây dựng (IBST) dưới sự giám sát nghiêm ngặt của Cục Cảnh sát PCCC & CNCH.
-          </p>
+
         </div>
 
         {/* 4 CON SỐ BẢO CHỨNG NIỀM TIN */}
@@ -138,74 +137,83 @@ export default function ProductFireTestProof() {
         </div>
 
         {/* BẢNG TỔNG HỢP CÁC KẾT QUẢ THỬ NGHIỆM THỰC TẾ */}
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg mb-10">
-          <div className="p-5 sm:p-6 bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-lg sm:text-xl font-bold mt-1 text-white">
-                Bảng Đối Chiếu Các Cấu Kiện Đã Đốt Thử Nghiệm Thành Công
-              </h3>
-            </div>
-            <Link
-              href="/bao-gia"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white text-xs font-bold transition-colors whitespace-nowrap self-start sm:self-auto"
-            >
-              <Download size={14} />
-              <span>Tải Hồ Sơ Đầy Đủ (PDF)</span>
-            </Link>
-          </div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-extrabold text-slate-900">
+            Bảng Đối Chiếu Các Cấu Kiện Đã Đốt Thử Nghiệm Thành Công
+          </h3>
+          <Link
+            href="/bao-gia"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-[#F26522] hover:text-white text-slate-700 text-xs font-bold transition-colors whitespace-nowrap"
+          >
+            <Download size={13} />
+            <span>Tải Hồ Sơ Đầy Đủ (PDF)</span>
+          </Link>
+        </div>
 
+        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg mb-10">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse" style={{ minWidth: 700 }}>
+            <table className="w-full text-left border-collapse" style={{ minWidth: 720 }}>
               <thead>
                 <tr className="border-b-2 border-slate-300">
                   <th scope="col" className="sticky left-0 z-20 bg-slate-50 px-5 py-4 w-[220px] text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                     Hạng Mục Cấu Kiện
                   </th>
-                  <th scope="col" className="px-5 py-4 bg-[#FEF3EC] border-l-2 border-r-2 border-[#F26522]/30 text-center w-[14%]">
+                  <th scope="col" className="px-5 py-4 bg-[#FEF3EC] border-l-2 border-r-2 border-[#F26522]/30 text-center w-[160px]">
                     <span className="font-extrabold text-[#F26522] text-sm whitespace-nowrap">Chỉ Số Chịu Lửa</span>
                   </th>
-                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300 whitespace-nowrap">
-                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Tiêu Chuẩn Áp Dụng</span>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-sm font-bold text-slate-800 border-l border-slate-300 whitespace-nowrap">
+                    Tiêu Chuẩn Áp Dụng
                   </th>
-                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300 whitespace-nowrap">
-                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Độ Dày Tấm MGO</span>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-sm font-bold text-slate-800 border-l border-slate-300 whitespace-nowrap">
+                    Độ Dày Tấm MGO
                   </th>
-                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300 whitespace-nowrap">
-                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Đơn Vị Đo Kiểm</span>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-sm font-bold text-slate-800 border-l border-slate-300 whitespace-nowrap">
+                    Đơn Vị Đo Kiểm
                   </th>
-                  <th scope="col" className="px-5 py-4 bg-slate-50 text-left border-l border-slate-300">
-                    <span className="font-bold text-slate-700 text-xs uppercase tracking-wider">Đánh Giá Thực Tế</span>
+                  <th scope="col" className="px-5 py-4 bg-slate-50 text-sm font-bold text-slate-800 border-l border-slate-300">
+                    Đánh Giá Thực Tế
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {TEST_REPORTS.map((item, idx) => (
                   <tr key={idx} className="group hover:bg-slate-50/80 transition-colors duration-100">
+                    {/* Hạng Mục Cấu Kiện — sticky first col */}
                     <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 px-5 py-4 align-top border-r border-b border-slate-300 transition-colors duration-100">
-                      <div className="flex items-start gap-2">
+                      <div className="flex items-start gap-2.5">
                         <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
                         <div>
                           <div className="font-bold text-[13px] text-slate-900">{item.assembly}</div>
-                          <div className="text-[10px] font-semibold text-[#5F8A03] mt-0.5">{item.status}</div>
+                          <div className="text-xs text-slate-600 mt-0.5 leading-snug">{item.status}</div>
                         </div>
                       </div>
                     </td>
+
+                    {/* Chỉ Số Chịu Lửa — highlighted */}
                     <td className="px-5 py-4 bg-[#FEF3EC]/60 group-hover:bg-[#FEF3EC] border-l-2 border-r-2 border-b border-b-slate-300 border-[#F26522]/20 align-top text-center transition-colors duration-100 whitespace-nowrap">
-                      <span className="inline-block px-2.5 py-1 rounded-md bg-[#F26522] text-white font-bold text-[11px] shadow-sm">
+                      <span className="inline-block px-2.5 py-1 rounded-full bg-[#F26522] text-white font-bold text-[11px]">
                         {item.rating}
                       </span>
                     </td>
-                    <td className="px-5 py-4 align-top border-b border-slate-300 text-[11px] font-semibold text-slate-700">
-                      {item.standard}
+
+                    {/* Tiêu Chuẩn Áp Dụng */}
+                    <td className="px-5 py-4 align-top border-l border-b border-slate-300">
+                      <div className="font-semibold text-[13px] text-slate-800">{item.standard}</div>
                     </td>
-                    <td className="px-5 py-4 align-top border-b border-slate-300 font-semibold text-slate-800 whitespace-nowrap">
-                      {item.thickness}
+
+                    {/* Độ Dày Tấm MGO */}
+                    <td className="px-5 py-4 align-top border-l border-b border-slate-300 whitespace-nowrap">
+                      <div className="font-semibold text-[13px] text-slate-800">{item.thickness}</div>
                     </td>
-                    <td className="px-5 py-4 align-top border-b border-slate-300 text-slate-600 whitespace-nowrap">
-                      {item.laboratory}
+
+                    {/* Đơn Vị Đo Kiểm */}
+                    <td className="px-5 py-4 align-top border-l border-b border-slate-300 whitespace-nowrap">
+                      <div className="text-[13px] text-slate-700">{item.laboratory}</div>
                     </td>
-                    <td className="px-5 py-4 align-top border-b border-slate-300 text-slate-600 leading-relaxed">
-                      {item.note}
+
+                    {/* Đánh Giá Thực Tế */}
+                    <td className="px-5 py-4 align-top border-l border-b border-slate-300">
+                      <div className="text-xs text-slate-600 leading-snug">{item.note}</div>
                     </td>
                   </tr>
                 ))}
@@ -221,7 +229,7 @@ export default function ProductFireTestProof() {
                       <span className="font-black text-white text-sm">5/5 Đạt</span>
                     </div>
                   </td>
-                  <td colSpan={4} className="px-5 py-4 text-center">
+                  <td colSpan={4} className="px-5 py-4 text-center border-l border-slate-700">
                     <span className="text-white text-sm font-medium">100% Hồ Sơ Nghiệm Thu QCVN 06:2022/BXD</span>
                   </td>
                 </tr>
@@ -237,7 +245,7 @@ export default function ProductFireTestProof() {
               Cần Bản Sao Biên Bản Đốt Mẫu & Thuyết Minh Kỹ Thuật Đệ Trình?
             </h4>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Kỹ sư PCCC của Remak sẵn sàng hỗ trợ nhà thầu lập bảng bóc tách, thuyết minh giải pháp 
+              Kỹ sư PCCC của Remak sẵn sàng hỗ trợ nhà thầu lập bảng bóc tách, thuyết minh giải pháp
               và cung cấp hồ sơ năng lực phục vụ giai đoạn duyệt vật tư dự án.
             </p>
           </div>
