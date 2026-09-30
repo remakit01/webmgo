@@ -1,3 +1,7 @@
+packages:
+  - fe
+  - cms
+
 allowBuilds:
   unrs-resolver: true
 minimumReleaseAgeExclude:
