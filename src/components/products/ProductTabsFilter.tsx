@@ -104,7 +104,7 @@ export default function ProductTabsFilter({
                 className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer flex-shrink-0 border ${
                   isActive
                     ? 'bg-[#5F8A03] text-white border-[#5F8A03] shadow-md shadow-[#5F8A03]/20 scale-[1.02]'
-                    : 'bg-slate-100 text-slate-700 border-transparent hover:bg-slate-200 hover:text-slate-900'
+                    : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200 hover:border-slate-400 hover:text-slate-900'
                 }`}
               >
                 <span>{cat.label}</span>
@@ -161,7 +161,7 @@ export default function ProductTabsFilter({
                     className={`px-2.5 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer border flex-shrink-0 ${
                       isSelected
                         ? 'bg-[#F26522] text-white border-[#F26522] shadow-xs font-bold'
-                        : 'bg-slate-100 text-slate-600 border-slate-200/60 hover:bg-slate-200 hover:text-slate-800'
+                        : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 hover:border-slate-400 hover:text-slate-800'
                     }`}
                   >
                     {item.id === 'all' ? 'Tất cả' : item.id}
@@ -196,7 +196,7 @@ export default function ProductTabsFilter({
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border ${
                     isActive
                       ? 'bg-[#5F8A03] text-white border-[#5F8A03] shadow-xs shadow-[#5F8A03]/30 scale-[1.03]'
-                      : 'bg-slate-100 text-slate-600 border-slate-200/70 hover:bg-slate-200 hover:text-slate-900'
+                      : 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200 hover:border-slate-400 hover:text-slate-900'
                   }`}
                 >
                   <IconComponent size={12} className={isActive ? 'text-white' : 'text-slate-400'} />

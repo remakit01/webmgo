@@ -116,9 +116,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
                   Ưu Điểm Vượt Trội Cho Công Trình
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  Đem lại độ bền cơ học cao, tiết kiệm chi phí thi công và tối ưu hoá trọng lượng kết cấu
-                </p>
+
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -232,9 +230,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
                 Các Dòng Tấm Chống Cháy Khác
               </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Khám phá hệ sinh thái vật liệu vô cơ chịu lửa Remak® FireOFF
-              </p>
+
             </div>
             <Link 
               href="/san-pham"

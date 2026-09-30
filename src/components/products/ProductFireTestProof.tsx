@@ -150,7 +150,7 @@ export default function ProductFireTestProof() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg mb-10">
+        <div className="bg-white rounded-3xl border border-slate-300 overflow-hidden shadow-lg mb-10">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse" style={{ minWidth: 720 }}>
               <thead>

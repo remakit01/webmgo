@@ -16,9 +16,6 @@ export default function ProductSystemAssemblies({ assemblies }: ProductSystemAss
         <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
           Cấu Tạo Hệ Thống Đạt Chuẩn Nghiệm Thu PCCC
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Sơ đồ lớp vật liệu theo đúng biên bản thử nghiệm đốt mẫu tại Viện KHCN Xây Dựng (IBST)
-        </p>
       </div>
 
       <div className="space-y-6">

@@ -27,7 +27,7 @@ export default function ComparisonTable({
         <SectionHeading title="So Sánh MGO Với Vật Liệu Khác" />
       )}
 
-      <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-lg">
+      <div className="bg-white rounded-3xl border border-slate-300 overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" style={{ minWidth: 640 }}>
 
