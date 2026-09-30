@@ -88,11 +88,8 @@ export default function HomeSpecMatrix() {
               <thead>
                 <tr className="border-b-2 border-slate-300">
                   {/* Sticky label column */}
-                  <th scope="col" className="sticky left-0 z-20 bg-slate-50 p-0 w-[180px] border-r border-slate-300 align-top">
-                    <div className="h-1 w-full bg-slate-200" />
-                    <div className="px-5 py-4">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Thông số</span>
-                    </div>
+                  <th scope="col" className="sticky left-0 z-20 bg-slate-50 w-[180px] border-r border-slate-300 align-top px-5 py-4">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Thông số</span>
                   </th>
 
                   {specs.map((spec, i) => {
@@ -108,11 +105,10 @@ export default function HomeSpecMatrix() {
                           hoveredCol === i ? 'bg-[#F4F9E8]' : 'bg-slate-50'
                         }`}
                       >
-                        <div className="h-1 w-full" style={{ backgroundColor: catColor }} />
                         <div className="px-4 py-4">
-                          <div className="text-2xl font-black text-slate-900 leading-none">
+                          <div className={`text-2xl font-black leading-none transition-colors duration-150 ${hoveredCol === i ? 'text-[#5F8A03]' : 'text-slate-900'}`}>
                             {spec.thickness.replace('mm', '')}
-                            <span className="text-sm font-bold text-slate-400">mm</span>
+                            <span className={`text-sm font-bold transition-colors duration-150 ${hoveredCol === i ? 'text-[#7CB305]' : 'text-slate-400'}`}>mm</span>
                           </div>
                           {priceData && (
                             <div className="text-xs mt-2 font-semibold text-slate-500 whitespace-nowrap">
