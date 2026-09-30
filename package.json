@@ -5,7 +5,9 @@
   "scripts": {
     "dev:fe": "pnpm --filter mgo_remak dev",
     "dev:cms": "pnpm --filter webmgo-cms dev",
+    "dev:api": "pnpm --filter api start:dev",
     "build:fe": "pnpm --filter mgo_remak build",
-    "build:cms": "pnpm --filter webmgo-cms build"
+    "build:cms": "pnpm --filter webmgo-cms build",
+    "build:api": "pnpm --filter api build"
   }
 }

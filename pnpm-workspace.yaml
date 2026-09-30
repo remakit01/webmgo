@@ -1,6 +1,7 @@
 packages:
   - fe
   - cms
+  - api
 
 allowBuilds:
   unrs-resolver: true
