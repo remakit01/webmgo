@@ -1,4 +1,3 @@
-import React from 'react';
 import { CheckCircle2, XCircle, Minus } from 'lucide-react';
 import { MATERIAL_COMPARISONS } from '@/data/products';
 import SectionHeading from '@/components/ui/SectionHeading';
@@ -7,13 +6,6 @@ interface ComparisonTableProps {
   id?: string;
   showHeading?: boolean;
 }
-
-const GROUPS = [
-  { id: 'fire', label: ' Chống Cháy' },
-  { id: 'mechanical', label: ' Cơ Học & Trọng Lượng' },
-  { id: 'chemical', label: ' Hóa Học & Độ Ẩm' },
-  { id: 'compliance', label: ' Kiểm Định PCCC' },
-] as const;
 
 function splitCell(text: string): { key: string; detail: string } {
   const idx = text.indexOf(' – ');
@@ -48,7 +40,6 @@ export default function ComparisonTable({
                 <th scope="col" className="px-5 py-4 bg-[#F4F9E8] border-l-2 border-r-2 border-[#5F8A03]/30 text-center w-[30%]">
                   <div className="flex flex-col items-center gap-1.5">
                     <span className="font-extrabold text-[#5F8A03] text-sm">Tấm MGO Remak®</span>
-
                   </div>
                 </th>
                 <th scope="col" className="px-5 py-4 bg-slate-50 text-center w-[22%] border-l border-slate-300">
@@ -61,68 +52,53 @@ export default function ComparisonTable({
             </thead>
 
             <tbody>
-              {GROUPS.map(group => {
-                const rows = MATERIAL_COMPARISONS.filter(r => r.category === group.id);
+              {MATERIAL_COMPARISONS.map((row) => {
+                const mgo = splitCell(row.mgoRemak);
+                const cem = splitCell(row.cemboard);
+                const gyp = splitCell(row.gypsum);
                 return (
-                  <React.Fragment key={group.id}>
-                    {/* Group header */}
-                    <tr className="bg-slate-100 border-y border-slate-200">
-                      <td colSpan={4} className="px-5 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                        {group.label}
-                      </td>
-                    </tr>
+                  <tr
+                    key={row.feature}
+                    className="group hover:bg-slate-50/80 transition-colors duration-100"
+                  >
+                    {/* Row label */}
+                    <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 px-5 py-4 text-[13px] font-bold text-slate-800 align-top border-r border-b border-slate-300 transition-colors duration-100">
+                      {row.feature}
+                    </td>
 
-                    {/* Data rows */}
-                    {rows.map((row) => {
-                      const mgo = splitCell(row.mgoRemak);
-                      const cem = splitCell(row.cemboard);
-                      const gyp = splitCell(row.gypsum);
-                      return (
-                        <tr
-                          key={row.feature}
-                          className="group hover:bg-slate-50/80 transition-colors duration-100"
-                        >
-                          {/* Row label */}
-                          <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 px-5 py-4 text-xs font-semibold text-slate-700 align-top border-r border-b border-slate-300 transition-colors duration-100">
-                            {row.feature}
-                          </td>
+                    {/* MGO — WIN */}
+                    <td className="px-5 py-4 bg-[#F4F9E8]/60 group-hover:bg-[#EEF7DB] border-l-2 border-r-2 border-b border-b-slate-300 border-[#5F8A03]/20 align-top transition-colors duration-100">
+                      <div className="flex items-start gap-2.5">
+                        <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-bold text-[13px] text-slate-900">{mgo.key}</div>
+                          {mgo.detail && <div className="text-xs text-slate-600 mt-0.5 leading-snug">{mgo.detail}</div>}
+                        </div>
+                      </div>
+                    </td>
 
-                          {/* MGO — WIN */}
-                          <td className="px-5 py-4 bg-[#F4F9E8]/60 group-hover:bg-[#EEF7DB] border-l-2 border-r-2 border-b border-b-slate-300 border-[#5F8A03]/20 align-top transition-colors duration-100">
-                            <div className="flex items-start gap-2.5">
-                              <CheckCircle2 size={15} className="text-[#5F8A03] flex-shrink-0 mt-0.5" />
-                              <div>
-                                <div className="font-bold text-[13px] text-slate-900">{mgo.key}</div>
-                                {mgo.detail && <div className="text-[11px] text-slate-500 mt-0.5 leading-snug">{mgo.detail}</div>}
-                              </div>
-                            </div>
-                          </td>
+                    {/* Cemboard — PARTIAL */}
+                    <td className="px-5 py-4 align-top border-b border-slate-300 transition-colors duration-100">
+                      <div className="flex items-start gap-2.5">
+                        <Minus size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-semibold text-[13px] text-slate-800">{cem.key}</div>
+                          {cem.detail && <div className="text-xs text-slate-600 mt-0.5 leading-snug">{cem.detail}</div>}
+                        </div>
+                      </div>
+                    </td>
 
-                          {/* Cemboard — PARTIAL */}
-                          <td className="px-5 py-4 align-top border-b border-slate-300 transition-colors duration-100">
-                            <div className="flex items-start gap-2.5">
-                              <Minus size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <div className="font-medium text-[13px] text-slate-700">{cem.key}</div>
-                                {cem.detail && <div className="text-[11px] text-slate-400 mt-0.5 leading-snug">{cem.detail}</div>}
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Thạch Cao — LOSE */}
-                          <td className="px-5 py-4 align-top border-l border-b border-slate-300 transition-colors duration-100">
-                            <div className="flex items-start gap-2.5">
-                              <XCircle size={15} className="text-rose-500 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <div className="font-medium text-[13px] text-slate-600">{gyp.key}</div>
-                                {gyp.detail && <div className="text-[11px] text-slate-400 mt-0.5 leading-snug">{gyp.detail}</div>}
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </React.Fragment>
+                    {/* Thạch Cao — LOSE */}
+                    <td className="px-5 py-4 align-top border-l border-b border-slate-300 transition-colors duration-100">
+                      <div className="flex items-start gap-2.5">
+                        <XCircle size={15} className="text-rose-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <div className="font-semibold text-[13px] text-slate-700">{gyp.key}</div>
+                          {gyp.detail && <div className="text-xs text-slate-600 mt-0.5 leading-snug">{gyp.detail}</div>}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
                 );
               })}
 
