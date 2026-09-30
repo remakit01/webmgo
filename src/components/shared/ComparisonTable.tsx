@@ -34,12 +34,12 @@ export default function ComparisonTable({
             {/* ── THEAD ── */}
             <thead>
               <tr className="border-b-2 border-slate-300">
-                <th scope="col" className="sticky left-0 z-20 bg-slate-50 px-5 py-4 w-[200px] text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <th scope="col" className="sticky left-0 z-20 bg-slate-50 px-5 py-4 w-[200px] text-xl font-bold text-slate-900 uppercase tracking-wider">
                   Chỉ tiêu kỹ thuật
                 </th>
-                <th scope="col" className="px-5 py-4 bg-[#F4F9E8] border-l-2 border-r-2 border-[#5F8A03]/30 text-center w-[30%]">
+                <th scope="col" className="px-5 py-4 bg-[#5F8A03] border-2 border-[#5F8A03] text-center w-[30%]">
                   <div className="flex flex-col items-center gap-1.5">
-                    <span className="font-extrabold text-[#5F8A03] text-sm">Tấm MGO Remak®</span>
+                    <span className="font-extrabold text-white text-sm">Tấm MGO Remak®</span>
                   </div>
                 </th>
                 <th scope="col" className="px-5 py-4 bg-slate-50 text-center w-[22%] border-l border-slate-300">
