@@ -155,11 +155,11 @@ export default function ProductFireTestProof() {
             <table className="w-full text-left border-collapse" style={{ minWidth: 720 }}>
               <thead>
                 <tr className="border-b-2 border-slate-300">
-                  <th scope="col" className="sticky left-0 z-20 bg-slate-50 px-5 py-4 w-[220px] text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
+                  <th scope="col" className="sticky left-0 z-20 bg-slate-50 px-5 py-4 w-[220px] text-xl font-bold text-slate-900 uppercase tracking-wider whitespace-nowrap">
                     Hạng Mục Cấu Kiện
                   </th>
-                  <th scope="col" className="px-5 py-4 bg-[#FEF3EC] border-l-2 border-r-2 border-[#F26522]/30 text-center w-[160px]">
-                    <span className="font-extrabold text-[#F26522] text-sm whitespace-nowrap">Chỉ Số Chịu Lửa</span>
+                  <th scope="col" className="px-5 py-4 bg-[#F26522] border-2 border-[#F26522] text-center w-[160px]">
+                    <span className="font-extrabold text-white text-sm whitespace-nowrap">Chỉ Số Chịu Lửa</span>
                   </th>
                   <th scope="col" className="px-5 py-4 bg-slate-50 text-sm font-bold text-slate-800 border-l border-slate-300 whitespace-nowrap">
                     Tiêu Chuẩn Áp Dụng

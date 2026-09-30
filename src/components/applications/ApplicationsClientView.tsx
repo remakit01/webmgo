@@ -6,13 +6,12 @@ import {
   ApplicationHero, 
   ApplicationFilterTabs, 
   ApplicationCard, 
-  ApplicationComparisonTable,
   ApplicationQcvnGuide,
   ApplicationBoqCalculator,
   ApplicationCadDownload,
   ApplicationProcess 
 } from '@/components/applications';
-import SampleRequestForm from '@/components/shared/SampleRequestForm';
+import { ComparisonTable, SampleRequestForm } from '@/components/shared';
 import { APPLICATIONS } from '@/data/applications';
 
 const BATCH_SIZE = 4; // Mặc định hiển thị mỗi đợt 4 giải pháp (2x2)
@@ -208,7 +207,9 @@ export default function ApplicationsClientView() {
       </section>
 
       {/* 3. HEAD-TO-HEAD MATERIAL COMPARISON (MGO VS GYPSUM VS CEMBOARD) */}
-      <ApplicationComparisonTable />
+      <div className="py-12 sm:py-16 bg-white border-t border-slate-200">
+        <ComparisonTable />
+      </div>
 
       {/* 4. INTERACTIVE QCVN 06:2022/BXD FIRE CODE LOOKUP */}
       <ApplicationQcvnGuide />
