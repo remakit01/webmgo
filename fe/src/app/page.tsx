@@ -6,10 +6,10 @@ import {
   HomeStickyBenefits,
   HomeSpecMatrix,
   HomeApplicationGrid,
+  HomeProjectsAndNews,
 } from '@/components/home';
 import {
   ComparisonTable,
-  FeaturedProjects,
   MaterialCalculator,
   SampleRequestForm,
   FaqAccordion,
@@ -133,22 +133,22 @@ export default function HomePage() {
           <HomeApplicationGrid />
         </ScrollReveal>
 
-        {/* 7. DỰ ÁN TIÊU BIỂU ĐÃ NGHIỆM THU PCCC (SAMSUNG, LOTTE MALL, VIETTEL IDC) */}
+        {/* 7. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
         <ScrollReveal direction="up" delay={50}>
-          <FeaturedProjects />
+          <HomeProjectsAndNews />
         </ScrollReveal>
 
-        {/* 8. DỰ TOÁN VẬT TƯ ONLINE (TÍNH NHANH SỐ TẤM & CHI PHÍ) */}
+        {/* 9. DỰ TOÁN VẬT TƯ ONLINE (TÍNH NHANH SỐ TẤM & CHI PHÍ) */}
         <ScrollReveal direction="up" delay={50}>
           <MaterialCalculator />
         </ScrollReveal>
 
-        {/* 9. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
+        {/* 10. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
         <ScrollReveal direction="up" delay={50}>
           <SampleRequestForm />
         </ScrollReveal>
 
-        {/* 10. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
+        {/* 11. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
         <ScrollReveal direction="up" delay={50}>
           <FaqAccordion />
         </ScrollReveal>

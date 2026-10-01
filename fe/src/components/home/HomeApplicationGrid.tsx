@@ -153,6 +153,9 @@ export default function HomeApplicationGrid() {
     .slice()
     .sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
 
+  // Mặc định chỉ hiển thị 8 giải pháp tiêu biểu
+  const displayed = filtered.slice(0, 8);
+
   return (
     <section className="max-w-[1440px] mx-auto px-4 lg:px-8">
       <SectionHeading title="Giải Pháp Ứng Dụng Tiêu Biểu" />
@@ -166,16 +169,16 @@ export default function HomeApplicationGrid() {
               key={tab.id}
               type="button"
               onClick={() => setActive(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 border ${
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2 border-2 ${
                 isActive
                   ? 'bg-[#5F8A03] text-white border-[#5F8A03] shadow-md shadow-green-600/20 scale-[1.02]'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
               }`}
             >
-              <span className={isActive ? 'text-white' : 'text-slate-400'}>{tab.icon}</span>
+              <span className={isActive ? 'text-white' : 'text-slate-500'}>{tab.icon}</span>
               <span>{tab.label}</span>
-              <span className={`text-[11px] px-2 py-0.5 rounded-full ${
-                isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+              <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+                isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
               }`}>
                 {tab.count}
               </span>
@@ -185,14 +188,11 @@ export default function HomeApplicationGrid() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-6">
-        {filtered.map((item, idx) => (
+        {displayed.map((item, idx) => (
           <div
             key={idx}
-            className="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]"
+            className="group bg-white rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs hover:shadow-xl hover:border-[#7CB305]/60 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]"
           >
-            {/* Colored accent bar */}
-            <div className={`h-1 w-full ${item.accent}`} />
-
             <div className="relative h-48 overflow-hidden bg-slate-100">
               <img
                 src={item.img}
@@ -206,7 +206,7 @@ export default function HomeApplicationGrid() {
                 <span>{item.badge}</span>
               </div>
               {/* Thickness */}
-              <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-md text-[10px] font-bold text-white">
+              <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-[10px] font-bold text-white">
                 {item.thickness}
               </div>
               {/* New badge */}
@@ -235,7 +235,7 @@ export default function HomeApplicationGrid() {
                 href={item.link}
                 className={`text-xs font-bold ${item.accentText} flex items-center gap-1.5 group-hover:translate-x-1 transition-transform pt-2`}
               >
-                <span>Xem Chi Tiết Giải Pháp</span>
+                <span>Xem Giải Pháp</span>
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -243,15 +243,17 @@ export default function HomeApplicationGrid() {
         ))}
       </div>
 
-      <div className="mt-8 text-center">
-        <Link
-          href="/giai-phap-ung-dung"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-sm"
-        >
-          <span>Xem Thêm Giải Pháp Ứng Dụng</span>
-          <ArrowRight size={16} />
-        </Link>
-      </div>
+      {filtered.length > 8 && (
+        <div className="mt-10 text-center">
+          <Link
+            href="/giai-phap-ung-dung"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white border-2 border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-xs hover:shadow-md cursor-pointer group"
+          >
+            <span>Xem Giải Pháp</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

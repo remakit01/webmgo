@@ -11,13 +11,6 @@ interface FeaturedProjectsProps {
   showHeading?: boolean;
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  'Khu Công Nghiệp':       '#F26522',
-  'Thương Mại & Dịch Vụ': '#5F8A03',
-  'Hạ Tầng Dữ Liệu':      '#475569',
-  'Cao Ốc Đô Thị':         '#7CB305',
-};
-
 const CATEGORY_ACCENT_TEXT: Record<string, string> = {
   'Khu Công Nghiệp':       'text-[#F26522]',
   'Thương Mại & Dịch Vụ': 'text-[#5F8A03]',
@@ -36,7 +29,14 @@ export default function FeaturedProjects({
       aria-label="Dự Án Tiêu Biểu Sử Dụng Tấm MGO Remak"
       className="max-w-[1440px] mx-auto px-4 lg:px-8"
     >
-      {showHeading && <SectionHeading title="Dự Án Tiêu Biểu" />}
+      {showHeading && (
+        <SectionHeading 
+          title="Dự Án Tiêu Biểu" 
+          badge="CÔNG TRÌNH THỰC TẾ"
+          badgeColor="green"
+          subtitle="Các dự án trọng điểm công nghiệp, thương mại và hạ tầng đã nghiệm thu PCCC bằng giải pháp tấm MGO Remak."
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...projects].sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)).map((project) => {
@@ -44,11 +44,8 @@ export default function FeaturedProjects({
           return (
             <div
               key={project.id}
-              className="group bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
+              className="group bg-white rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs hover:shadow-xl hover:border-[#7CB305]/60 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between"
             >
-              {/* Colored accent bar */}
-              <div className="h-1 w-full" style={{ backgroundColor: CATEGORY_COLORS[project.category] ?? '#5F8A03' }} />
-
               {/* Image */}
               <div className="relative h-48 overflow-hidden bg-slate-100">
                 <img
@@ -69,7 +66,7 @@ export default function FeaturedProjects({
                       MỚI
                     </div>
                   )}
-                  <div className="px-2.5 py-1 rounded-lg bg-white/95 backdrop-blur-md text-xs font-bold text-slate-800 shadow-sm">
+                  <div className="px-2.5 py-1 rounded-lg bg-white/95 backdrop-blur-md text-xs font-bold text-slate-800 shadow-sm border border-slate-200/50">
                     {project.category}
                   </div>
                 </div>
@@ -81,7 +78,7 @@ export default function FeaturedProjects({
                 </div>
               </div>
 
-              {/* Body — giống ApplicationGrid */}
+              {/* Body */}
               <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
                 <div>
                   <h3 className={`font-bold text-slate-900 text-base group-hover:${accentText} transition-colors leading-snug`}>
@@ -112,10 +109,10 @@ export default function FeaturedProjects({
       <div className="mt-8 text-center">
         <Link
           href="/du-an"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white border border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-sm"
+          className="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-white border-2 border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-xs hover:shadow-md cursor-pointer group"
         >
-          <span>Xem Thêm Dự Án</span>
-          <ArrowRight size={16} />
+          <span>Xem Toàn Bộ Dự Án Tiêu Biểu</span>
+          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
         </Link>
       </div>
     </section>
