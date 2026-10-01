@@ -188,59 +188,75 @@ export default function HomeApplicationGrid() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-6">
-        {displayed.map((item, idx) => (
-          <div
-            key={idx}
-            className="group bg-white rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs hover:shadow-xl hover:border-[#7CB305]/60 hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]"
-          >
-            <div className="relative h-48 overflow-hidden bg-slate-100">
-              <img
-                src={item.img}
-                alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
-              {/* Fire rating badge */}
-              <div className="absolute bottom-3 left-3 bg-[#F26522] px-2.5 py-1 rounded-md text-[10px] font-black text-white shadow-md flex items-center gap-1">
-                <ShieldCheck size={12} />
-                <span>{item.badge}</span>
-              </div>
-              {/* Thickness */}
-              <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-[10px] font-bold text-white">
-                {item.thickness}
-              </div>
-              {/* New badge */}
-              {item.isNew && (
-                <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#5F8A03] text-white px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide shadow-md">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-                  </span>
-                  MỚI
+        {displayed.map((item, idx) => {
+          // So le màu Xanh lá (#5F8A03) trước, Cam (#F26522) sau xen kẽ nhau
+          const isGreen = (Math.floor(idx / 4) + idx) % 2 === 0;
+          const theme = isGreen ? {
+            badgeBg: 'bg-[#5F8A03]',
+            borderHover: 'hover:border-[#7CB305]/60',
+            textHover: 'group-hover:text-[#5F8A03]',
+            btnText: 'text-[#5F8A03]',
+          } : {
+            badgeBg: 'bg-[#F26522]',
+            borderHover: 'hover:border-[#F26522]/60',
+            textHover: 'group-hover:text-[#F26522]',
+            btnText: 'text-[#F26522]',
+          };
+
+          return (
+            <div
+              key={idx}
+              className={`group bg-white rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs hover:shadow-xl ${theme.borderHover} hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]`}
+            >
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                <img
+                  src={item.img}
+                  alt={item.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/50 to-transparent" />
+                {/* Fire rating badge */}
+                <div className={`absolute bottom-3 left-3 ${theme.badgeBg} px-2.5 py-1 rounded-md text-[10px] font-black text-white shadow-md flex items-center gap-1`}>
+                  <ShieldCheck size={12} />
+                  <span>{item.badge}</span>
                 </div>
-              )}
-            </div>
-
-            <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
-              <div>
-                <h3 className={`font-bold text-slate-900 text-base group-hover:${item.accentText} transition-colors leading-snug`}>
-                  {item.title}
-                </h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
-                  {item.desc}
-                </p>
+                {/* Thickness */}
+                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-[10px] font-bold text-white">
+                  {item.thickness}
+                </div>
+                {/* New badge */}
+                {item.isNew && (
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#5F8A03] text-white px-2.5 py-1 rounded-full text-[10px] font-black tracking-wide shadow-md">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
+                    </span>
+                    MỚI
+                  </div>
+                )}
               </div>
 
-              <Link
-                href={item.link}
-                className={`text-xs font-bold ${item.accentText} flex items-center gap-1.5 group-hover:translate-x-1 transition-transform pt-2`}
-              >
-                <span>Xem Giải Pháp</span>
-                <ArrowRight size={14} />
-              </Link>
+              <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
+                <div>
+                  <h3 className={`font-bold text-slate-900 text-base ${theme.textHover} transition-colors leading-snug`}>
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+
+                <Link
+                  href={item.link}
+                  className={`text-xs font-bold ${theme.btnText} flex items-center gap-1.5 group-hover:translate-x-1 transition-transform pt-2`}
+                >
+                  <span>Xem Giải Pháp</span>
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {filtered.length > 8 && (
@@ -249,7 +265,7 @@ export default function HomeApplicationGrid() {
             href="/giai-phap-ung-dung"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white border-2 border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-sm font-bold transition-all shadow-xs hover:shadow-md cursor-pointer group"
           >
-            <span>Xem Giải Pháp</span>
+            <span>Xem Tất Cả {filtered.length} Giải Pháp Ứng Dụng</span>
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>

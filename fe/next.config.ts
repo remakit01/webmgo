@@ -51,6 +51,14 @@ const nextConfig: NextConfig = {
         source: '/gioi-thieu',
         destination: '/about',
       },
+      {
+        source: '/tin-tuc',
+        destination: '/news',
+      },
+      {
+        source: '/tin-tuc/:slug',
+        destination: '/news/:slug',
+      },
     ];
   },
 };

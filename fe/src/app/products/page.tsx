@@ -434,11 +434,7 @@ export default function ProductsPage() {
       </section>
 
       {/* 10. FORM ĐĂNG KÝ HỘP MẪU THỬ TẤM MGO MIỄN PHÍ TẬN NƠI */}
-      <section className="py-14 bg-white border-b border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-          <SampleRequestForm />
-        </div>
-      </section>
+      <SampleRequestForm />
 
       {/* 11. CTA DOWNLOAD DOSSIER & TEST REPORT */}
       <section className="py-14 bg-gradient-to-r from-emerald-900 via-slate-900 to-slate-950 text-white">
