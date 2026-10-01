@@ -1,8 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ==============================================================================
+# Global Git Ignore for Monorepo (Root, fe/, cms/, api/)
+# ==============================================================================
 
-# dependencies
+# Dependencies (Root & all packages)
 node_modules/
-/.pnp
+.pnp/
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,18 +12,29 @@ node_modules/
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
+# Test & Coverage (NestJS Vitest / Jest / Playwright)
+coverage/
+*.lcov
+.nyc_output/
 
-# next.js
+# Next.js & Frontend Build Outputs (fe/ & cms/)
 .next/
-/out/
+out/
 
-# production
-/build
-/dist
+# Production Builds & Compilations (NestJS api/dist, TypeScript dist, etc.)
+build/
+dist/
 
-# security & credentials
+# Monorepo Caches
+.turbo/
+.cache/
+.temp/
+.tmp/
+*.tsbuildinfo
+next-env.d.ts
+.eslintcache
+
+# Security & Private Credentials
 *.pem
 *.key
 *.crt
@@ -36,28 +49,41 @@ service-account*.json
 google-services*.json
 GoogleService-Info.plist
 
-# env files (keep .env.example only)
-.env*
-!.env.example
+# Environment Configuration (Keep all .env.example files across root & workspaces)
+.env
+.env.*
+.env*.local
+!**/.env.example
 
-# debug & logs
+# Local Database & Storage Volumes (Docker mount data)
+postgres_data/
+redis_data/
+minio_data/
+*.sqlite
+*.sqlite-journal
+*.db
+
+# Logs & Debugging
+*.log
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-*.log
-logs/
 
-# editor & ide
+# Editor & IDE configs
 .idea/
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# OS metadata
+# OS Generated Files
 .DS_Store
 Thumbs.db
 Thumbs.db:encryptable
@@ -65,13 +91,5 @@ ehthumbs.db
 ehthumbs_vista.db
 desktop.ini
 
-# vercel & cloud
+# Cloud & Vercel
 .vercel
-
-# typescript & cache
-*.tsbuildinfo
-next-env.d.ts
-.eslintcache
-.cache/
-.temp/
-.tmp/
