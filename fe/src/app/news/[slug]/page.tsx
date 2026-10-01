@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function TinTucDetailPage({ params }: Props) {
+export default async function NewsDetailPage({ params }: Props) {
   const { slug } = await params;
   const article = NEWS_ARTICLES.find((a) => a.slug === slug);
 

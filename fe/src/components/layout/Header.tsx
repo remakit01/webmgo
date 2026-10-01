@@ -40,7 +40,8 @@ export default function Header() {
   const isGuideActive = pathname.startsWith('/huong-dan-thi-cong');
   const isPriceActive = pathname.startsWith('/bao-gia');
   const isAgentsActive = pathname.startsWith('/dai-ly');
-  const isAboutActive = pathname === '/gioi-thieu';
+  const isAboutActive = pathname.startsWith('/gioi-thieu');
+  const isNewsActive = pathname.startsWith('/tin-tuc');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -69,8 +70,8 @@ export default function Header() {
             <Link href="/gioi-thieu" className={`flex items-center gap-1.5 transition-colors ${isAboutActive ? 'text-[#5F8A03] font-semibold' : 'hover:text-[#5F8A03]'}`}>
               <Building2 size={13} /> Giới thiệu
             </Link>
-            <Link href="/tin-tuc" className="flex items-center gap-1.5 hover:text-[#5F8A03] transition-colors">
-              <Newspaper size={13} /> Tin tức PCCC
+            <Link href="/tin-tuc" className={`flex items-center gap-1.5 transition-colors ${isNewsActive ? 'text-[#5F8A03] font-semibold' : 'hover:text-[#5F8A03]'}`}>
+              <Newspaper size={13} /> Tin tức
             </Link>
             <a href="mailto:contact@remak.vn" className="flex items-center gap-1.5 hover:text-[#5F8A03] transition-colors">
               <Mail size={13} /> contact@remak.vn

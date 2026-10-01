@@ -133,7 +133,12 @@ export default function HomePage() {
           <HomeApplicationGrid />
         </ScrollReveal>
 
-        {/* 7. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
+        {/* 7. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
+        <ScrollReveal direction="up" delay={50} className="w-full">
+          <SampleRequestForm />
+        </ScrollReveal>
+
+        {/* 8. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
         <ScrollReveal direction="up" delay={50}>
           <HomeProjectsAndNews />
         </ScrollReveal>
@@ -143,12 +148,7 @@ export default function HomePage() {
           <MaterialCalculator />
         </ScrollReveal>
 
-        {/* 10. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
-        <ScrollReveal direction="up" delay={50}>
-          <SampleRequestForm />
-        </ScrollReveal>
-
-        {/* 11. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
+        {/* 10. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
         <ScrollReveal direction="up" delay={50}>
           <FaqAccordion />
         </ScrollReveal>

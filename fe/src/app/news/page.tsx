@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { NEWS_ARTICLES, NEWS_CATEGORIES } from '@/data/news';
 
-export default function TinTucPage() {
+export default function NewsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
