@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Layers, 
@@ -13,8 +13,11 @@ import {
   Scale, 
   ExternalLink,
   ShieldCheck,
-  ChevronRight
+  ChevronRight,
+  LogOut,
+  User
 } from 'lucide-react';
+import { getAuthSession, logoutWithApi, AuthSession } from '@/lib/api-auth';
 
 const MENU_ITEMS = [
   {
@@ -57,11 +60,25 @@ const MENU_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [session, setSession] = useState<AuthSession | null>(null);
+
+  useEffect(() => {
+    setSession(getAuthSession());
+  }, []);
+
+  const handleLogout = async () => {
+    if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống CMS?')) {
+      await logoutWithApi();
+      router.push('/login');
+      router.refresh();
+    }
+  };
 
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 text-slate-300 flex flex-col flex-shrink-0 h-screen sticky top-0 select-none">
       {/* Brand Header */}
-      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800">
+      <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800 flex-shrink-0">
         <Link href="/" className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7CB305] to-[#5F8A03] text-white flex items-center justify-center font-black text-lg shadow-md shadow-[#5F8A03]/30">
             R
@@ -75,6 +92,28 @@ export default function Sidebar() {
           </div>
         </Link>
       </div>
+
+      {/* Logged in User Bar */}
+      {session?.user && (
+        <div className="px-4 py-2.5 bg-slate-950/60 border-b border-slate-800 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-[#A0D911] flex-shrink-0">
+              <User size={14} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-white truncate max-w-[120px]">
+                {session.user.username ? `@${session.user.username}` : session.user.email}
+              </div>
+              <div className="text-[10px] text-slate-400 truncate max-w-[120px]" title={session.user.email}>
+                {session.user.email}
+              </div>
+            </div>
+          </div>
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#5F8A03]/20 text-[#A0D911] border border-[#5F8A03]/30">
+            {session.user.role}
+          </span>
+        </div>
+      )}
 
       {/* Navigation List */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
@@ -109,8 +148,8 @@ export default function Sidebar() {
         })}
       </div>
 
-      {/* System Status / Quick Link to Web */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/40 space-y-3">
+      {/* System Status & Logout */}
+      <div className="p-3 border-t border-slate-800 bg-slate-950/40 space-y-2 flex-shrink-0">
         <a
           href="http://localhost:3000"
           target="_blank"
@@ -119,14 +158,23 @@ export default function Sidebar() {
         >
           <div className="flex items-center gap-2">
             <ExternalLink size={14} className="text-[#A0D911]" />
-            <span>Xem Website Chính</span>
+            <span>Mở Website Live (3000)</span>
           </div>
           <ChevronRight size={14} className="text-slate-500" />
         </a>
 
-        <div className="flex items-center gap-2 px-1 text-[11px] text-slate-400">
-          <ShieldCheck size={14} className="text-[#5F8A03]" />
-          <span>Remak FireOFF v1.0 • PCCC QCVN 06</span>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-bold transition-all border border-rose-500/20 cursor-pointer"
+        >
+          <LogOut size={14} />
+          <span>Đăng Xuất Khỏi CMS</span>
+        </button>
+
+        <div className="flex items-center gap-2 px-1 text-[10px] text-slate-400 pt-0.5">
+          <ShieldCheck size={13} className="text-[#5F8A03]" />
+          <span>Remak FireOFF • PCCC QCVN 06</span>
         </div>
       </div>
     </aside>
