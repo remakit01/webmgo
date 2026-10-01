@@ -4,6 +4,8 @@ export { default as HomeHeroSection } from './HomeHeroSection';
 export { default as HomeStickyBenefits } from './HomeStickyBenefits';
 export { default as HomeSpecMatrix } from './HomeSpecMatrix';
 export { default as HomeApplicationGrid } from './HomeApplicationGrid';
+export { default as HomeFeaturedNews } from './HomeFeaturedNews';
+export { default as HomeProjectsAndNews } from './HomeProjectsAndNews';
 
 // Re-export shared components from @/components/shared for convenience and backwards-compatibility
 export {
