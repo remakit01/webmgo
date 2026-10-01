@@ -40,15 +40,15 @@ export default function AdminSampleRequestsPage() {
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-2 ${
                   filter === key
-                    ? 'bg-[#5F8A03] text-white shadow-sm shadow-[#5F8A03]/30'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    ? 'bg-[#5F8A03] text-white shadow-xs border-[#5F8A03]'
+                    : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <span>{labels[key]}</span>
-                <span className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] ${
-                  filter === key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                <span className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                  filter === key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {count}
                 </span>
@@ -58,10 +58,10 @@ export default function AdminSampleRequestsPage() {
         </div>
 
         {/* Requests Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+              <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-wider text-[11px] border-b-2 border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">Mã Đơn / Ngày Tạo</th>
                   <th className="py-3.5 px-4">Khách Hàng / Đơn Vị</th>
@@ -71,52 +71,52 @@ export default function AdminSampleRequestsPage() {
                   <th className="py-3.5 px-4 text-right">Cập Nhật</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y-2 divide-slate-100">
                 {filteredRequests.map((req) => (
-                  <tr key={req.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={req.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="font-extrabold text-slate-900">{req.id}</div>
-                      <div className="text-[11px] text-slate-400">{req.createdAt}</div>
+                      <div className="text-[11px] text-slate-400 font-medium">{req.createdAt}</div>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-900">{req.customerName}</div>
-                      <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-medium">
                         <Building size={12} className="text-slate-400" />
                         <span>{req.company || 'Cá nhân tư vấn'}</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-800 flex items-center gap-1.5">
+                      <div className="font-bold text-slate-800 flex items-center gap-1.5">
                         <Phone size={12} className="text-[#F26522]" />
                         <span>{req.phone}</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+                      <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5 font-medium">
                         <MapPin size={12} className="text-slate-400" />
                         <span className="truncate max-w-[180px]">{req.address}, {req.city}</span>
                       </div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-800">{req.productName}</div>
+                      <div className="font-bold text-slate-900">{req.productName}</div>
                       <div className="text-[11px] text-[#5F8A03] font-bold">Quy cách: {req.thickness}</div>
                     </td>
                     <td className="py-3.5 px-4">
                       {req.status === 'new' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border border-amber-300">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border-2 border-amber-300">
                           <AlertCircle size={12}/> Chờ Xử Lý
                         </span>
                       )}
                       {req.status === 'processing' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-700 border border-sky-300">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-700 border-2 border-sky-300">
                           <Clock size={12}/> Đang Chuẩn Bị
                         </span>
                       )}
                       {req.status === 'shipped' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/10 text-purple-700 border border-purple-300">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/10 text-purple-700 border-2 border-purple-300">
                           <Truck size={12}/> Đang Gửi Hàng
                         </span>
                       )}
                       {req.status === 'completed' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/40">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
                           <CheckCircle2 size={12}/> Đã Nghiệm Thu
                         </span>
                       )}
@@ -125,7 +125,7 @@ export default function AdminSampleRequestsPage() {
                       <select
                         value={req.status}
                         onChange={(e) => handleUpdateStatus(req.id, e.target.value)}
-                        className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-medium focus:outline-none focus:border-[#7CB305] cursor-pointer"
+                        className="text-xs bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 font-bold focus:outline-none focus:border-[#7CB305] cursor-pointer"
                       >
                         <option value="new">Chờ Xử Lý</option>
                         <option value="processing">Đang Chuẩn Bị</option>

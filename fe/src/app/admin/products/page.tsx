@@ -19,10 +19,10 @@ export default function AdminProductsPage() {
       />
 
       <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+              <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-wider text-[11px] border-b-2 border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">Tên Sản Phẩm</th>
                   <th className="py-3.5 px-4">Tiêu Chuẩn PCCC</th>
@@ -32,30 +32,30 @@ export default function AdminProductsPage() {
                   <th className="py-3.5 px-4 text-right">Thao Tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y-2 divide-slate-100">
                 {products.map((prod) => (
-                  <tr key={prod.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={prod.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-900 text-sm">{prod.name}</div>
-                      <div className="text-[11px] text-slate-400">Slug: /{prod.slug}</div>
+                      <div className="text-[11px] text-slate-400 font-medium">Slug: /{prod.slug}</div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
                         <Shield size={12} /> {prod.eiRating}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <div className="font-medium text-slate-800">{prod.thickness}</div>
-                      <div className="text-[11px] text-slate-400">{prod.density}</div>
+                      <div className="font-semibold text-slate-800">{prod.thickness}</div>
+                      <div className="text-[11px] text-slate-400 font-medium">{prod.density}</div>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-extrabold text-[#F26522] text-sm">
                         {prod.price.toLocaleString()} đ
                       </div>
-                      <div className="text-[10px] text-slate-400">Đơn vị: {prod.unit}</div>
+                      <div className="text-[10px] text-slate-400 font-medium">Đơn vị: {prod.unit}</div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border-2 border-emerald-200">
                         <CheckCircle2 size={11} /> Đang Bán
                       </span>
                     </td>
@@ -64,14 +64,14 @@ export default function AdminProductsPage() {
                         <Link
                           href={`/san-pham/${prod.slug}`}
                           target="_blank"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200"
                           title="Xem ngoài Live Web"
                         >
                           <ExternalLink size={15} />
                         </Link>
                         <button
                           type="button"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#5F8A03] hover:bg-slate-100 cursor-pointer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#5F8A03] hover:bg-slate-100 border border-transparent hover:border-slate-200 cursor-pointer"
                           title="Chỉnh sửa sản phẩm"
                         >
                           <Edit2 size={15} />
