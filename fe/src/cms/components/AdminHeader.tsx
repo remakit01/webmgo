@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { Bell, Search, Plus, Sparkles } from 'lucide-react';
+import { Bell, Search, Plus } from 'lucide-react';
 
 interface AdminHeaderProps {
   title: string;
@@ -17,11 +16,11 @@ export default function AdminHeader({
   onAction,
 }: AdminHeaderProps) {
   return (
-    <header className="h-16 px-6 bg-white border-b border-slate-200 flex items-center justify-between sticky top-0 z-30 flex-shrink-0">
+    <header className="h-16 px-6 bg-white border-b-2 border-slate-200 flex items-center justify-between sticky top-0 z-30 flex-shrink-0">
       <div>
-        <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+        <h1 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
           <span>{title}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#7CB305]" />
+          <span className="w-2 h-2 rounded-full bg-[#7CB305]" />
         </h1>
         {subtitle && <p className="text-xs text-slate-500 font-medium">{subtitle}</p>}
       </div>
@@ -29,18 +28,18 @@ export default function AdminHeader({
       <div className="flex items-center gap-3">
         {/* Search */}
         <div className="relative hidden md:block">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Tìm kiếm dữ liệu CMS..."
-            className="w-64 pl-9 pr-3 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:border-[#7CB305] focus:bg-white transition-all"
+            className="w-64 pl-10 pr-3.5 py-2 text-xs font-medium bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-xl text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#7CB305] focus:bg-white transition-all"
           />
         </div>
 
         {/* Notifications */}
         <button
           type="button"
-          className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+          className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 transition-all cursor-pointer"
           title="Thông báo hệ thống"
         >
           <Bell size={18} />
@@ -52,7 +51,7 @@ export default function AdminHeader({
           <button
             type="button"
             onClick={onAction}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#7CB305] to-[#5F8A03] hover:brightness-105 text-white text-xs font-bold shadow-sm shadow-[#5F8A03]/30 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#7CB305] to-[#5F8A03] hover:from-[#85B90B] hover:to-[#6B9C03] text-white text-xs font-extrabold shadow-sm shadow-[#5F8A03]/25 border-2 border-[#5F8A03] transition-all cursor-pointer"
           >
             <Plus size={15} />
             <span>{actionText}</span>

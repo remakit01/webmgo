@@ -19,10 +19,10 @@ export default function AdminApplicationsPage() {
       />
 
       <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+              <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-wider text-[11px] border-b-2 border-slate-200">
                 <tr>
                   <th className="py-3.5 px-4">Tên Giải Pháp</th>
                   <th className="py-3.5 px-4">Phân Loại</th>
@@ -32,27 +32,27 @@ export default function AdminApplicationsPage() {
                   <th className="py-3.5 px-4 text-right">Thao Tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y-2 divide-slate-100">
                 {apps.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-900 text-sm">{item.name}</div>
-                      <div className="text-[11px] text-slate-400">/{item.slug}</div>
+                      <div className="text-[11px] text-slate-400 font-medium">/{item.slug}</div>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-700">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-bold bg-slate-100 text-slate-700 border border-slate-200">
                         {item.category}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
                         <Shield size={12} /> {item.targetEI}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-semibold text-slate-800">{item.layersCount} lớp cấu tạo</div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500">
+                    <td className="py-3.5 px-4 text-slate-500 font-medium">
                       {item.updatedAt}
                     </td>
                     <td className="py-3.5 px-4 text-right">
@@ -60,14 +60,14 @@ export default function AdminApplicationsPage() {
                         <Link
                           href={`/giai-phap-ung-dung/${item.slug}`}
                           target="_blank"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 border border-transparent hover:border-slate-200"
                           title="Xem ngoài Live Web"
                         >
                           <ExternalLink size={15} />
                         </Link>
                         <button
                           type="button"
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#5F8A03] hover:bg-slate-100 cursor-pointer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#5F8A03] hover:bg-slate-100 border border-transparent hover:border-slate-200 cursor-pointer"
                           title="Chỉnh sửa"
                         >
                           <Edit2 size={15} />
