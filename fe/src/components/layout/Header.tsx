@@ -37,7 +37,6 @@ export default function Header() {
   const isProductsActive = pathname.startsWith('/san-pham');
   const isAppsActive = pathname.startsWith('/giai-phap-ung-dung');
   const isProjectsActive = pathname.startsWith('/du-an');
-  const isLibraryActive = pathname.startsWith('/thu-vien-tai-lieu');
   const isGuideActive = pathname.startsWith('/huong-dan-thi-cong');
   const isPriceActive = pathname.startsWith('/bao-gia');
   const isAgentsActive = pathname.startsWith('/dai-ly');
@@ -310,22 +309,6 @@ export default function Header() {
               </div>
             </div>
 
-            {/* 5. Thư viện tài liệu */}
-            <div className="relative h-full flex items-center flex-shrink-0">
-              <Link
-                href="/thu-vien-tai-lieu"
-                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
-                  isLibraryActive
-                    ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
-                    : 'text-slate-800 hover:text-[#5F8A03] hover:bg-[#F4F9E8]'
-                }`}
-              >
-                Thư viện
-              </Link>
-              {isLibraryActive && (
-                <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
-              )}
-            </div>
 
             {/* 6. Hướng dẫn thi công */}
             <div className="relative h-full flex items-center flex-shrink-0">
@@ -505,17 +488,6 @@ export default function Header() {
                   Dự án tiêu biểu
                 </Link>
 
-                <Link 
-                  href="/thu-vien-tai-lieu" 
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-2.5 rounded-lg transition-colors ${
-                    pathname.startsWith('/thu-vien-tai-lieu') 
-                      ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]' 
-                      : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
-                  }`}
-                >
-                  Thư viện kiểm định PCCC
-                </Link>
 
                 <Link 
                   href="/huong-dan-thi-cong" 

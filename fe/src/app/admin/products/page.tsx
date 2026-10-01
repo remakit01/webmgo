@@ -1,208 +1,80 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  Flame, 
-  X
-} from 'lucide-react';
-import AdminHeader from '@/components/admin/AdminHeader';
-import { ADMIN_PRODUCTS, AdminProduct } from '@/lib/admin-data';
+import Link from 'next/link';
+import { Boxes, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Shield, ExternalLink } from 'lucide-react';
+import AdminHeader from '@/cms/components/AdminHeader';
+import { INITIAL_PRODUCTS, Product } from '@/cms/lib/cms-data';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<AdminProduct[]>(ADMIN_PRODUCTS);
-  const [search, setSearch] = useState('');
-  const [selectedCat, setSelectedCat] = useState('all');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    category: 'Vật Liệu Chống Cháy',
-    thickness: '5mm, 8mm, 10mm, 12mm',
-    fireRating: 'EI 120 (A1)',
-    price: '350.000đ/tấm',
-    status: 'active' as 'active' | 'draft',
-    stock: 1000,
-  });
-
-  const categories = ['all', 'Vật Liệu Chống Cháy', 'Sàn Chịu Lực', 'Cách Âm & Tiêu Âm', 'Bọc Cột Thép', 'Trang Trí Nội Thất'];
-
-  const filtered = products.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase());
-    const matchCat = selectedCat === 'all' || p.category === selectedCat;
-    return matchSearch && matchCat;
-  });
-
-  const handleDelete = (id: string) => {
-    if (confirm('Xóa sản phẩm này khỏi hệ thống?')) {
-      setProducts(prev => prev.filter(p => p.id !== id));
-    }
-  };
-
-  const handleOpenAdd = () => {
-    setEditingProduct(null);
-    setFormData({
-      name: '',
-      category: 'Vật Liệu Chống Cháy',
-      thickness: '8mm, 10mm, 12mm',
-      fireRating: 'EI 120 (A1)',
-      price: '380.000đ/tấm',
-      status: 'active',
-      stock: 500,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (p: AdminProduct) => {
-    setEditingProduct(p);
-    setFormData({
-      name: p.name,
-      category: p.category,
-      thickness: p.thickness.join(', '),
-      fireRating: p.fireRating,
-      price: p.price,
-      status: p.status,
-      stock: p.stock,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const thList = formData.thickness.split(',').map(s => s.trim()).filter(Boolean);
-
-    if (editingProduct) {
-      setProducts(prev => prev.map(p => p.id === editingProduct.id ? {
-        ...p,
-        ...formData,
-        thickness: thList,
-        updatedAt: new Date().toISOString().split('T')[0]
-      } : p));
-    } else {
-      const newP: AdminProduct = {
-        id: `prod-${Date.now()}`,
-        ...formData,
-        thickness: thList,
-        updatedAt: new Date().toISOString().split('T')[0]
-      };
-      setProducts([newP, ...products]);
-    }
-    setIsModalOpen(false);
-  };
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
 
   return (
-    <div className="flex-1 flex flex-col min-h-screen">
+    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
       <AdminHeader 
-        title="Quản Lý Sản Phẩm MGO Remak®" 
-        subtitle="Thêm, sửa, cập nhật thông số chống cháy A1, độ dày và tình trạng tồn kho sản phẩm." 
+        title="Quản Lý Sản Phẩm MGO Remak" 
+        subtitle="Quản lý danh sách, thông số kỹ thuật PCCC, độ dày và bảng giá niêm yết"
+        actionText="Thêm Sản Phẩm Mới"
+        onAction={() => alert('Chức năng thêm sản phẩm mới (Form Modal)')}
       />
 
-      <main className="flex-1 p-6 sm:p-8 space-y-6 max-w-[1600px] w-full mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative w-full sm:w-72">
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Tìm sản phẩm theo tên..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-[#5F8A03] shadow-2xs"
-              />
-            </div>
-
-            <select
-              aria-label="Lọc theo phân loại"
-              value={selectedCat}
-              onChange={(e) => setSelectedCat(e.target.value)}
-              className="py-2 px-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-[#5F8A03] cursor-pointer"
-            >
-              {categories.map(c => (
-                <option key={c} value={c}>{c === 'all' ? 'Tất cả phân loại' : c}</option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleOpenAdd}
-            className="px-4 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-          >
-            <Plus size={16} />
-            <span>Thêm Sản Phẩm Mới</span>
-          </button>
-        </div>
-
-        {/* PRODUCTS TABLE */}
-        <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-2xs">
+      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs sm:text-sm">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="p-4 pl-6">Tên Sản Phẩm</th>
-                  <th className="p-4">Phân Loại</th>
-                  <th className="p-4">Dải Độ Dày</th>
-                  <th className="p-4">Chịu Lửa (EI)</th>
-                  <th className="p-4">Giá Tham Khảo</th>
-                  <th className="p-4 text-center">Trạng Thái</th>
-                  <th className="p-4 pr-6 text-right">Thao Tác</th>
+            <table className="w-full text-left text-xs text-slate-600">
+              <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-100">
+                <tr>
+                  <th className="py-3.5 px-4">Tên Sản Phẩm</th>
+                  <th className="py-3.5 px-4">Tiêu Chuẩn PCCC</th>
+                  <th className="py-3.5 px-4">Quy Cách (Dày / Tỷ Trọng)</th>
+                  <th className="py-3.5 px-4">Giá Niêm Yết (VND/m²)</th>
+                  <th className="py-3.5 px-4">Trạng Thái</th>
+                  <th className="py-3.5 px-4 text-right">Thao Tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filtered.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4 pl-6">
-                      <div className="font-extrabold text-slate-900">{p.name}</div>
-                      <div className="text-[11px] text-slate-400 font-mono">Mã: {p.id} • Cập nhật: {p.updatedAt}</div>
+              <tbody className="divide-y divide-slate-100">
+                {products.map((prod) => (
+                  <tr key={prod.id} className="hover:bg-slate-50/60 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="font-bold text-slate-900 text-sm">{prod.name}</div>
+                      <div className="text-[11px] text-slate-400">Slug: /{prod.slug}</div>
                     </td>
-                    <td className="p-4 font-semibold text-slate-700">
-                      {p.category}
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30">
+                        <Shield size={12} /> {prod.eiRating}
+                      </span>
                     </td>
-                    <td className="p-4">
-                      <div className="flex flex-wrap gap-1">
-                        {p.thickness.map(t => (
-                          <span key={t} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-bold">
-                            {t}
-                          </span>
-                        ))}
+                    <td className="py-3.5 px-4">
+                      <div className="font-medium text-slate-800">{prod.thickness}</div>
+                      <div className="text-[11px] text-slate-400">{prod.density}</div>
+                    </td>
+                    <td className="py-3.5 px-4">
+                      <div className="font-extrabold text-[#F26522] text-sm">
+                        {prod.price.toLocaleString()} đ
                       </div>
+                      <div className="text-[10px] text-slate-400">Đơn vị: {prod.unit}</div>
                     </td>
-                    <td className="p-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#FEF3EC] text-[#F26522]">
-                        <Flame size={12} /> {p.fireRating}
+                    <td className="py-3.5 px-4">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <CheckCircle2 size={11} /> Đang Bán
                       </span>
                     </td>
-                    <td className="p-4 font-bold text-slate-900">
-                      {p.price}
-                    </td>
-                    <td className="p-4 text-center">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        p.status === 'active' 
-                          ? 'bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30' 
-                          : 'bg-slate-100 text-slate-500'
-                      }`}>
-                        {p.status === 'active' ? 'Đang Bán' : 'Bản Nháp'}
-                      </span>
-                    </td>
-                    <td className="p-4 pr-6 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/san-pham/${prod.slug}`}
+                          target="_blank"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                          title="Xem ngoài Live Web"
+                        >
+                          <ExternalLink size={15} />
+                        </Link>
                         <button
                           type="button"
-                          onClick={() => handleOpenEdit(p)}
-                          className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-[#5F8A03] transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-[#5F8A03] hover:bg-slate-100 cursor-pointer"
+                          title="Chỉnh sửa sản phẩm"
                         >
                           <Edit2 size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(p.id)}
-                          className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition-colors cursor-pointer"
-                        >
-                          <Trash2 size={15} />
                         </button>
                       </div>
                     </td>
@@ -212,123 +84,7 @@ export default function AdminProductsPage() {
             </table>
           </div>
         </div>
-
-      </main>
-
-      {/* MODAL */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-base sm:text-lg font-bold text-slate-900">
-                {editingProduct ? 'Chỉnh Sửa Sản Phẩm MGO' : 'Thêm Sản Phẩm MGO Mới'}
-              </h3>
-              <button 
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs sm:text-sm">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Tên sản phẩm *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Ví dụ: Tấm MGO Remak® FireOFF Chống Cháy A1"
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#5F8A03]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Phân loại</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#5F8A03]"
-                  >
-                    <option value="Vật Liệu Chống Cháy">Vật Liệu Chống Cháy</option>
-                    <option value="Sàn Chịu Lực">Sàn Chịu Lực</option>
-                    <option value="Cách Âm & Tiêu Âm">Cách Âm & Tiêu Âm</option>
-                    <option value="Bọc Cột Thép">Bọc Cột Thép</option>
-                    <option value="Trang Trí Nội Thất">Trang Trí Nội Thất</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Cấp chịu lửa (EI/A1)</label>
-                  <input
-                    type="text"
-                    value={formData.fireRating}
-                    onChange={(e) => setFormData({ ...formData, fireRating: e.target.value })}
-                    placeholder="EI 30 - EI 180 (A1)"
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#5F8A03]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">Dải độ dày</label>
-                <input
-                  type="text"
-                  value={formData.thickness}
-                  onChange={(e) => setFormData({ ...formData, thickness: e.target.value })}
-                  placeholder="5mm, 8mm, 10mm, 12mm"
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#5F8A03]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Giá tham khảo</label>
-                  <input
-                    type="text"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    placeholder="280.000đ - 520.000đ/tấm"
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#5F8A03]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">Trạng thái</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#5F8A03]"
-                  >
-                    <option value="active">Đang Bán (Active)</option>
-                    <option value="draft">Bản Nháp (Draft)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold transition-colors cursor-pointer shadow-sm"
-                >
-                  {editingProduct ? 'Cập Nhật' : 'Tạo Sản Phẩm'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
+      </div>
     </div>
   );
 }

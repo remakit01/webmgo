@@ -1,7 +1,11 @@
-import { PrismaClient, Role } from '@prisma/client';
+import 'dotenv/config';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient, Role } from '../src/generated/prisma/client.js';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 async function main() {
   const adminPassword = 'Admin@123456';
@@ -14,13 +18,13 @@ async function main() {
     where: { email: 'admin@remak.vn' },
     update: {
       username: 'admin',
-      passwordHash: adminPasswordHash,
+      password: adminPasswordHash,
       role: Role.ADMIN,
     },
     create: {
       username: 'admin',
       email: 'admin@remak.vn',
-      passwordHash: adminPasswordHash,
+      password: adminPasswordHash,
       role: Role.ADMIN,
     },
   });
@@ -29,13 +33,13 @@ async function main() {
     where: { email: 'editor@remak.vn' },
     update: {
       username: 'editor',
-      passwordHash: editorPasswordHash,
+      password: editorPasswordHash,
       role: Role.EDITOR,
     },
     create: {
       username: 'editor',
       email: 'editor@remak.vn',
-      passwordHash: editorPasswordHash,
+      password: editorPasswordHash,
       role: Role.EDITOR,
     },
   });

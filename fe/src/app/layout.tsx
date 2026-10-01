@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import AppShell from "@/components/layout/AppShell";
 
 const beVietnamPro = Be_Vietnam_Pro({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -43,11 +42,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className={`h-full antialiased ${beVietnamPro.variable}`}>
-      <body className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-800">
-        <Header />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+    <html lang="vi" className={`h-full antialiased ${beVietnamPro.variable}`} suppressHydrationWarning>
+      <body className="min-h-full bg-[#F8FAFC] text-slate-800 antialiased">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

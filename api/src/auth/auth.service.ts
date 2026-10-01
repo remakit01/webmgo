@@ -123,7 +123,7 @@ export class AuthService {
       },
     });
     if (!user) return null;
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await bcrypt.compare(password, user.password);
     return valid ? user : null;
   }
 }
