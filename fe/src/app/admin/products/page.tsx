@@ -21,42 +21,42 @@ export default function AdminProductsPage() {
       <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
         <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-wider text-[11px] border-b-2 border-slate-200">
+            <table className="w-full text-left text-sm text-slate-600">
+              <thead className="bg-slate-50 text-slate-600 font-black uppercase tracking-wider text-xs border-b-2 border-slate-200">
                 <tr>
-                  <th className="py-3.5 px-4">Tên Sản Phẩm</th>
-                  <th className="py-3.5 px-4">Tiêu Chuẩn PCCC</th>
-                  <th className="py-3.5 px-4">Quy Cách (Dày / Tỷ Trọng)</th>
-                  <th className="py-3.5 px-4">Giá Niêm Yết (VND/m²)</th>
-                  <th className="py-3.5 px-4">Trạng Thái</th>
-                  <th className="py-3.5 px-4 text-right">Thao Tác</th>
+                  <th className="py-4 px-5">Tên Sản Phẩm</th>
+                  <th className="py-4 px-5">Tiêu Chuẩn PCCC</th>
+                  <th className="py-4 px-5">Quy Cách (Dày / Tỷ Trọng)</th>
+                  <th className="py-4 px-5">Giá Niêm Yết (VND/m²)</th>
+                  <th className="py-4 px-5">Trạng Thái</th>
+                  <th className="py-4 px-5 text-right">Thao Tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-slate-100">
                 {products.map((prod) => (
                   <tr key={prod.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900 text-sm">{prod.name}</div>
-                      <div className="text-[11px] text-slate-400 font-medium">Slug: /{prod.slug}</div>
+                    <td className="py-4 px-5">
+                      <div className="font-extrabold text-slate-900 text-base">{prod.name}</div>
+                      <div className="text-xs text-slate-400 font-medium mt-0.5">Slug: /{prod.slug}</div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
-                        <Shield size={12} /> {prod.eiRating}
+                    <td className="py-4 px-5">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
+                        <Shield size={14} /> {prod.eiRating}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-800">{prod.thickness}</div>
-                      <div className="text-[11px] text-slate-400 font-medium">{prod.density}</div>
+                    <td className="py-4 px-5">
+                      <div className="font-bold text-slate-800 text-sm">{prod.thickness}</div>
+                      <div className="text-xs text-slate-400 font-medium">{prod.density}</div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-extrabold text-[#F26522] text-sm">
+                    <td className="py-4 px-5">
+                      <div className="font-black text-[#F26522] text-base">
                         {prod.price.toLocaleString()} đ
                       </div>
-                      <div className="text-[10px] text-slate-400 font-medium">Đơn vị: {prod.unit}</div>
+                      <div className="text-xs text-slate-400 font-medium">Đơn vị: {prod.unit}</div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-700 border-2 border-emerald-200">
-                        <CheckCircle2 size={11} /> Đang Bán
+                    <td className="py-4 px-5">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-700 border-2 border-emerald-200">
+                        <CheckCircle2 size={13} /> Đang Bán
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">

@@ -17,9 +17,28 @@ import {
   Layers,
   DoorClosed,
   Music,
-  Package
+  Package,
+  Sliders,
+  Sparkles,
+  Table2,
+  Scale,
+  Calculator,
+  HelpCircle,
 } from 'lucide-react';
 import SearchModal from './SearchModal';
+
+const HOMEPAGE_SECTIONS = [
+  { id: 'banner-swiper', name: 'Banner Trình Chiếu', desc: 'Slider ảnh & chứng nhận chất lượng PCCC', icon: Sliders },
+  { id: 'hero-section', name: 'Giới Thiệu & Chứng Nhận', desc: 'Thương hiệu Remak® FireOFF chuẩn A1', icon: Sparkles },
+  { id: 'dac-tinh-vuot-troi', name: '4 Đặc Tính Vượt Trội', desc: 'Chống cháy 1200°C, kháng nước, không rỉ', icon: Flame },
+  { id: 'bang-thong-so', name: 'Bảng Thông Số MGO', desc: 'Độ dày 5mm - 18mm & thông số kỹ thuật', icon: Table2 },
+  { id: 'so-sanh-vat-lieu', name: 'Đối Chuẩn Vật Liệu', desc: 'MGO vs Cemboard vs Thạch Cao vs Ván Ép', icon: Scale },
+  { id: 'giai-phap-ung-dung', name: '4 Ứng Dụng Hàng Đầu', desc: 'Ống gió, vách ngăn, lót sàn, cửa PCCC', icon: Layers },
+  { id: 'nhan-mau-thu', name: 'Hộp Mẫu Thử Miễn Phí', desc: 'Giao tận nơi 6 mẫu cắt thực tế + hồ sơ IBST', icon: Package, badge: 'HOT' },
+  { id: 'du-an-tin-tuc', name: 'Dự Án & Tin Tức', desc: 'Công trình trọng điểm & kiến thức kỹ thuật', icon: Building2 },
+  { id: 'du-toan-vat-tu', name: 'Dự Toán Vật Tư Online', desc: 'Tính nhanh số tấm & chi phí dự kiến', icon: Calculator },
+  { id: 'faq-hoi-dap', name: 'Hỏi Đáp FAQ PCCC', desc: 'Giải đáp quy chuẩn QCVN 06:2022/BXD', icon: HelpCircle },
+];
 
 export default function Header() {
   const pathname = usePathname();
@@ -53,6 +72,17 @@ export default function Header() {
 
   const toggleSubmenu = (menu: string) => {
     setActiveMobileSubmenu(activeMobileSubmenu === menu ? null : menu);
+  };
+
+  const handleSectionClick = (id: string, e: React.MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault();
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        window.history.pushState(null, '', `/#${id}`);
+      }
+    }
   };
 
   return (
@@ -115,21 +145,68 @@ export default function Header() {
           {/* 7 HEADER ĐIỀU HƯỚNG CHA (DESKTOP) - THẲNG HÀNG TUYỆT ĐỐI KHÔNG XUỐNG DÒNG */}
           <nav className="hidden xl:flex items-center gap-1 h-full flex-nowrap flex-shrink-0">
             
-            {/* 1. Trang chủ */}
-            <div className="relative h-full flex items-center flex-shrink-0">
+            {/* 1. Trang chủ (Dropdown Mega-Menu 10 Section Components page.tsx) */}
+            <div className="group relative h-full flex items-center flex-shrink-0">
               <Link 
                 href="/" 
-                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 ${
                   isHomeActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
-                    : 'text-slate-800 hover:text-[#5F8A03] hover:bg-[#F4F9E8]'
+                    : 'text-slate-800 group-hover:text-[#5F8A03] group-hover:bg-[#F4F9E8]'
                 }`}
               >
-                Trang chủ
+                <span>Trang chủ</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 flex-shrink-0 group-hover:rotate-180 ${
+                  isHomeActive ? 'text-[#5F8A03]' : 'text-slate-400'
+                }`} />
               </Link>
               {isHomeActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
+
+              {/* Dropdown: 10 Section Components Trang Chủ - Chữ To Đẹp */}
+              <div className="absolute top-[calc(100%-8px)] left-0 w-[630px] bg-white rounded-2xl shadow-xl border border-slate-200 p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
+                <div className="flex items-center justify-between px-3 py-2.5 mb-2 border-b border-slate-100">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#7CB305] animate-pulse"></span>
+                    <span className="text-xs font-black uppercase tracking-wider text-slate-600">Các Khu Vực Trên Trang Chủ</span>
+                  </div>
+                  <Link href="/" className="text-xs font-bold text-[#5F8A03] hover:underline">Về đầu trang →</Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {HOMEPAGE_SECTIONS.map((sec, idx) => {
+                    const SecIcon = sec.icon;
+                    return (
+                      <Link 
+                        key={sec.id} 
+                        href={`/#${sec.id}`}
+                        onClick={(e) => handleSectionClick(sec.id, e)}
+                        className="flex items-start gap-3 p-2.5 rounded-xl border border-transparent hover:border-[#7CB305]/40 hover:bg-[#F4F9E8]/80 transition-all group/item"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 group-hover/item:bg-white text-slate-600 group-hover/item:text-[#5F8A03] flex items-center justify-center shrink-0 transition-colors mt-0.5 shadow-2xs">
+                          <SecIcon size={16} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-bold text-slate-800 group-hover/item:text-[#5F8A03] truncate">
+                              {idx + 1}. {sec.name}
+                            </span>
+                            {sec.badge && (
+                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#F26522] text-white shrink-0">
+                                {sec.badge}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 font-medium">
+                            {sec.desc}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* 2. Sản phẩm (Dropdown Mega-Menu Đã Kiểm Chứng) */}
@@ -417,17 +494,54 @@ export default function Header() {
 
             <div className="p-4 flex-grow">
               <nav className="flex flex-col gap-1">
-                <Link 
-                  href="/" 
-                  onClick={() => setMobileOpen(false)}
-                  className={`px-3 py-2.5 rounded-lg transition-colors ${
-                    isHomeActive 
-                      ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]' 
-                      : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
-                  }`}
-                >
-                  Trang chủ
-                </Link>
+                {/* Submenu Trang Chủ (10 Sections tương ứng page.tsx) */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Link 
+                      href="/" 
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex-1 px-3 py-2.5 rounded-lg transition-colors ${
+                        isHomeActive 
+                          ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]' 
+                          : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
+                      }`}
+                    >
+                      Trang chủ
+                    </Link>
+                    <button 
+                      type="button"
+                      onClick={() => toggleSubmenu('home')}
+                      className="p-2.5 text-slate-500 hover:text-[#5F8A03] transition-colors"
+                      aria-label="Xem các mục trong Trang chủ"
+                    >
+                      <ChevronDown size={16} className={`transition-transform duration-200 ${activeMobileSubmenu === 'home' ? 'rotate-180 text-[#5F8A03]' : ''}`} />
+                    </button>
+                  </div>
+                  {activeMobileSubmenu === 'home' && (
+                    <div className="pl-3 py-1 flex flex-col gap-1 text-xs text-slate-600 border-l-2 border-[#7CB305]/40 ml-3.5 mt-0.5 animate-in slide-in-from-top-1 duration-150">
+                      {HOMEPAGE_SECTIONS.map((sec, idx) => (
+                        <Link
+                          key={sec.id}
+                          href={`/#${sec.id}`}
+                          onClick={(e) => {
+                            setMobileOpen(false);
+                            handleSectionClick(sec.id, e);
+                          }}
+                          className="py-2 px-3 rounded-lg hover:bg-[#F4F9E8] hover:text-[#5F8A03] flex items-center justify-between transition-colors"
+                        >
+                          <span className="text-[13.5px] font-semibold text-slate-800 hover:text-[#5F8A03] truncate">
+                            {idx + 1}. {sec.name}
+                          </span>
+                          {sec.badge && (
+                            <span className="text-[10px] px-2 py-0.5 rounded font-black bg-[#F26522] text-white shrink-0 ml-1">
+                              {sec.badge}
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 {/* Submenu Sản phẩm */}
                 <div>
