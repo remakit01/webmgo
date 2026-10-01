@@ -40,14 +40,14 @@ export default function AdminSampleRequestsPage() {
                 key={key}
                 type="button"
                 onClick={() => setFilter(key)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-2 ${
+                className={`px-4 py-2 rounded-xl text-sm font-extrabold transition-all cursor-pointer border-2 ${
                   filter === key
                     ? 'bg-[#5F8A03] text-white shadow-xs border-[#5F8A03]'
                     : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <span>{labels[key]}</span>
-                <span className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-black ${
                   filter === key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {count}
@@ -60,72 +60,72 @@ export default function AdminSampleRequestsPage() {
         {/* Requests Table */}
         <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-500 font-extrabold uppercase tracking-wider text-[11px] border-b-2 border-slate-200">
+            <table className="w-full text-left text-sm text-slate-600">
+              <thead className="bg-slate-50 text-slate-600 font-black uppercase tracking-wider text-xs border-b-2 border-slate-200">
                 <tr>
-                  <th className="py-3.5 px-4">Mã Đơn / Ngày Tạo</th>
-                  <th className="py-3.5 px-4">Khách Hàng / Đơn Vị</th>
-                  <th className="py-3.5 px-4">Thông Tin Liên Hệ</th>
-                  <th className="py-3.5 px-4">Sản Phẩm Cần Nhận Mẫu</th>
-                  <th className="py-3.5 px-4">Trạng Thái Xử Lý</th>
-                  <th className="py-3.5 px-4 text-right">Cập Nhật</th>
+                  <th className="py-4 px-5">Mã Đơn / Ngày Tạo</th>
+                  <th className="py-4 px-5">Khách Hàng / Đơn Vị</th>
+                  <th className="py-4 px-5">Thông Tin Liên Hệ</th>
+                  <th className="py-4 px-5">Sản Phẩm Cần Nhận Mẫu</th>
+                  <th className="py-4 px-5">Trạng Thái Xử Lý</th>
+                  <th className="py-4 px-5 text-right">Cập Nhật</th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-slate-100">
                 {filteredRequests.map((req) => (
                   <tr key={req.id} className="hover:bg-slate-50/70 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="font-extrabold text-slate-900">{req.id}</div>
-                      <div className="text-[11px] text-slate-400 font-medium">{req.createdAt}</div>
+                    <td className="py-4 px-5">
+                      <div className="font-black text-slate-900 text-sm">{req.id}</div>
+                      <div className="text-xs text-slate-400 font-medium mt-0.5">{req.createdAt}</div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900">{req.customerName}</div>
+                    <td className="py-4 px-5">
+                      <div className="font-extrabold text-slate-900 text-base">{req.customerName}</div>
                       <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 font-medium">
                         <Building size={12} className="text-slate-400" />
                         <span>{req.company || 'Cá nhân tư vấn'}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-800 flex items-center gap-1.5">
-                        <Phone size={12} className="text-[#F26522]" />
+                    <td className="py-4 px-5">
+                      <div className="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
+                        <Phone size={13} className="text-[#F26522]" />
                         <span>{req.phone}</span>
                       </div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5 font-medium">
-                        <MapPin size={12} className="text-slate-400" />
-                        <span className="truncate max-w-[180px]">{req.address}, {req.city}</span>
+                      <div className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5 font-medium">
+                        <MapPin size={13} className="text-slate-400" />
+                        <span className="truncate max-w-[200px]">{req.address}, {req.city}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900">{req.productName}</div>
-                      <div className="text-[11px] text-[#5F8A03] font-bold">Quy cách: {req.thickness}</div>
+                    <td className="py-4 px-5">
+                      <div className="font-bold text-slate-900 text-sm">{req.productName}</div>
+                      <div className="text-xs text-[#5F8A03] font-bold mt-0.5">Quy cách: {req.thickness}</div>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-4 px-5">
                       {req.status === 'new' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border-2 border-amber-300">
-                          <AlertCircle size={12}/> Chờ Xử Lý
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 border-2 border-amber-300">
+                          <AlertCircle size={13}/> Chờ Xử Lý
                         </span>
                       )}
                       {req.status === 'processing' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-700 border-2 border-sky-300">
-                          <Clock size={12}/> Đang Chuẩn Bị
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-500/10 text-sky-700 border-2 border-sky-300">
+                          <Clock size={13}/> Đang Chuẩn Bị
                         </span>
                       )}
                       {req.status === 'shipped' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/10 text-purple-700 border-2 border-purple-300">
-                          <Truck size={12}/> Đang Gửi Hàng
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/10 text-purple-700 border-2 border-purple-300">
+                          <Truck size={13}/> Đang Gửi Hàng
                         </span>
                       )}
                       {req.status === 'completed' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
-                          <CheckCircle2 size={12}/> Đã Nghiệm Thu
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#F4F9E8] text-[#5F8A03] border-2 border-[#7CB305]/40">
+                          <CheckCircle2 size={13}/> Đã Nghiệm Thu
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-4 px-5 text-right">
                       <select
                         value={req.status}
                         onChange={(e) => handleUpdateStatus(req.id, e.target.value)}
-                        className="text-xs bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-lg px-2.5 py-1 text-slate-800 font-bold focus:outline-none focus:border-[#7CB305] cursor-pointer"
+                        className="text-xs sm:text-sm bg-slate-50 border-2 border-slate-200 hover:border-slate-300 rounded-xl px-3 py-1.5 text-slate-800 font-bold focus:outline-none focus:border-[#7CB305] cursor-pointer"
                       >
                         <option value="new">Chờ Xử Lý</option>
                         <option value="processing">Đang Chuẩn Bị</option>

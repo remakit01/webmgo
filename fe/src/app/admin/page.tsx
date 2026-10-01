@@ -79,58 +79,58 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           {/* Card 1 */}
-          <div className="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-xs relative overflow-hidden group hover:border-[#7CB305] transition-all">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sản Phẩm MGO</span>
-              <div className="w-10 h-10 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center border-2 border-[#7CB305]/20">
-                <Boxes size={20} />
+          <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 shadow-xs relative overflow-hidden group hover:border-[#7CB305] transition-all">
+            <div className="flex items-center justify-between mb-3.5">
+              <span className="text-sm font-extrabold text-slate-600 uppercase tracking-wider">Sản Phẩm MGO</span>
+              <div className="w-11 h-11 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center border-2 border-[#7CB305]/30">
+                <Boxes size={22} />
               </div>
             </div>
-            <div className="text-2xl font-black text-slate-900">{INITIAL_PRODUCTS.length} dòng</div>
-            <div className="flex items-center justify-between mt-2 pt-2 border-t-2 border-slate-100 text-xs">
-              <span className="text-slate-500">Đạt chuẩn QCVN 06</span>
-              <Link href="/admin/products" className="text-[#5F8A03] font-bold hover:underline inline-flex items-center gap-0.5">
+            <div className="text-3xl font-black text-slate-900">{INITIAL_PRODUCTS.length} dòng</div>
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t-2 border-slate-100 text-sm">
+              <span className="text-slate-500 font-medium">Đạt chuẩn QCVN 06</span>
+              <Link href="/admin/products" className="text-[#5F8A03] font-bold hover:underline inline-flex items-center gap-1">
                 Chi tiết →
               </Link>
             </div>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-xs relative overflow-hidden group hover:border-sky-500 transition-all">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Giải Pháp Thi Công</span>
-              <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border-2 border-sky-200">
-                <Layers size={20} />
+          <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 shadow-xs relative overflow-hidden group hover:border-sky-500 transition-all">
+            <div className="flex items-center justify-between mb-3.5">
+              <span className="text-sm font-extrabold text-slate-600 uppercase tracking-wider">Giải Pháp Thi Công</span>
+              <div className="w-11 h-11 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border-2 border-sky-200">
+                <Layers size={22} />
               </div>
             </div>
-            <div className="text-2xl font-black text-slate-900">{INITIAL_APPLICATIONS.length} giải pháp</div>
-            <div className="flex items-center justify-between mt-2 pt-2 border-t-2 border-slate-100 text-xs">
-              <span className="text-slate-500">Hệ bọc ống, vách, sàn</span>
-              <Link href="/admin/applications" className="text-sky-600 font-bold hover:underline inline-flex items-center gap-0.5">
+            <div className="text-3xl font-black text-slate-900">{INITIAL_APPLICATIONS.length} giải pháp</div>
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t-2 border-slate-100 text-sm">
+              <span className="text-slate-500 font-medium">Hệ bọc ống, vách, sàn</span>
+              <Link href="/admin/applications" className="text-sky-600 font-bold hover:underline inline-flex items-center gap-1">
                 Chi tiết →
               </Link>
             </div>
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white p-5 rounded-2xl border-2 border-slate-200 shadow-xs relative overflow-hidden group hover:border-[#F26522] transition-all">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Yêu Cầu Mẫu Thử</span>
-              <div className="w-10 h-10 rounded-xl bg-[#FEF3EC] text-[#F26522] flex items-center justify-center border-2 border-[#F26522]/20">
-                <Inbox size={20} />
+          <div className="bg-white p-6 rounded-2xl border-2 border-slate-200 shadow-xs relative overflow-hidden group hover:border-[#F26522] transition-all">
+            <div className="flex items-center justify-between mb-3.5">
+              <span className="text-sm font-extrabold text-slate-600 uppercase tracking-wider">Yêu Cầu Mẫu Thử</span>
+              <div className="w-11 h-11 rounded-xl bg-[#FEF3EC] text-[#F26522] flex items-center justify-center border-2 border-[#F26522]/30">
+                <Inbox size={22} />
               </div>
             </div>
-            <div className="text-2xl font-black text-slate-900 flex items-center gap-2">
+            <div className="text-3xl font-black text-slate-900 flex items-center gap-2.5">
               <span>{requests.length}</span>
               {pendingCount > 0 && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#FEF3EC] text-[#F26522] border-2 border-[#F26522]/30">
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-[#FEF3EC] text-[#F26522] border-2 border-[#F26522]/30">
                   {pendingCount} chờ xử lý
                 </span>
               )}
             </div>
-            <div className="flex items-center justify-between mt-2 pt-2 border-t-2 border-slate-100 text-xs">
-              <span className="text-slate-500">Khách hàng & B2B</span>
-              <Link href="/admin/sample-requests" className="text-[#F26522] font-bold hover:underline inline-flex items-center gap-0.5">
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t-2 border-slate-100 text-sm">
+              <span className="text-slate-500 font-medium">Khách hàng & B2B</span>
+              <Link href="/admin/sample-requests" className="text-[#F26522] font-bold hover:underline inline-flex items-center gap-1">
                 Xử lý ngay →
               </Link>
             </div>

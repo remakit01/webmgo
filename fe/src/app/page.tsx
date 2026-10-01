@@ -110,48 +110,68 @@ export default function HomePage() {
 
       <div className="space-y-16 pb-20">
         {/* 1. AUTO BANNER SWIPER (TỰ ĐỘNG CHẠY, KHÔNG ACTION TRÁI PHẢI, KHÔNG PROGRESS BAR) */}
-        <HomeBannerSwiper />
+        <section id="banner-swiper" className="scroll-mt-24">
+          <HomeBannerSwiper />
+        </section>
 
         {/* 2. HERO INTRO & TRUST BADGES (CLIENT COMPONENT - accordion giới thiệu) */}
-        <HomeHeroSection />
+        <section id="hero-section" className="scroll-mt-24">
+          <HomeHeroSection />
+        </section>
 
         {/* 3. MGO BENEFITS - 4 ĐẶC TÍNH VƯỢT TRỘI (INTERACTIVE TAB SWITCHER) */}
-        <HomeStickyBenefits />
+        <section id="dac-tinh-vuot-troi" className="scroll-mt-24">
+          <HomeStickyBenefits />
+        </section>
 
         {/* 4. BẢNG THÔNG SỐ KỸ THUẬT TẤM MGO REMAK (ĐẨY LÊN CAO THEO YÊU CẦU LEADER) */}
-        <ScrollReveal direction="up" delay={50}>
-          <HomeSpecMatrix />
-        </ScrollReveal>
+        <section id="bang-thong-so" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <HomeSpecMatrix />
+          </ScrollReveal>
+        </section>
 
         {/* 5. BẢNG ĐỐI CHUẨN KỸ THUẬT VẬT LIỆU (MGO VS CEMBOARD VS THẠCH CAO VS VÁN ÉP) */}
-        <ScrollReveal direction="up" delay={50}>
-          <ComparisonTable />
-        </ScrollReveal>
+        <section id="so-sanh-vat-lieu" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <ComparisonTable />
+          </ScrollReveal>
+        </section>
 
         {/* 6. 4 ỨNG DỤNG THỰC TẾ HÀNG ĐẦU (ỐNG GIÓ, VÁCH NGĂN, LÓT SÀN, CỬA CHỐNG CHÁY) */}
-        <ScrollReveal direction="up" delay={50}>
-          <HomeApplicationGrid />
-        </ScrollReveal>
+        <section id="giai-phap-ung-dung" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <HomeApplicationGrid />
+          </ScrollReveal>
+        </section>
 
         {/* 7. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
-        <ScrollReveal direction="up" delay={50} className="w-full">
-          <SampleRequestForm />
-        </ScrollReveal>
+        <section id="nhan-mau-thu" className="scroll-mt-24 w-full">
+          <ScrollReveal direction="up" delay={50} className="w-full">
+            <SampleRequestForm />
+          </ScrollReveal>
+        </section>
 
         {/* 8. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
-        <ScrollReveal direction="up" delay={50}>
-          <HomeProjectsAndNews />
-        </ScrollReveal>
+        <section id="du-an-tin-tuc" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <HomeProjectsAndNews />
+          </ScrollReveal>
+        </section>
 
         {/* 9. DỰ TOÁN VẬT TƯ ONLINE (TÍNH NHANH SỐ TẤM & CHI PHÍ) */}
-        <ScrollReveal direction="up" delay={50}>
-          <MaterialCalculator />
-        </ScrollReveal>
+        <section id="du-toan-vat-tu" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <MaterialCalculator />
+          </ScrollReveal>
+        </section>
 
         {/* 10. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
-        <ScrollReveal direction="up" delay={50}>
-          <FaqAccordion />
-        </ScrollReveal>
+        <section id="faq-hoi-dap" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <FaqAccordion />
+          </ScrollReveal>
+        </section>
       </div>
     </>
   );
