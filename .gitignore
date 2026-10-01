@@ -93,3 +93,6 @@ desktop.ini
 
 # Cloud & Vercel
 .vercel
+
+# Prisma generated client
+api/src/generated/

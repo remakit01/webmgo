@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import { getAdminSession } from '@/lib/admin-auth';
+import AdminSidebar from '@/cms/components/AdminSidebar';
+import { getAuthSession } from '@/cms/lib/api-auth';
 
 export default function AdminLayout({
   children,
@@ -22,7 +22,7 @@ export default function AdminLayout({
       return;
     }
 
-    const session = getAdminSession();
+    const session = getAuthSession();
     if (!session) {
       router.replace('/admin/login');
     } else {
@@ -30,27 +30,28 @@ export default function AdminLayout({
     }
   }, [pathname, isLoginPage, router]);
 
-  // Đang kiểm tra auth
+  // Loading state when checking authentication
   if (authorized === null && !isLoginPage) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white text-xs font-bold">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 border-2 border-[#5F8A03] border-t-transparent rounded-full animate-spin" />
-          <span>Đang xác thực quyền truy cập CMS...</span>
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center text-slate-800 text-xs font-bold select-none">
+        <div className="flex items-center gap-2.5">
+          <div className="w-5 h-5 border-2 border-[#7CB305] border-t-transparent rounded-full animate-spin" />
+          <span>Đang xác thực quyền truy cập CMS Remak...</span>
         </div>
       </div>
     );
   }
 
-  // Trang đăng nhập hiển thị toàn màn hình không có sidebar
+  // Login page: renders fullscreen without sidebar
   if (isLoginPage) {
-    return <div className="min-h-screen bg-slate-950">{children}</div>;
+    return <div className="min-h-screen w-full bg-[#F8FAFC] text-slate-900">{children}</div>;
   }
 
+  // Authenticated layout with Sidebar
   return (
-    <div className="min-h-screen flex bg-slate-50 text-slate-800 antialiased">
+    <div className="flex min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
       <AdminSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {children}
       </div>
     </div>
