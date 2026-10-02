@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Bell, Search, Plus, User } from 'lucide-react';
-import { getAuthSession, AuthSession } from '../lib/api-auth';
+import { fetchCurrentUser, type AuthUser } from '../lib/api-auth';
 
 interface AdminHeaderProps {
   title: string;
@@ -17,10 +17,10 @@ export default function AdminHeader({
   actionText,
   onAction,
 }: AdminHeaderProps) {
-  const [session, setSession] = useState<AuthSession | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    setSession(getAuthSession());
+    fetchCurrentUser().then(setUser).catch(() => setUser(null));
   }, []);
 
   return (
@@ -53,17 +53,17 @@ export default function AdminHeader({
         </button>
 
         {/* Thông tin tài khoản quản trị */}
-        {session?.user && (
+        {user && (
           <div className="flex items-center gap-2.5 pl-3 border-l border-slate-300">
             <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-[#5F8A03] flex-shrink-0">
               <User size={15} />
             </div>
             <div className="hidden sm:block text-left min-w-0">
               <div className="text-xs font-bold text-slate-900 truncate max-w-[140px]">
-                {session.user.username ? `@${session.user.username}` : session.user.email}
+                {user.username ? `@${user.username}` : user.email}
               </div>
-              <div className="text-[11px] text-slate-400 font-normal truncate max-w-[140px]" title={session.user.email}>
-                {session.user.email}
+              <div className="text-[11px] text-slate-400 font-normal truncate max-w-[140px]" title={user.email}>
+                {user.email}
               </div>
             </div>
           </div>

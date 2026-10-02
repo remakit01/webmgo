@@ -12,6 +12,14 @@ export default () => ({
     accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '30d',
   },
+  minio: {
+    endpoint: process.env.MINIO_ENDPOINT ?? 'http://localhost:9000',
+    publicUrl: process.env.MINIO_PUBLIC_URL ?? process.env.MINIO_ENDPOINT ?? 'http://localhost:9000',
+    accessKey: process.env.MINIO_ACCESS_KEY,
+    secretKey: process.env.MINIO_SECRET_KEY,
+    bucket: process.env.MINIO_BUCKET ?? 'remak-mgo-assets',
+  },
+  revalidateSecret: process.env.REVALIDATE_SECRET_TOKEN,
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',
     port: parseInt(process.env.REDIS_PORT ?? '6379', 10),

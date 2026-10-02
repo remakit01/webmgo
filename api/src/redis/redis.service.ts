@@ -35,6 +35,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.set(key, value, exMode, ttlSeconds);
   }
 
+  /** SET NX EX — trả true nếu giành được khoá (dùng làm lock cho job chạy định kỳ). */
+  async acquireLock(key: string, ttlSeconds: number) {
+    return (await this.client.set(key, '1', 'EX', ttlSeconds, 'NX')) === 'OK';
+  }
+
   del(key: string) {
     return this.client.del(key);
   }

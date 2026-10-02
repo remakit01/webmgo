@@ -1,50 +1,52 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { 
-  BannerSlide, 
-  DEFAULT_BANNERS, 
-  DEFAULT_SWIPER_CONFIG,
-  getBannerSlides, 
-  getSwiperConfig 
-} from '@/lib/banner-store';
-
-export type { BannerSlide };
-export const defaultBanners = DEFAULT_BANNERS;
+import type { BannerSwiperConfig, PublicBanner } from '@/lib/api';
 
 interface HomeBannerSwiperProps {
-  banners?: BannerSlide[];
-  autoPlayInterval?: number; // Thời gian tự động chuyển (ms), mặc định 3500ms
-  showDots?: boolean;
+  banners: PublicBanner[];
+  config: BannerSwiperConfig;
+}
+
+const SIZES = '100vw';
+
+function srcSet(banner: PublicBanner, format: 'webp' | 'avif') {
+  return banner.images
+    .filter((v) => v.format === format)
+    .sort((a, b) => a.width - b.width)
+    .map((v) => `${v.url} ${v.width}w`)
+    .join(', ');
+}
+
+function BannerPicture({ banner, priority }: { banner: PublicBanner; priority: boolean }) {
+  const avif = srcSet(banner, 'avif');
+  const webp = srcSet(banner, 'webp');
+  return (
+    <picture>
+      {avif && <source type="image/avif" srcSet={avif} sizes={SIZES} />}
+      {webp && <source type="image/webp" srcSet={webp} sizes={SIZES} />}
+      <img
+        src={banner.imageUrl}
+        alt={banner.alt}
+        className="w-full h-full object-cover object-center"
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding={priority ? 'sync' : 'async'}
+      />
+    </picture>
+  );
 }
 
 /**
- * Component HomeBannerSwiper:
- * - Đọc dữ liệu động từ CMS (Banner Store)
- * - Tự động trượt (Auto Sliding / Infinite Loop)
- * - KHÔNG CÓ nút bấm trái/phải (No left/right action buttons)
- * - KHÔNG CÓ thanh tiến trình (No progress bar)
- * - Tương thích mượt mà kéo/vuốt trên điện thoại (Touch Swipe)
+ * HomeBannerSwiper:
+ * - Dữ liệu banner + cấu hình lấy từ API (server component truyền xuống qua props, ISR)
+ * - Tự động trượt, vuốt chạm trên mobile; không nút trái/phải, không thanh tiến trình
  */
-export default function HomeBannerSwiper({
-  banners: propBanners,
-  autoPlayInterval: propAutoPlayInterval,
-  showDots: propShowDots,
-}: HomeBannerSwiperProps) {
-  // Khởi tạo ban đầu với prop hoặc mặc định để SSR không bị lệch hydration
-  const [activeBanners, setActiveBanners] = useState<BannerSlide[]>(
-    propBanners || DEFAULT_BANNERS
-  );
-  const [intervalTime, setIntervalTime] = useState<number>(
-    propAutoPlayInterval || DEFAULT_SWIPER_CONFIG.autoPlayInterval
-  );
-  const [isPauseOnHover, setIsPauseOnHover] = useState<boolean>(
-    DEFAULT_SWIPER_CONFIG.pauseOnHover
-  );
-  const [displayDots, setDisplayDots] = useState<boolean>(
-    propShowDots !== undefined ? propShowDots : DEFAULT_SWIPER_CONFIG.showDots
-  );
+export default function HomeBannerSwiper({ banners: activeBanners, config }: HomeBannerSwiperProps) {
+  const intervalTime = config.autoPlayInterval;
+  const isPauseOnHover = config.pauseOnHover;
+  const displayDots = config.showDots;
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
@@ -54,54 +56,10 @@ export default function HomeBannerSwiper({
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
-  // Đọc dữ liệu CMS và đăng ký lắng nghe sự kiện đồng bộ từ CMS
+  // Danh sách đổi (sau revalidate) -> tránh index vượt quá độ dài
   useEffect(() => {
-    if (!propBanners) {
-      const stored = getBannerSlides();
-      const filtered = stored.filter(b => b.active !== false);
-      if (filtered.length > 0) {
-        setActiveBanners(filtered);
-      }
-    }
-
-    if (!propAutoPlayInterval) {
-      const storedConfig = getSwiperConfig();
-      setIntervalTime(storedConfig.autoPlayInterval);
-      setIsPauseOnHover(storedConfig.pauseOnHover);
-      if (propShowDots === undefined) {
-        setDisplayDots(storedConfig.showDots);
-      }
-    }
-
-    // Lắng nghe cập nhật tức thời khi Admin lưu trong CMS
-    const handleBannersUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<BannerSlide[]>;
-      if (customEvent.detail && Array.isArray(customEvent.detail)) {
-        const filtered = customEvent.detail.filter(b => b.active !== false);
-        setActiveBanners(filtered.length > 0 ? filtered : DEFAULT_BANNERS);
-        setCurrentIndex(0);
-      }
-    };
-
-    const handleConfigUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<{ autoPlayInterval: number; pauseOnHover: boolean; showDots: boolean }>;
-      if (customEvent.detail) {
-        setIntervalTime(customEvent.detail.autoPlayInterval);
-        setIsPauseOnHover(customEvent.detail.pauseOnHover);
-        if (propShowDots === undefined) {
-          setDisplayDots(customEvent.detail.showDots);
-        }
-      }
-    };
-
-    window.addEventListener('remak_banners_updated', handleBannersUpdate);
-    window.addEventListener('remak_swiper_config_updated', handleConfigUpdate);
-
-    return () => {
-      window.removeEventListener('remak_banners_updated', handleBannersUpdate);
-      window.removeEventListener('remak_swiper_config_updated', handleConfigUpdate);
-    };
-  }, [propBanners, propAutoPlayInterval, propShowDots]);
+    setCurrentIndex((prev) => (prev >= activeBanners.length ? 0 : prev));
+  }, [activeBanners.length]);
 
   // Tự động chạy slider (Auto play)
   useEffect(() => {
@@ -128,12 +86,9 @@ export default function HomeBannerSwiper({
     if (!touchStartX.current || !touchEndX.current) return;
     const diff = touchStartX.current - touchEndX.current;
 
-    // Vuốt sang trái (next slide)
     if (diff > 45) {
       setCurrentIndex((prev) => (prev + 1) % activeBanners.length);
-    } 
-    // Vuốt sang phải (prev slide)
-    else if (diff < -45) {
+    } else if (diff < -45) {
       setCurrentIndex((prev) => (prev - 1 + activeBanners.length) % activeBanners.length);
     }
 
@@ -141,9 +96,11 @@ export default function HomeBannerSwiper({
     touchEndX.current = null;
   };
 
+  if (activeBanners.length === 0) return null;
+
   return (
     <section 
-      aria-label="Banner Swiper Tấm MGO Remak"
+      aria-label="Banner"
       className="relative w-full overflow-hidden select-none bg-slate-100"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -166,27 +123,17 @@ export default function HomeBannerSwiper({
               key={banner.id}
               className="w-full flex-shrink-0 relative aspect-[1024/342]"
             >
-              {banner.link ? (
-                <Link 
-                  href={banner.link} 
+              {banner.linkUrl ? (
+                <Link
+                  href={banner.linkUrl}
                   className="block w-full h-full relative cursor-pointer"
                   title={banner.title}
                 >
-                  <img 
-                    src={banner.image} 
-                    alt={banner.alt}
-                    className="w-full h-full object-cover object-center" 
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
+                  <BannerPicture banner={banner} priority={index === 0} />
                 </Link>
               ) : (
                 <div className="w-full h-full relative">
-                  <img 
-                    src={banner.image} 
-                    alt={banner.alt}
-                    className="w-full h-full object-cover object-center" 
-                    loading={index === 0 ? "eager" : "lazy"}
-                  />
+                  <BannerPicture banner={banner} priority={index === 0} />
                 </div>
               )}
             </div>

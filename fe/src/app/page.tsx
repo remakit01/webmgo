@@ -16,6 +16,7 @@ import {
 } from '@/components/shared';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { FAQ_LIST, THICKNESS_DATA } from '@/data/products';
+import { getHomeBanners } from '@/lib/api';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mgo.remak.vn';
 
@@ -27,7 +28,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+// ISR: dựng tĩnh, làm mới tối đa mỗi 60s; CMS publish -> /api/revalidate làm mới ngay
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const home = await getHomeBanners();
+
   // Cấu trúc dữ liệu JSON-LD Schema (Google Rich Results)
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -111,7 +117,7 @@ export default function HomePage() {
       <div className="space-y-16 pb-20">
         {/* 1. AUTO BANNER SWIPER (TỰ ĐỘNG CHẠY, KHÔNG ACTION TRÁI PHẢI, KHÔNG PROGRESS BAR) */}
         <section id="banner-swiper" className="scroll-mt-24">
-          <HomeBannerSwiper />
+          {home && <HomeBannerSwiper banners={home.banners} config={home.swiper} />}
         </section>
 
         {/* 2. HERO INTRO & TRUST BADGES (CLIENT COMPONENT - accordion giới thiệu) */}
