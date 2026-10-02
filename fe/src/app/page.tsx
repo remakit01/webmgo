@@ -114,10 +114,14 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
 
-      <div className="space-y-16 pb-20">
+      <div className="w-full overflow-x-clip space-y-16 pb-20">
         {/* 1. AUTO BANNER SWIPER (TỰ ĐỘNG CHẠY, KHÔNG ACTION TRÁI PHẢI, KHÔNG PROGRESS BAR) */}
-        <section id="banner-swiper" className="scroll-mt-24">
-          {home && <HomeBannerSwiper banners={home.banners} config={home.swiper} />}
+        <section id="banner-swiper" className="scroll-mt-24 w-full">
+          {home ? (
+            <HomeBannerSwiper banners={home.banners} config={home.swiper} />
+          ) : (
+            <div className="w-full aspect-[1024/342] bg-slate-200/60 animate-pulse" aria-hidden="true" />
+          )}
         </section>
 
         {/* 2. HERO INTRO & TRUST BADGES (CLIENT COMPONENT - accordion giới thiệu) */}
