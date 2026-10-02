@@ -1,7 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/layout/AppShell";
+
+export const viewport: Viewport = {
+  themeColor: "#5F8A03",
+  width: "device-width",
+  initialScale: 1,
+};
 
 const beVietnamPro = Be_Vietnam_Pro({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -42,8 +48,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className={`h-full antialiased ${beVietnamPro.variable}`} suppressHydrationWarning>
-      <body className="min-h-full bg-[#F8FAFC] text-slate-800 antialiased">
+    <html lang="vi" dir="ltr" className={`h-full antialiased ${beVietnamPro.variable}`} suppressHydrationWarning>
+      <body className="min-h-full bg-[#F8FAFC] text-slate-800 antialiased font-sans">
         <AppShell>{children}</AppShell>
       </body>
     </html>

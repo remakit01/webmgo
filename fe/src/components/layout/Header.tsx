@@ -70,6 +70,21 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Đóng Drawer bằng phím ESC và khóa cuộn nền khi Drawer mở
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setMobileOpen(false);
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.body.style.overflow = '';
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [mobileOpen]);
+
   const toggleSubmenu = (menu: string) => {
     setActiveMobileSubmenu(activeMobileSubmenu === menu ? null : menu);
   };
@@ -476,7 +491,12 @@ export default function Header() {
           />
 
           {/* Drawer Body */}
-          <div className="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-2xl z-50 flex flex-col overflow-y-auto">
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu điều hướng di động"
+            className="fixed inset-y-0 left-0 max-w-xs w-full bg-white shadow-2xl z-50 flex flex-col overflow-y-auto"
+          >
             <div className="relative p-4 border-b border-slate-200 flex items-center justify-center">
               <img
                 src="https://mgo.com.vn/wp-content/uploads/2022/08/Logo_remak_800.png"
@@ -485,22 +505,22 @@ export default function Header() {
               />
               <button
                 onClick={() => setMobileOpen(false)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-700 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305]"
                 aria-label="Đóng menu"
               >
-                <X size={22} />
+                <X size={22} aria-hidden="true" />
               </button>
             </div>
 
             <div className="p-4 flex-grow">
-              <nav className="flex flex-col gap-1">
+              <nav aria-label="Menu di động" className="flex flex-col gap-1">
                 {/* Submenu Trang Chủ (10 Sections tương ứng page.tsx) */}
                 <div>
                   <div className="flex items-center justify-between">
                     <Link 
                       href="/" 
                       onClick={() => setMobileOpen(false)}
-                      className={`flex-1 px-3 py-2.5 rounded-lg transition-colors ${
+                      className={`flex-1 px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] ${
                         isHomeActive 
                           ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]' 
                           : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
@@ -511,15 +531,16 @@ export default function Header() {
                     <button 
                       type="button"
                       onClick={() => toggleSubmenu('home')}
-                      className="p-2.5 text-slate-500 hover:text-[#5F8A03] transition-colors"
+                      className="p-2.5 text-slate-500 hover:text-[#5F8A03] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] rounded-lg"
                       aria-label="Xem các mục trong Trang chủ"
+                      aria-expanded={activeMobileSubmenu === 'home'}
                     >
-                      <ChevronDown size={16} className={`transition-transform duration-200 ${activeMobileSubmenu === 'home' ? 'rotate-180 text-[#5F8A03]' : ''}`} />
+                      <ChevronDown size={16} className={`transition-transform duration-200 ${activeMobileSubmenu === 'home' ? 'rotate-180 text-[#5F8A03]' : ''}`} aria-hidden="true" />
                     </button>
                   </div>
                   {activeMobileSubmenu === 'home' && (
                     <div className="pl-3 py-1 flex flex-col gap-1 text-xs text-slate-600 border-l-2 border-[#7CB305]/40 ml-3.5 mt-0.5 animate-in slide-in-from-top-1 duration-150">
-                      {HOMEPAGE_SECTIONS.map((sec, idx) => (
+                      {HOMEPAGE_SECTIONS.map((sec) => (
                         <Link
                           key={sec.id}
                           href={`/#${sec.id}`}
@@ -527,11 +548,14 @@ export default function Header() {
                             setMobileOpen(false);
                             handleSectionClick(sec.id, e);
                           }}
-                          className="py-2 px-3 rounded-lg hover:bg-[#F4F9E8] hover:text-[#5F8A03] flex items-center justify-between transition-colors"
+                          className="group py-2 px-3 rounded-lg hover:bg-[#F4F9E8] hover:text-[#5F8A03] flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305]"
                         >
-                          <span className="text-[13.5px] font-semibold text-slate-800 hover:text-[#5F8A03] truncate">
-                            {idx + 1}. {sec.name}
-                          </span>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="w-1 h-3 rounded-full bg-slate-300 group-hover:bg-[#5F8A03] transition-colors shrink-0" aria-hidden="true" />
+                            <span className="text-[13.5px] font-semibold text-slate-800 group-hover:text-[#5F8A03] truncate">
+                              {sec.name}
+                            </span>
+                          </div>
                           {sec.badge && (
                             <span className="text-[10px] px-2 py-0.5 rounded font-black bg-[#F26522] text-white shrink-0 ml-1">
                               {sec.badge}
