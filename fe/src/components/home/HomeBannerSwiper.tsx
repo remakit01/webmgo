@@ -48,18 +48,15 @@ export default function HomeBannerSwiper({ banners: activeBanners, config }: Hom
   const isPauseOnHover = config.pauseOnHover;
   const displayDots = config.showDots;
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [rawIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  // Danh sách có thể ngắn lại sau revalidate -> index cũ vượt phạm vi thì quay về slide đầu
+  const currentIndex = rawIndex < activeBanners.length ? rawIndex : 0;
 
   // Quản lý vuốt chạm trên Mobile
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
-
-  // Danh sách đổi (sau revalidate) -> tránh index vượt quá độ dài
-  useEffect(() => {
-    setCurrentIndex((prev) => (prev >= activeBanners.length ? 0 : prev));
-  }, [activeBanners.length]);
 
   // Tự động chạy slider (Auto play)
   useEffect(() => {
@@ -83,7 +80,8 @@ export default function HomeBannerSwiper({ banners: activeBanners, config }: Hom
   };
 
   const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
+    // So với null (không dùng !x) vì clientX = 0 ở mép trái màn hình là hợp lệ
+    if (touchStartX.current === null || touchEndX.current === null) return;
     const diff = touchStartX.current - touchEndX.current;
 
     if (diff > 45) {
@@ -119,9 +117,12 @@ export default function HomeBannerSwiper({ banners: activeBanners, config }: Hom
           style={{ transform: `translateX(-${currentIndex * 100}%)` }}
         >
           {activeBanners.map((banner, index) => (
-            <div 
+            <div
               key={banner.id}
               className="w-full flex-shrink-0 relative aspect-[1024/342]"
+              // Slide đang khuất: ẩn khỏi trình đọc màn hình và không cho Tab vào link
+              aria-hidden={index !== currentIndex}
+              inert={index !== currentIndex}
             >
               {banner.linkUrl ? (
                 <Link

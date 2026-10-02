@@ -1,9 +1,17 @@
 // This is your Prisma schema file
 // Docs: https://pris.ly/d/prisma-schema
+//
+// Quy ước DB (Postgres best practices):
+// - Tên bảng/cột snake_case (@@map/@map) để viết SQL tay không phải quote; field trong code vẫn camelCase.
+// - Mọi DateTime dùng timestamptz (@db.Timestamptz(3)) — không phụ thuộc múi giờ server.
+// - Mọi cột khoá ngoại đều có index (Postgres không tự tạo).
+// - Thay đổi schema qua `prisma migrate` (prisma/migrations), không dùng `db push`.
+//   CHECK constraint không khai báo được trong Prisma — nằm trong file migration SQL.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -13,13 +21,13 @@ datasource db {
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(cuid())
-  username     String?  @unique
-  email        String   @unique
-  password     String
-  role         Role     @default(EDITOR)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(cuid())
+  username  String?  @unique
+  email     String   @unique
+  password  String
+  role      Role     @default(EDITOR)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   deletedBanners Banner[] @relation("BannerDeletedBy")
 
@@ -29,6 +37,8 @@ model User {
 enum Role {
   ADMIN
   EDITOR
+
+  @@map("role")
 }
 
 // ─── Products ────────────────────────────────────────────────────────────────
@@ -38,26 +48,28 @@ model Product {
   slug        String   @unique
   name        String
   description String?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive    Boolean  @default(true) @map("is_active")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  specs       ProductSpec[]
+  specs ProductSpec[]
 
   @@map("products")
 }
 
 model ProductSpec {
-  id          String  @id @default(cuid())
-  productId   String
-  thickness   Float
-  fireRating  String? // EI value (e.g. "EI 60")
-  density     Float?
-  bendStrength Float?
+  id           String  @id @default(cuid())
+  productId    String  @map("product_id")
+  thickness    Float
+  fireRating   String? @map("fire_rating") // EI value (e.g. "EI 60")
+  density      Float?
+  bendStrength Float?  @map("bend_strength")
 
-  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  // FK + ON DELETE CASCADE: không có index thì xoá 1 sản phẩm phải quét toàn bảng thông số
+  @@index([productId])
   @@map("product_specs")
 }
 
@@ -68,22 +80,26 @@ model Banner {
   title     String
   subtitle  String?
   alt       String
-  ctaText   String?
-  imageUrl  String // biến thể mặc định (fallback cho <img>)
-  imageKey  String // prefix object trong MinIO (vd: banners/<id>) để dọn khi xoá/thay ảnh
-  images    Json // [{ width, format, url }]
-  linkUrl   String?
-  isActive  Boolean  @default(true)
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  ctaText   String?  @map("cta_text")
+  imageUrl  String   @map("image_url") // biến thể mặc định (fallback cho <img>)
+  imageKey  String   @map("image_key") // prefix object trong MinIO (vd: banners/<id>) để dọn khi xoá/thay ảnh
+  images    Json // [{ width, format, url }] — CHECK là mảng JSON (xem migration)
+  linkUrl   String?  @map("link_url")
+  isActive  Boolean  @default(true) @map("is_active")
+  sortOrder Int      @default(0) @map("sort_order") // CHECK >= 0 (xem migration)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   // Soft delete: vào thùng rác, khôi phục được trong thời hạn lưu; job purge xoá hẳn (DB + MinIO) sau đó
-  deletedAt   DateTime?
-  deletedById String?
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(3)
+  deletedById String?   @map("deleted_by_id")
   deletedBy   User?     @relation("BannerDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
 
-  @@index([deletedAt, sortOrder])
+  // Partial index: danh sách CMS + trang chủ chỉ đọc banner chưa xoá, sắp theo sort_order
+  @@index([sortOrder], map: "banners_live_sort_order_idx", where: raw("deleted_at IS NULL"))
+  // Partial index: thùng rác (sắp theo deleted_at) và job dọn (deleted_at < cutoff)
+  @@index([deletedAt], map: "banners_trash_deleted_at_idx", where: raw("deleted_at IS NOT NULL"))
+  @@index([deletedById])
   @@map("banners")
 }
 
@@ -92,7 +108,7 @@ model Banner {
 model SiteSetting {
   key       String   @id
   value     Json
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@map("site_settings")
 }
