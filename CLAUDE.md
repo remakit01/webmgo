@@ -61,3 +61,23 @@ Chi tiết: [fe/docs/ARCHITECTURE_3_TIER_PHASE_ROADMAP.md](fe/docs/ARCHITECTURE_
 - [fe/docs/ROUTES_CONTENT_MAP.md](fe/docs/ROUTES_CONTENT_MAP.md): sơ đồ route & nội dung
 - [fe/docs/HEADER_NAVIGATION_STRUCTURE.md](fe/docs/HEADER_NAVIGATION_STRUCTURE.md): cấu trúc menu
 - [fe/docs/CONTENT_STRATEGY_MASTER.md](fe/docs/CONTENT_STRATEGY_MASTER.md): chiến lược nội dung/SEO
+
+## 📕 Sổ đen — lỗi đã gặp, KHÔNG được lặp lại
+
+Mỗi khi Claude (hoặc người) làm sai một điều mà đọc code chưa chắc đã thấy, ghi một dòng vào đây. Mục đích: lần sau không ai, kể cả Claude, mắc lại lỗi đó.
+
+**Cách ghi:**
+- Một dòng một lỗi, theo mẫu: `- [khu vực] Đừng <việc sai> → <làm đúng thế nào>. <vì sao, nếu không hiển nhiên> (PR #số)`
+- Khu vực: `fe`, `cms`, `api`, `db`, `infra`, `git`.
+- Trong PR: comment `@claude thêm vào sổ đen: <mô tả lỗi>`, Claude sẽ commit dòng mới vào file này ngay trên PR đó.
+- Khi một mục không còn đúng (đã đổi stack, đã có lint/test chặn), **xoá** nó đi. Sổ quá dài thì Claude đọc kém.
+
+- [api] Đừng viết import tương đối thiếu đuôi `.js` → luôn `'./x.service.js'`. Project là ESM `nodenext`, thiếu đuôi thì build vẫn qua nhưng runtime crash.
+- [api] Đừng import `PrismaClient` từ `@prisma/client` → import từ `src/generated/prisma/client.js` (Prisma 7, output tùy chỉnh).
+- [api] Đừng gọi Redis trần không `try/catch` trong luồng phục vụ request → Redis lỗi phải fallback DB, không trả 500.
+- [fe] Đừng nối thẳng `NEXT_PUBLIC_API_URL` + path → biến này có thể chứa hậu tố `/api` trong khi NestJS không có global prefix; luôn dùng `API_URL` đã strip hậu tố.
+- [fe] Đừng gọi `revalidateTag(tag)` một tham số → đã deprecated ở Next 16; dùng `revalidateTag(tag, { expire: 0 })` khi revalidate từ webhook/route handler.
+- [fe] Đừng nuốt lỗi fetch ISR lúc runtime rồi trả mảng rỗng → làm vậy sẽ cache đè trang tốt bằng trang trống. Chỉ fallback khi `NEXT_PHASE === 'phase-production-build'`.
+- [cms] Đừng tạo code trong thư mục `cms/` hay dùng `pnpm dev:cms` → CMS đã gộp vào `fe/src/app/admin` + `fe/src/cms`.
+- [cms] Đừng lưu access token/session trong `localStorage` → auth dùng httpOnly cookie, client chỉ `credentials: 'include'`.
+- [git] Đừng mở PR vào `main` → base luôn là `dev`.
