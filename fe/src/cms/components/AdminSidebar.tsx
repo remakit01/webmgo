@@ -17,6 +17,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { logoutWithApi } from '../lib/api-auth';
+import { useConfirm } from './ConfirmDialog';
 
 const HOMEPAGE_SUBMENU = [
   { id: 'banners', name: 'Biểu Ngữ Trang Chủ', href: '/admin/homepage/banners' },
@@ -78,6 +79,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const confirm = useConfirm();
   const isHomepageActive = pathname.startsWith('/admin/homepage');
   const [isHomeSubmenuOpen, setIsHomeSubmenuOpen] = useState(isHomepageActive);
 
@@ -88,11 +90,19 @@ export default function AdminSidebar() {
   }, [pathname]);
 
   const handleLogout = async () => {
-    if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống quản trị?')) {
-      await logoutWithApi();
-      router.push('/admin/login');
-      router.refresh();
-    }
+    await confirm({
+      title: 'Đăng xuất tài khoản quản trị?',
+      description: 'Phiên làm việc quản trị của bạn sẽ kết thúc. Bạn sẽ cần đăng nhập lại để tiếp tục quản lý website.',
+      confirmText: 'Đăng xuất ngay',
+      cancelText: 'Ở lại',
+      variant: 'danger',
+      onConfirm: async () => {
+        await logoutWithApi();
+        router.push('/admin/login');
+        router.refresh();
+      },
+      successMessage: 'Đã đăng xuất tài khoản thành công!',
+    });
   };
 
   return (

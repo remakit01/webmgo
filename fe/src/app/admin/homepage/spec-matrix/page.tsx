@@ -188,14 +188,6 @@ export default function AdminSpecMatrixPage() {
             >
               Khôi phục mặc định
             </button>
-            <a
-              href="/#homepage-spec-matrix"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3.5 py-1.5 rounded-lg bg-[#5F8A03] hover:bg-[#4E7202] text-white text-xs font-bold transition-colors"
-            >
-              Xem ngoài trang chủ
-            </a>
           </div>
         </div>
 

@@ -21,6 +21,8 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  deletedBanners Banner[] @relation("BannerDeletedBy")
+
   @@map("users")
 }
 
@@ -65,12 +67,32 @@ model Banner {
   id        String   @id @default(cuid())
   title     String
   subtitle  String?
-  imageUrl  String
+  alt       String
+  ctaText   String?
+  imageUrl  String // biến thể mặc định (fallback cho <img>)
+  imageKey  String // prefix object trong MinIO (vd: banners/<id>) để dọn khi xoá/thay ảnh
+  images    Json // [{ width, format, url }]
   linkUrl   String?
   isActive  Boolean  @default(true)
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Soft delete: vào thùng rác, khôi phục được trong thời hạn lưu; job purge xoá hẳn (DB + MinIO) sau đó
+  deletedAt   DateTime?
+  deletedById String?
+  deletedBy   User?     @relation("BannerDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+
+  @@index([deletedAt, sortOrder])
   @@map("banners")
+}
+
+// ─── Site settings (key-value) ───────────────────────────────────────────────
+
+model SiteSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
 }

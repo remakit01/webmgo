@@ -163,15 +163,6 @@ export default function AdminProjectsNewsManagerPage() {
             >
               Lưu Cấu Hình
             </button>
-
-            <a
-              href="/#homepage-projects-news"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
-            >
-              Xem ngoài trang chủ
-            </a>
           </div>
         </div>
 

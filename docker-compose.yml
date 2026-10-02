@@ -45,7 +45,8 @@ services:
 
   # 3. MinIO - Lưu trữ file CAD DWG, PDF kiểm định IBST, ảnh sản phẩm (S3 Compatible)
   minio:
-    image: quay.io/minio/aistor/minio:RELEASE.2026-09-19T17-05-25Z
+    # Silo: fork cộng đồng của MinIO (AGPL, S3-compatible, không cần license)
+    image: docker.io/pgsty/silo:RELEASE.2026-09-03T13-18-01Z
     container_name: remak_mgo_minio
     restart: unless-stopped
     command: server /data --console-address ":9001"

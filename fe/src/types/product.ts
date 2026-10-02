@@ -36,14 +36,6 @@ export interface FaqItem {
   a: string;
 }
 
-export interface BannerSlide {
-  id: number;
-  image: string;
-  alt: string;
-  link?: string;
-  title: string;
-}
-
 export interface ProductSystemAssembly {
   title: string;
   fireRating: string;
