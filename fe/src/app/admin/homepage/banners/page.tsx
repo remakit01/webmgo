@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Play,
   Pause,
+  GripVertical,
 } from 'lucide-react';
 import AdminHeader from '@/cms/components/AdminHeader';
 import { useConfirm } from '@/cms/components/ConfirmDialog';
@@ -139,6 +140,9 @@ export default function AdminBannersManagerPage() {
     linkUrl?: string;
   }>({});
   const [isDragging, setIsDragging] = useState(false);
+  // Quản lý kéo thả sắp xếp Banner
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   // Phím ESC để đóng modal
   useEffect(() => {
@@ -334,6 +338,52 @@ export default function AdminBannersManagerPage() {
     try {
       await apiFetch('/banners/reorder', { method: 'PATCH', body: JSON.stringify({ ids: next.map((b) => b.id) }) });
       showToast('Đã thay đổi thứ tự banner!');
+    } catch (err) {
+      setBanners(previous);
+      showError(err);
+    }
+  };
+
+  // Kéo thả sắp xếp Banner (Drag & Drop Reordering)
+  const handleDragStart = (index: number, e: React.DragEvent) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragOver = (index: number, e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = async (targetIndex: number, e: React.DragEvent) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      handleDragEnd();
+      return;
+    }
+
+    const next = [...banners];
+    const [moved] = next.splice(draggedIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    const previous = banners;
+    setBanners(next);
+    handleDragEnd();
+
+    try {
+      await apiFetch('/banners/reorder', {
+        method: 'PATCH',
+        body: JSON.stringify({ ids: next.map((b) => b.id) }),
+      });
+      showToast('Đã cập nhật vị trí banner thành công!');
     } catch (err) {
       setBanners(previous);
       showError(err);
@@ -620,7 +670,7 @@ export default function AdminBannersManagerPage() {
                   Danh Sách Banner ({banners.length})
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Có {activeBannersList.length} banner đang được bật hiển thị
+                  Có {activeBannersList.length} banner đang được bật hiển thị · <span className="text-[#5F8A03] font-medium">Kéo thả ⋮⋮ hoặc dùng mũi tên ↑↓ để đổi vị trí</span>
                 </p>
               </div>
 
@@ -648,25 +698,48 @@ export default function AdminBannersManagerPage() {
               )}
               {banners.map((b, index) => {
                 const isActive = b.isActive;
+                const isItemDragged = draggedIndex === index;
+                const isItemTarget = dragOverIndex === index && draggedIndex !== index;
+
                 return (
                   <div 
                     key={b.id}
-                    className={`bg-white rounded-xl p-4 border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
-                      isActive 
+                    onDragOver={(e) => handleDragOver(index, e)}
+                    onDrop={(e) => handleDrop(index, e)}
+                    className={`bg-white rounded-xl p-4 border transition-all duration-150 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+                      isItemDragged
+                        ? 'opacity-40 border-dashed border-[#5F8A03] scale-[0.99] bg-[#F4F9E8]/20'
+                        : isItemTarget
+                        ? 'border-[#5F8A03] ring-2 ring-[#7CB305]/50 bg-[#F4F9E8]/40 shadow-md scale-[1.01]'
+                        : isActive 
                         ? 'border-slate-300 shadow-2xs hover:border-slate-400' 
                         : 'border-dashed border-slate-300 opacity-60 bg-slate-50'
                     }`}
                   >
-                    {/* Ảnh thu nhỏ */}
-                    <div className="relative w-full sm:w-44 h-24 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-300">
-                      <img 
-                        src={b.imageUrl} 
-                        alt={b.alt} 
-                        className="w-full h-full object-cover" 
-                      />
-                      <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900/80 text-white">
-                        Vị trí #{index + 1}
-                      </span>
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      {/* Tay cầm kéo thả (Drag Handle) */}
+                      <div
+                        draggable
+                        onDragStart={(e) => handleDragStart(index, e)}
+                        onDragEnd={handleDragEnd}
+                        className="p-1.5 -ml-1 text-slate-400 hover:text-[#5F8A03] hover:bg-[#F4F9E8] rounded-lg cursor-grab active:cursor-grabbing transition-colors shrink-0 flex items-center justify-center"
+                        title="Nhấn giữ để kéo thả đổi vị trí"
+                        aria-label="Kéo thả đổi vị trí banner"
+                      >
+                        <GripVertical size={19} />
+                      </div>
+
+                      {/* Ảnh thu nhỏ */}
+                      <div className="relative w-full sm:w-44 h-24 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-300">
+                        <img 
+                          src={b.imageUrl} 
+                          alt={b.alt} 
+                          className="w-full h-full object-cover" 
+                        />
+                        <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900/80 text-white">
+                          Vị trí #{index + 1}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Nội dung thông tin */}
@@ -675,8 +748,10 @@ export default function AdminBannersManagerPage() {
                         <h5 className="text-sm font-bold text-slate-900 truncate">
                           {b.title}
                         </h5>
-                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                          isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${
+                          isActive 
+                            ? 'bg-[#F4F9E8] text-[#5F8A03] border-[#7CB305]/30' 
+                            : 'bg-slate-100 text-slate-500 border-slate-200'
                         }`}>
                           {isActive ? 'Đang bật' : 'Đã ẩn'}
                         </span>
@@ -690,26 +765,30 @@ export default function AdminBannersManagerPage() {
                     </div>
 
                     {/* Nút thao tác */}
-                    <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-                      {/* Đổi thứ tự lên xuống */}
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        onClick={() => handleMove(index, 'up')}
-                        className="p-1.5 rounded border border-slate-300 hover:bg-slate-100 text-slate-600 disabled:opacity-20 cursor-pointer"
-                        title="Chuyển lên trên"
-                      >
-                        <ArrowUp size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === banners.length - 1}
-                        onClick={() => handleMove(index, 'down')}
-                        className="p-1.5 rounded border border-slate-300 hover:bg-slate-100 text-slate-600 disabled:opacity-20 cursor-pointer"
-                        title="Chuyển xuống dưới"
-                      >
-                        <ArrowDown size={14} />
-                      </button>
+                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                      {/* Đổi thứ tự lên xuống bằng phím mũi tên (WCAG 2.2 alternative) */}
+                      <div className="flex items-center rounded-lg border border-slate-300 bg-white overflow-hidden shadow-2xs">
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() => handleMove(index, 'up')}
+                          className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 disabled:opacity-25 cursor-pointer border-r border-slate-200 transition-colors"
+                          title="Di chuyển lên trên"
+                          aria-label="Di chuyển lên trên"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={index === banners.length - 1}
+                          onClick={() => handleMove(index, 'down')}
+                          className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 disabled:opacity-25 cursor-pointer transition-colors"
+                          title="Di chuyển xuống dưới"
+                          aria-label="Di chuyển xuống dưới"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </div>
 
                       {/* Bật / Tắt */}
                       <button
@@ -718,7 +797,7 @@ export default function AdminBannersManagerPage() {
                         className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
                           isActive
                             ? 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-[#F4F9E8] text-[#5F8A03] border-[#7CB305]/60 hover:bg-[#5F8A03] hover:text-white'
                         }`}
                       >
                         {isActive ? 'Ẩn đi' : 'Hiện lại'}
@@ -734,6 +813,7 @@ export default function AdminBannersManagerPage() {
                         }}
                         className="p-2 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-700 transition-colors cursor-pointer"
                         title="Chỉnh sửa"
+                        aria-label="Chỉnh sửa banner"
                       >
                         <Edit3 size={14} />
                       </button>
@@ -744,6 +824,7 @@ export default function AdminBannersManagerPage() {
                         onClick={() => handleDelete(b)}
                         className="p-2 rounded-lg border border-rose-300 hover:bg-rose-50 text-rose-600 transition-colors cursor-pointer"
                         title="Chuyển vào thùng rác"
+                        aria-label="Chuyển vào thùng rác"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -1062,7 +1143,7 @@ export default function AdminBannersManagerPage() {
                           <span>Ảnh xem trước</span>
                         </div>
                         {editingBanner.file && (
-                          <div className="absolute top-2 right-2 bg-emerald-700/90 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-xs">
+                          <div className="absolute top-2 right-2 bg-[#5F8A03]/90 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-xs">
                             {(editingBanner.file.size / 1024 / 1024).toFixed(2)} MB
                           </div>
                         )}
