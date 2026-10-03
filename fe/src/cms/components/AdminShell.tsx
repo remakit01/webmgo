@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import AdminSidebar from '@/cms/components/AdminSidebar';
+import PageLoadingBar from '@/cms/components/PageLoadingBar';
 import { ConfirmDialogProvider } from '@/cms/components/ConfirmDialog';
 import { fetchCurrentUser } from '@/cms/lib/api-auth';
 
@@ -60,6 +61,7 @@ export default function AdminShell({
   // Authenticated layout with Sidebar & Global Confirm Dialog Root
   return (
     <ConfirmDialogProvider>
+      <PageLoadingBar />
       <div className="flex min-h-screen bg-slate-50 text-slate-800 antialiased font-sans admin-typography">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">

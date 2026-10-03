@@ -8,7 +8,7 @@ import { logoutWithApi } from '../lib/api-auth';
 import { useConfirm } from './ConfirmDialog';
 
 const HOMEPAGE_SUBMENU = [
-  { id: 'banners', name: 'Biểu Ngữ Trang Chủ', href: '/admin/homepage/banners' },
+  { id: 'banners', name: 'Banner Trang Chủ', href: '/admin/homepage/banners' },
   { id: 'hero', name: 'Tiêu Đề & Điểm Nhấn', href: '/admin/homepage/hero' },
   { id: 'benefits', name: 'Đặc Tính Nổi Bật', href: '/admin/homepage/benefits' },
   { id: 'spec-matrix', name: 'Bảng Quy Cách Độ Dày', href: '/admin/homepage/spec-matrix' },
@@ -173,18 +173,18 @@ export default function AdminSidebar() {
                                 <Link
                                   key={sub.id}
                                   href={sub.href}
-                                  className={`group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-[background-color,color] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] focus-visible:ring-offset-1 ${
+                                  className={`group flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] focus-visible:ring-offset-1 ${
                                     isSubActive
-                                      ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold shadow-2xs'
-                                      : 'text-slate-600 hover:text-[#5F8A03] hover:bg-[#F4F9E8]/60 font-medium'
+                                      ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold shadow-2xs translate-x-1'
+                                      : 'text-slate-600 hover:text-[#5F8A03] hover:bg-[#F4F9E8]/70 hover:translate-x-1 font-medium'
                                   }`}
                                 >
                                   {/* Vạch prefix brand Remak */}
                                   <span
-                                    className={`w-1 rounded-full transition-[height,background-color] duration-200 shrink-0 ${
+                                    className={`w-1 rounded-full transition-all duration-200 shrink-0 ${
                                       isSubActive 
                                         ? 'bg-[#5F8A03] h-4' 
-                                        : 'bg-transparent h-2 group-hover:bg-[#7CB305]/40'
+                                        : 'bg-transparent h-1.5 group-hover:bg-[#7CB305] group-hover:h-3'
                                     }`}
                                     aria-hidden="true"
                                   />

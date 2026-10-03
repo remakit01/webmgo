@@ -12,6 +12,7 @@ import type { HeroContent, HomeHeroForCms } from '@/types/homepage';
 import HeroViForm from '@/cms/components/hero/HeroViForm';
 import HeroEnForm from '@/cms/components/hero/HeroEnForm';
 import LocaleTabs, { type CmsLocale } from '@/cms/components/hero/LocaleTabs';
+import Skeleton from '@/cms/components/ui/Skeleton';
 import {
   EMPTY_CONTENT,
   ifMatch,
@@ -55,10 +56,15 @@ export default function AdminHeroManagerPage() {
   };
 
   useEffect(() => {
+    const startTime = Date.now();
     apiFetch<HomeHeroForCms>('/homepage/hero')
       .then(applySaved)
       .catch((err: unknown) => showToast(err instanceof Error ? err.message : 'Không tải được dữ liệu', 'error'))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 350 - elapsed);
+        setTimeout(() => setLoading(false), remaining);
+      });
   }, [showToast]);
 
   const savedVi = saved.vi ?? EMPTY_CONTENT;
@@ -203,9 +209,45 @@ export default function AdminHeroManagerPage() {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-        <AdminHeader title="Quản Lý Tiêu Đề & Điểm Nhấn" />
-        <div className="p-8 text-xs text-slate-500 flex items-center gap-2" role="status">
-          <Loader2 size={14} className="animate-spin" /> Đang tải nội dung…
+        <AdminHeader
+          title="Quản Lý Tiêu Đề & Điểm Nhấn"
+          subtitle="Quản trị tiêu đề chính, mô tả kỹ thuật và các cam kết chất lượng ở đầu trang chủ"
+        />
+
+        {/* Khung Xem Trước Skeleton 1:1 */}
+        <div className="w-full bg-white border-b border-slate-300 select-none font-sans">
+          <div className="px-6 py-3 border-b border-slate-300 bg-white flex items-center justify-between gap-3">
+            <Skeleton className="h-4 w-36 rounded" />
+            <Skeleton className="h-7 w-36 rounded-lg" />
+          </div>
+          <Skeleton className="w-full h-64 sm:h-72 rounded-none" />
+        </div>
+
+        {/* Khối Form Nhập Liệu Skeleton 1:1 */}
+        <div className="p-6 space-y-6 w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl p-5 border border-slate-300 shadow-2xs space-y-4">
+              <Skeleton className="h-4 w-44 rounded" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full rounded-lg" />
+                <Skeleton className="h-10 w-full rounded-lg" />
+              </div>
+              <div className="space-y-3 pt-2">
+                <Skeleton className="h-24 w-full rounded-lg" />
+                <Skeleton className="h-24 w-full rounded-lg" />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-5 border border-slate-300 shadow-2xs space-y-4">
+              <Skeleton className="h-4 w-52 rounded" />
+              <div className="grid grid-cols-2 gap-3">
+                <Skeleton className="h-10 w-full rounded-lg" />
+                <Skeleton className="h-10 w-full rounded-lg" />
+              </div>
+              <Skeleton className="h-64 sm:h-80 w-full rounded-lg" />
+              <Skeleton className="h-10 w-full rounded-lg" />
+            </div>
+          </div>
         </div>
       </div>
     );
