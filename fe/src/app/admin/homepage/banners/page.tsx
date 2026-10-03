@@ -28,6 +28,7 @@ import AdminHeader from '@/cms/components/AdminHeader';
 import { useConfirm } from '@/cms/components/ConfirmDialog';
 import { apiFetch, ifMatch, isConflict } from '@/cms/lib/api-client';
 import { fetchCurrentUser, type AuthUser } from '@/cms/lib/api-auth';
+import Skeleton from '@/cms/components/ui/Skeleton';
 
 interface AdminBanner {
   id: string;
@@ -245,13 +246,19 @@ export default function AdminBannersManagerPage() {
   useEffect(() => {
     loadTrash();
     fetchCurrentUser().then(setCurrentUser).catch(() => setCurrentUser(null));
+    const startTime = Date.now();
     Promise.all([apiFetch<AdminBanner[]>('/banners'), apiFetch<SwiperConfig>('/banners/settings/swiper')])
       .then(([list, config]) => {
         setBanners(list);
         setSwiperConfig(config);
       })
       .catch(showError)
-      .finally(() => setLoading(false));
+      .finally(() => {
+        // Đảm bảo mắt người cảm nhận được chuyển động Shimmer mượt mà, tránh chớp tắt gián đoạn do localhost quá nhanh
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 350 - elapsed);
+        setTimeout(() => setLoading(false), remaining);
+      });
   }, []);
 
   const activeBannersList = banners.filter((b) => b.isActive);
@@ -545,11 +552,8 @@ export default function AdminBannersManagerPage() {
         <div className="px-6 py-3 border-b border-slate-300 flex items-center justify-between flex-wrap gap-3 bg-white">
           <div>
             <h3 className="text-sm font-bold text-slate-900">
-              Xem Trước Hiển Thị Banner
+              Xem trước hiển thị banner
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Khung hình tỷ lệ 1024 / 342 chuẩn theo giao diện ngoài trang chủ
-            </p>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -589,12 +593,15 @@ export default function AdminBannersManagerPage() {
 
         {/* Màn hình hiển thị Banner (Mô phỏng 1:1 theo Swiper trang chủ) */}
         <div 
-          className="relative w-full bg-slate-900 aspect-[1024/342] overflow-hidden select-none border-b border-slate-300 group"
+          className={`relative w-full aspect-[1024/342] overflow-hidden select-none border-b border-slate-300 group ${loading ? 'bg-slate-200' : 'bg-slate-900'}`}
           onMouseEnter={() => setIsHoveredPreview(true)}
           onMouseLeave={() => setIsHoveredPreview(false)}
         >
-          {activeBannersList.length > 0 ? (
-            <div className="w-full h-full relative overflow-hidden">
+          {loading ? (
+            /* Skeleton Shimmer Preview: nền màu xám nhạt tinh gọn, không chữ, chuẩn tỉ lệ 1024/342 */
+            <Skeleton className="w-full h-full rounded-none" />
+          ) : activeBannersList.length > 0 ? (
+            <div className="w-full h-full relative overflow-hidden animate-in fade-in duration-300">
               {/* Dải băng chuyền trượt chuyển động mượt mà (Slide Carousel) */}
               <div 
                 className="flex w-full h-full transition-transform duration-700 ease-in-out"
@@ -676,7 +683,7 @@ export default function AdminBannersManagerPage() {
               )}
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-1">
+            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-1 animate-in fade-in duration-200">
               <span className="text-sm font-semibold">Tất cả banner hiện đang ở trạng thái ẩn</span>
             </div>
           )}
@@ -717,11 +724,37 @@ export default function AdminBannersManagerPage() {
 
             {/* Các thẻ Banner */}
             <div className="space-y-3">
-              {loading && <p className="text-xs text-slate-500">Đang tải danh sách banner…</p>}
-              {!loading && banners.length === 0 && (
-                <p className="text-xs text-slate-500">Chưa có banner nào. Nhấn “Thêm Banner Mới” để tạo.</p>
+              {loading && (
+                <div className="space-y-3" aria-label="Đang tải danh sách banner">
+                  {[1, 2, 3].map((n) => (
+                    <div
+                      key={n}
+                      className="bg-white rounded-xl p-4 border border-slate-300 shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    >
+                      <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <Skeleton className="w-5 h-7 rounded" />
+                        <Skeleton className="w-full sm:w-44 h-24 rounded-lg shrink-0" />
+                        <div className="space-y-2.5 flex-1 sm:w-64">
+                          <Skeleton className="h-4 w-3/4 rounded" />
+                          <Skeleton className="h-3 w-1/2 rounded" />
+                          <Skeleton className="h-3 w-1/3 rounded" />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end pt-2 sm:pt-0">
+                        <Skeleton className="h-8 w-16 rounded-lg" />
+                        <Skeleton className="h-8 w-16 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-              {banners.map((b, index) => {
+              {!loading && banners.length === 0 && (
+                <p className="text-xs text-slate-500 py-8 text-center bg-white rounded-xl border border-slate-300">
+                  Chưa có banner nào. Nhấn “Thêm Banner Mới” để tạo.
+                </p>
+              )}
+              {!loading && banners.map((b, index) => {
                 const isActive = b.isActive;
                 const isItemDragged = draggedIndex === index;
                 const isItemTarget = dragOverIndex === index && draggedIndex !== index;
