@@ -1,0 +1,7 @@
+{
+    "claudeCode.useTerminal": false,
+    "claudeCode.useCtrlEnterToSend": true,
+    "claudeCode.hideOnboarding": true,
+    "claudeCode.lockEditorGroups": true,
+    "claudeCode.respectGitIgnore": true
+}

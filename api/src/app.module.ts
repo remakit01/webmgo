@@ -11,6 +11,7 @@ import { StorageModule } from './storage/storage.module.js';
 import { RevalidateModule } from './revalidate/revalidate.module.js';
 import { BannersModule } from './banners/banners.module.js';
 import { HomepageModule } from './homepage/homepage.module.js';
+import { TranslationModule } from './translation/translation.module.js';
 import configuration from './config/configuration.js';
 
 @Module({
@@ -29,6 +30,7 @@ import configuration from './config/configuration.js';
     RevalidateModule,
     BannersModule,
     HomepageModule,
+    TranslationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

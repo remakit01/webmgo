@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Sparkles } from 'lucide-react';
 import { inputClass } from './hero-form';
 
 interface TranslatableFieldProps {
@@ -13,6 +13,8 @@ interface TranslatableFieldProps {
   maxLength?: number;
   placeholder?: string;
   error?: string;
+  /** Nội dung vừa được AI dịch và chưa bị sửa tay -> nhắc người dùng kiểm tra lại */
+  aiFilled?: boolean;
 }
 
 /**
@@ -30,6 +32,7 @@ export default function TranslatableField({
   maxLength,
   placeholder,
   error,
+  aiFilled,
 }: TranslatableFieldProps) {
   const id = useId();
   const hasTranslation = value.trim() !== '';
@@ -47,19 +50,26 @@ export default function TranslatableField({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <label htmlFor={id} className="text-xs font-bold text-slate-700">
+        <label htmlFor={id} className="text-xs font-semibold text-slate-700">
           {label}
         </label>
-        {hasTranslation && (
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
-            title="Xóa bản dịch này"
-          >
-            Xoá bản dịch
-          </button>
-        )}
+        <span className="flex items-center gap-2">
+          {aiFilled && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#5F8A03] bg-[#F4F9E8] border border-[#7CB305]/40 px-1.5 py-0.5 rounded">
+              <Sparkles size={10} aria-hidden="true" /> AI dịch
+            </span>
+          )}
+          {hasTranslation && (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="text-[11px] font-medium text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+              title="Xóa bản dịch này"
+            >
+              Xoá bản dịch
+            </button>
+          )}
+        </span>
       </div>
 
       {multiline ? (

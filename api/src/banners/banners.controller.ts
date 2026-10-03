@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -26,6 +27,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { parseIfMatch } from '../common/site-settings.js';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 // memoryStorage: không ghi file xuống đĩa/source, buffer đi thẳng sang sharp -> MinIO
@@ -63,15 +65,15 @@ export class BannersController {
   @Roles('ADMIN', 'EDITOR')
   @ApiCookieAuth('access_token')
   getSwiper() {
-    return this.banners.getSwiperSettings();
+    return this.banners.getSwiperSettingsForCms();
   }
 
   @Put('settings/swiper')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'EDITOR')
   @ApiCookieAuth('access_token')
-  updateSwiper(@Body() dto: SwiperSettingsDto) {
-    return this.banners.updateSwiperSettings(dto);
+  updateSwiper(@Body() dto: SwiperSettingsDto, @Headers('if-match') ifMatch?: string) {
+    return this.banners.updateSwiperSettings(dto, parseIfMatch(ifMatch));
   }
 
   @Get('trash')
@@ -97,8 +99,8 @@ export class BannersController {
   @Roles('ADMIN')
   @ApiCookieAuth('access_token')
   @ApiOperation({ summary: 'Bật/tắt tự dọn và đổi số ngày lưu thùng rác' })
-  updateTrashSettings(@Body() dto: TrashSettingsDto) {
-    return this.banners.updateTrashSettings(dto);
+  updateTrashSettings(@Body() dto: TrashSettingsDto, @Headers('if-match') ifMatch?: string) {
+    return this.banners.updateTrashSettings(dto, parseIfMatch(ifMatch));
   }
 
   @Post('trash/purge-expired')

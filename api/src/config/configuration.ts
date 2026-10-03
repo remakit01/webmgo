@@ -26,6 +26,15 @@ export default () => ({
     bucket: process.env.MINIO_BUCKET ?? 'remak-mgo-assets',
   },
   revalidateSecret: process.env.REVALIDATE_SECRET_TOKEN,
+  // Dịch tự động bằng Gemini (CMS). Thiếu key -> tính năng tắt, API trả 503.
+  translation: {
+    geminiApiKey: process.env.GEMINI_API_KEY,
+    // Ghim phiên bản cụ thể (không dùng alias *-latest) để chất lượng dịch ổn định, chủ động khi nâng cấp
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
+    // Model dự phòng khi model chính quá tải (503/429); để trống để tắt
+    geminiFallbackModel: process.env.GEMINI_FALLBACK_MODEL ?? 'gemini-3.1-flash-lite',
+    timeoutMs: parseInt(process.env.TRANSLATE_TIMEOUT_MS ?? '30000', 10),
+  },
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',
     port: parseInt(process.env.REDIS_PORT ?? '6379', 10),

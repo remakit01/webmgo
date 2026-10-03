@@ -58,3 +58,12 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (!res.ok) throw await toError(res);
   return (res.status === 204 ? undefined : await res.json()) as T;
 }
+
+/**
+ * Header khoá lạc quan: gửi phiên bản (updatedAt) nhận được lúc GET.
+ * API trả 409 nếu người khác đã lưu trước. Chưa có phiên bản (chưa từng lưu) thì không gửi.
+ */
+export const ifMatch = (version: string | null | undefined): Record<string, string> =>
+  version ? { 'If-Match': `"${version}"` } : {};
+
+export const isConflict = (err: unknown) => err instanceof ApiError && err.status === 409;
