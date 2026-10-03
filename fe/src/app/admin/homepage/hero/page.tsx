@@ -14,7 +14,6 @@ import HeroEnForm from '@/cms/components/hero/HeroEnForm';
 import LocaleTabs, { type CmsLocale } from '@/cms/components/hero/LocaleTabs';
 import {
   EMPTY_CONTENT,
-  HERO_IMAGE_MIN_WIDTH,
   ifMatch,
   isTranslated,
   linkErrors,
@@ -91,18 +90,11 @@ export default function AdminHeroManagerPage() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [isDirty]);
 
-  // Kiểm tra kích thước ngay khi chọn (API kiểm tra lại); ảnh nhỏ sẽ mờ trên màn hình retina
+  // Chấp nhận mọi ảnh sản phẩm hợp lệ, không giới hạn kích thước tối thiểu
   const handlePickFile = (picked: File) => {
     const url = URL.createObjectURL(picked);
     const img = new Image();
     img.onload = () => {
-      if (img.naturalWidth < HERO_IMAGE_MIN_WIDTH) {
-        URL.revokeObjectURL(url);
-        setFileError(
-          `Ảnh quá nhỏ (${img.naturalWidth}×${img.naturalHeight}px). Cần chiều rộng tối thiểu ${HERO_IMAGE_MIN_WIDTH}px, khuyến nghị 1200px trở lên.`,
-        );
-        return;
-      }
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setFile(picked);
       setPreviewUrl(url);

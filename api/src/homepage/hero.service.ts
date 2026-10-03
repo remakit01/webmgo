@@ -16,8 +16,6 @@ const cacheKey = (locale: HeroLocale) => `homepage:hero:public:${locale}`;
 const ALL_LOCALES: HeroLocale[] = ['vi', 'en'];
 const CACHE_TTL = 60;
 const REVALIDATE_TAG = 'homepage-hero';
-// Ảnh nằm ở cột phải (~600px trên desktop); dưới 800px sẽ mờ trên màn hình retina
-export const HERO_IMAGE_MIN_WIDTH = 800;
 
 export type HeroContent = Omit<UpdateHeroDto, 'secondaryCta'> & { secondaryCta: UpdateHeroDto['secondaryCta'] | null };
 export type HeroImage = UploadedImage;
@@ -163,7 +161,7 @@ export class HeroService {
     const hasContent = await this.prisma.siteSetting.count({ where: { key: HERO_CONTENT_KEY } });
     if (!hasContent) throw new BadRequestException('Cần lưu nội dung tiêu đề trước khi tải ảnh');
 
-    const uploaded = await this.media.uploadImage('homepage/hero', file.buffer, { minWidth: HERO_IMAGE_MIN_WIDTH });
+    const uploaded = await this.media.uploadImage('homepage/hero', file.buffer);
     let previous: HeroImage | undefined;
     try {
       ({ previous } = await saveSettingVersioned<HeroImage>(this.prisma, HERO_IMAGE_KEY, () => uploaded, ifMatch));

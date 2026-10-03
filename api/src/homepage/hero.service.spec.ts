@@ -92,7 +92,7 @@ describe('HeroService', () => {
       { key: 'homepage.hero.image', value: { imageKey: 'homepage/hero/old', imageUrl: 'o', images: [] } },
     ]);
     await service.updateImage({ buffer: Buffer.from('x') } as Express.Multer.File);
-    expect(media.uploadImage).toHaveBeenCalledWith('homepage/hero', expect.any(Buffer), { minWidth: 800 });
+    expect(media.uploadImage).toHaveBeenCalledWith('homepage/hero', expect.any(Buffer));
     expect((db.get('homepage.hero.image') as { imageKey: string }).imageKey).toBe('homepage/hero/new');
     expect(media.removeImage).toHaveBeenCalledWith('homepage/hero/old');
   });
