@@ -10,7 +10,7 @@ export const LINK_ERROR = 'Đường dẫn phải bắt đầu bằng "/", "#" h
 export const isValidLink = (link: string) => LINK_PATTERN.test(link);
 
 export const inputClass =
-  'w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-900 bg-white placeholder:text-slate-400 focus:outline-none focus:border-[#5F8A03] focus:ring-2 focus:ring-[#5F8A03]/20 transition-all aria-[invalid=true]:border-rose-400';
+  'w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-900 bg-white placeholder:text-slate-400 focus:outline-none focus:border-[#5F8A03] focus:ring-1 focus:ring-[#5F8A03] transition-colors aria-[invalid=true]:border-rose-400';
 
 // Form trống (chỉ khung cấu trúc, không có nội dung) — dùng khi hero chưa từng được cấu hình
 export const EMPTY_CONTENT: HeroContent = {
@@ -122,6 +122,25 @@ export function translationPatch(draft: HeroTranslationDraft, saved: HeroTransla
   ) as Partial<HeroTranslationDraft>;
 }
 
-/** Header khoá lạc quan: gửi phiên bản đang sửa; chưa có phiên bản (chưa từng lưu) thì không gửi */
-export const ifMatch = (version: string | null): Record<string, string> =>
-  version ? { 'If-Match': `"${version}"` } : {};
+// Header khoá lạc quan dùng chung cho mọi trang CMS
+export { ifMatch } from '@/cms/lib/api-client';
+
+/** Đọc giá trị một ô bản dịch theo khoá dạng "title", "paragraphs.0", "stats.1.label", "media.alt" */
+export function getDraftField(draft: HeroTranslationDraft, key: string): string {
+  const value = key.split('.').reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], draft);
+  return typeof value === 'string' ? value : '';
+}
+
+/** Ghi một ô bản dịch theo khoá (trả bản sao mới, không sửa đối tượng cũ) */
+export function setDraftField(draft: HeroTranslationDraft, key: string, value: string): HeroTranslationDraft {
+  const next = structuredClone(draft);
+  const parts = key.split('.');
+  let node = next as unknown as Record<string, unknown>;
+  for (let i = 0; i < parts.length - 1; i++) {
+    // Phần tiếp theo là số -> nút hiện tại là mảng (vd "paragraphs.0", "stats.1.label")
+    node[parts[i]] ??= /^\d+$/.test(parts[i + 1]) ? [] : {};
+    node = node[parts[i]] as Record<string, unknown>;
+  }
+  node[parts[parts.length - 1]] = value;
+  return next;
+}

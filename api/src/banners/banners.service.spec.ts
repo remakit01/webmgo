@@ -150,3 +150,49 @@ describe('BannersService.update khi có request ghi chen vào', () => {
     expect(media.removeImage).toHaveBeenCalledWith('banners/new');
   });
 });
+
+describe('BannersService cài đặt có khoá lạc quan (If-Match)', () => {
+  function settingsSetup() {
+    let clock = Date.parse('2026-10-03T00:00:00.000Z');
+    const table = new Map<string, { value: unknown; updatedAt: Date }>([
+      ['homepage.banner.swiper', { value: { autoPlayInterval: 3500, pauseOnHover: true, showDots: false }, updatedAt: new Date(clock) }],
+    ]);
+    const prisma = {
+      siteSetting: {
+        findUnique: vi.fn(async ({ where }: { where: { key: string } }) =>
+          table.has(where.key) ? { key: where.key, ...table.get(where.key)! } : null,
+        ),
+        create: vi.fn(async ({ data }: { data: { key: string; value: unknown } }) => {
+          table.set(data.key, { value: data.value, updatedAt: new Date(++clock) });
+        }),
+        updateMany: vi.fn(async ({ where, data }: { where: { key: string; updatedAt: Date }; data: { value: unknown } }) => {
+          const row = table.get(where.key);
+          if (!row || row.updatedAt.getTime() !== where.updatedAt.getTime()) return { count: 0 };
+          table.set(where.key, { value: data.value, updatedAt: new Date(++clock) });
+          return { count: 1 };
+        }),
+      },
+    };
+    const service = new BannersService(prisma as never, { delCache: vi.fn() } as never, {} as never, { trigger: vi.fn() } as never);
+    return { service, table };
+  }
+
+  it('swiper: lưu với phiên bản đúng -> trả cài đặt + phiên bản mới; lưu lại với phiên bản cũ -> 409', async () => {
+    const { service, table } = settingsSetup();
+    const opened = (await service.getSwiperSettingsForCms()).version!;
+    const saved = await service.updateSwiperSettings({ autoPlayInterval: 5000, pauseOnHover: true, showDots: true }, opened);
+    expect(saved).toMatchObject({ autoPlayInterval: 5000, showDots: true });
+    expect(saved.version).not.toBe(opened);
+    await expect(
+      service.updateSwiperSettings({ autoPlayInterval: 2000, pauseOnHover: false, showDots: false }, opened),
+    ).rejects.toBeInstanceOf(ConflictException);
+    expect((table.get('homepage.banner.swiper')!.value as { autoPlayInterval: number }).autoPlayInterval).toBe(5000);
+  });
+
+  it('thùng rác: chưa có cài đặt -> lưu lần đầu không cần phiên bản, trả kèm phiên bản', async () => {
+    const { service } = settingsSetup();
+    vi.spyOn(service as never, 'getTrashOverview' as never);
+    const res = await service.updateTrashSettings({ autoPurgeEnabled: false, retentionDays: 7 });
+    expect(res).toMatchObject({ autoPurgeEnabled: false, retentionDays: 7, version: expect.any(String) });
+  });
+});

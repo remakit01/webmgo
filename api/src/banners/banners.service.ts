@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { MediaService } from '../storage/media.service.js';
-import { CONFLICT_MESSAGE } from '../common/site-settings.js';
+import { CONFLICT_MESSAGE, readSetting, saveSettingVersioned } from '../common/site-settings.js';
 import { RevalidateService } from '../revalidate/revalidate.service.js';
 import type { CreateBannerDto, SwiperSettingsDto, TrashSettingsDto, UpdateBannerDto } from './dto/banner.dto.js';
 
@@ -237,17 +237,24 @@ export class BannersService {
     return { ...DEFAULT_TRASH_SETTINGS, ...((row?.value as Partial<TrashSettingsDto> | undefined) ?? {}) };
   }
 
-  /** Cài đặt + lần dọn gần nhất, cho CMS hiển thị. */
+  /** Cài đặt + lần dọn gần nhất + phiên bản (gửi lại qua If-Match khi lưu), cho CMS hiển thị. */
   async getTrashOverview() {
-    const [settings, lastRunRow] = await Promise.all([
-      this.getTrashSettings(),
+    const [row, lastRunRow] = await Promise.all([
+      readSetting<Partial<TrashSettingsDto>>(this.prisma, TRASH_SETTINGS_KEY),
       this.prisma.siteSetting.findUnique({ where: { key: TRASH_LAST_RUN_KEY } }),
     ]);
-    return { ...settings, lastRun: (lastRunRow?.value as PurgeRun | undefined) ?? null };
+    return {
+      ...DEFAULT_TRASH_SETTINGS,
+      ...(row?.value ?? {}),
+      lastRun: (lastRunRow?.value as PurgeRun | undefined) ?? null,
+      version: row?.version ?? null,
+    };
   }
 
-  async updateTrashSettings(dto: TrashSettingsDto) {
-    await this.saveSetting(TRASH_SETTINGS_KEY, { autoPurgeEnabled: dto.autoPurgeEnabled, retentionDays: dto.retentionDays });
+  /** PUT có khoá lạc quan: 2 ADMIN đổi cài đặt cùng lúc -> người sau nhận 409 thay vì ghi đè im lặng. */
+  async updateTrashSettings(dto: TrashSettingsDto, ifMatch?: string) {
+    const value = { autoPurgeEnabled: dto.autoPurgeEnabled, retentionDays: dto.retentionDays };
+    await saveSettingVersioned(this.prisma, TRASH_SETTINGS_KEY, () => value, ifMatch);
     return this.getTrashOverview();
   }
 
@@ -258,11 +265,18 @@ export class BannersService {
     return { ...DEFAULT_SWIPER, ...((row?.value as Partial<SwiperSettingsDto> | undefined) ?? {}) };
   }
 
-  async updateSwiperSettings(dto: SwiperSettingsDto) {
-    const value = { ...dto };
-    await this.saveSetting(SWIPER_KEY, value);
+  /** Cho CMS: cài đặt + phiên bản (gửi lại qua If-Match khi lưu). */
+  async getSwiperSettingsForCms() {
+    const row = await readSetting<Partial<SwiperSettingsDto>>(this.prisma, SWIPER_KEY);
+    return { ...DEFAULT_SWIPER, ...(row?.value ?? {}), version: row?.version ?? null };
+  }
+
+  /** PUT có khoá lạc quan (If-Match) — xem common/site-settings.ts */
+  async updateSwiperSettings(dto: SwiperSettingsDto, ifMatch?: string) {
+    const value = { autoPlayInterval: dto.autoPlayInterval, pauseOnHover: dto.pauseOnHover, showDots: dto.showDots };
+    await saveSettingVersioned(this.prisma, SWIPER_KEY, () => value, ifMatch);
     await this.afterChange();
-    return value;
+    return this.getSwiperSettingsForCms();
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────

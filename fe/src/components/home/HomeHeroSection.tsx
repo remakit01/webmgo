@@ -122,7 +122,7 @@ export default function HomeHeroSection({ hero, previewImageUrl }: HomeHeroSecti
                   return (
                     <div
                       key={i}
-                      className={`rounded-2xl bg-white border-2 border-slate-200 ${style.card} p-4 sm:p-4.5 hover:-translate-y-0.5 transition-all duration-200 shadow-2xs flex flex-col justify-between h-full`}
+                      className={`rounded-2xl bg-white border-2 border-slate-300/90 ${style.card} p-4 sm:p-4.5 hover:-translate-y-0.5 transition-all duration-200 shadow-2xs hover:shadow-xs flex flex-col justify-between h-full`}
                     >
                       <div
                         className={`text-2xl sm:text-3xl font-black leading-none tracking-tight ${style.value} tabular-nums`}

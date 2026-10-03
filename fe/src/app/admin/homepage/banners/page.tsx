@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import AdminHeader from '@/cms/components/AdminHeader';
 import { useConfirm } from '@/cms/components/ConfirmDialog';
-import { apiFetch } from '@/cms/lib/api-client';
+import { apiFetch, ifMatch, isConflict } from '@/cms/lib/api-client';
 import { fetchCurrentUser, type AuthUser } from '@/cms/lib/api-auth';
 
 interface AdminBanner {
@@ -51,12 +51,16 @@ interface TrashSettings {
   autoPurgeEnabled: boolean;
   retentionDays: number;
   lastRun: { at: string; by: string; purged: number } | null;
+  /** Phiên bản cài đặt (updatedAt) — gửi lại qua If-Match khi lưu */
+  version: string | null;
 }
 
 interface SwiperConfig {
   autoPlayInterval: number;
   pauseOnHover: boolean;
   showDots: boolean;
+  /** Phiên bản cài đặt (updatedAt) — gửi lại qua If-Match khi lưu */
+  version: string | null;
 }
 
 // Dữ liệu form; id rỗng = tạo mới. file = ảnh mới chọn (bắt buộc khi tạo).
@@ -179,6 +183,7 @@ export default function AdminBannersManagerPage() {
     try {
       const updated = await apiFetch<TrashSettings>('/banners/trash/settings', {
         method: 'PUT',
+        headers: ifMatch(trashSettings.version),
         body: JSON.stringify({
           autoPurgeEnabled: patch.autoPurgeEnabled ?? trashSettings.autoPurgeEnabled,
           retentionDays: patch.retentionDays ?? trashSettings.retentionDays,
@@ -191,7 +196,13 @@ export default function AdminBannersManagerPage() {
       showToast('Đã lưu cài đặt thùng rác');
     } catch (err) {
       setRetentionDraft(String(trashSettings.retentionDays));
-      showError(err);
+      if (isConflict(err)) {
+        // Người khác vừa đổi cài đặt -> tải giá trị mới nhất thay vì ghi đè
+        await loadTrash();
+        showToast('Cài đặt thùng rác vừa được người khác thay đổi — đã tải giá trị mới nhất, vui lòng chỉnh lại');
+      } else {
+        showError(err);
+      }
     }
   };
 
@@ -491,11 +502,25 @@ export default function AdminBannersManagerPage() {
     const updated = { ...swiperConfig, [key]: value };
     setSwiperConfig(updated);
     try {
-      await apiFetch('/banners/settings/swiper', { method: 'PUT', body: JSON.stringify(updated) });
+      const { version, ...body } = updated;
+      // Lấy lại phiên bản mới từ phản hồi để lần chỉnh tiếp theo không bị coi là xung đột
+      setSwiperConfig(
+        await apiFetch<SwiperConfig>('/banners/settings/swiper', {
+          method: 'PUT',
+          headers: ifMatch(version),
+          body: JSON.stringify(body),
+        }),
+      );
       showToast('Đã lưu cấu hình trình chiếu!');
     } catch (err) {
-      setSwiperConfig(previous);
-      showError(err);
+      if (isConflict(err)) {
+        // Người khác vừa đổi cấu hình -> hiển thị giá trị mới nhất thay vì ghi đè
+        setSwiperConfig(await apiFetch<SwiperConfig>('/banners/settings/swiper').catch(() => previous));
+        showToast('Cấu hình trình chiếu vừa được người khác thay đổi — đã tải giá trị mới nhất, vui lòng chỉnh lại');
+      } else {
+        setSwiperConfig(previous);
+        showError(err);
+      }
     }
   };
 
