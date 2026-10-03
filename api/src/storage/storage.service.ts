@@ -11,7 +11,7 @@ import {
 } from '@aws-sdk/client-s3';
 
 /** Prefix được phép đọc công khai không cần đăng nhập. Thêm prefix khi có module mới phục vụ file public. */
-const PUBLIC_PREFIXES = ['banners/'];
+const PUBLIC_PREFIXES = ['banners/', 'homepage/'];
 
 /** Prefix chứa file gốc (không công khai), dùng để tạo lại biến thể khi đổi cỡ/chất lượng. */
 export const PRIVATE_PREFIX = 'private/';

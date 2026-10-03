@@ -1,0 +1,152 @@
+{
+  "Metadata": {
+    "title": "Remak® FireOFF MgO Fire-Rated Board - QCVN 06:2022/BXD Compliant",
+    "description": "Factory-direct supplier of MgO (magnesium oxide) fire-rated boards: Class A1 non-combustible, EI 15 - EI 120. 100% water resistant, zero corrosion, 30% lighter than cement board. Wholesale pricing and free samples!",
+    "ogDescription": "Factory-direct MgO (magnesium oxide) fire-rated boards: Class A1, EI 15 - EI 120. 100% water resistant, zero corrosion, 30% lighter than cement board.",
+    "keywords": "mgo board, fire rated mgo board, magnesium oxide board, remak mgo, fire rated duct board, ei 60 fire wall, acoustic partition, mgo floor board",
+    "ogLocale": "en_US"
+  },
+  "Common": {
+    "skipToContent": "Skip to main content",
+    "hotline": "Hotline: {phone}",
+    "logoAlt": "Remak MGO Fireproof Board",
+    "viewAll": "View all →",
+    "hot": "HOT"
+  },
+  "LanguageSwitcher": {
+    "label": "Language",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "Header": {
+    "topBar": {
+      "brand": "Remak® FireOFF:",
+      "tagline": "MgO fire-rated board supplier compliant with QCVN 06:2022/BXD",
+      "about": "About us",
+      "news": "News"
+    },
+    "nav": {
+      "home": "Home",
+      "products": "Products",
+      "applications": "Applications",
+      "projects": "Projects",
+      "guide": "Installation",
+      "quote": "Quote",
+      "dealer": "Dealers"
+    },
+    "homeMenu": {
+      "heading": "Sections on the Home Page",
+      "backToTop": "Back to top →",
+      "toggle": "Show home page sections"
+    },
+    "sections": {
+      "banner": { "name": "Featured Banners", "desc": "Image slider & fire-safety certifications" },
+      "hero": { "name": "Introduction & Certifications", "desc": "Remak® FireOFF brand, Class A1" },
+      "benefits": { "name": "4 Key Advantages", "desc": "1,200°C fire resistance, waterproof, rust-free" },
+      "specs": { "name": "MgO Specifications", "desc": "5mm - 18mm thickness & technical data" },
+      "comparison": { "name": "Material Comparison", "desc": "MgO vs cement board vs gypsum vs plywood" },
+      "applications": { "name": "Top 4 Applications", "desc": "Ducts, partitions, floors, fire doors" },
+      "sample": { "name": "Free Sample Kit", "desc": "6 real cut samples + IBST test reports, delivered" },
+      "projectsNews": { "name": "Projects & News", "desc": "Landmark projects & technical insights" },
+      "calculator": { "name": "Online Material Estimator", "desc": "Quickly estimate boards & cost" },
+      "faq": { "name": "Fire Safety FAQ", "desc": "QCVN 06:2022/BXD explained" }
+    },
+    "productsMenu": {
+      "heading": "Remak® FireOFF product range",
+      "all": "• All products (>)",
+      "duct": { "name": "MgO Fire-Rated Duct Board", "desc": "DuctBoard 5–12mm, condensation resistant", "tag": "EI 30–120" },
+      "standard": { "name": "Standard Fire-Rated MgO Board", "desc": "Walls & ceilings, Euroclass A1", "tag": "Class A1" },
+      "floor": { "name": "MgO Structural Floor Board", "desc": "850 kg/m² load capacity, 15–18mm", "tag": "REI 180" },
+      "acoustic": { "name": "Acoustic & Decorative MgO Board", "desc": "STC 50–55 dB sound insulation, fine finish", "tag": "Acoustic" }
+    },
+    "applicationsMenu": {
+      "heading": "Fire protection systems",
+      "duct": { "name": "Fire-Rated Duct Encasement", "desc": "Smoke extraction, fresh air, pressurisation", "tag": "EI 30–120" },
+      "karaoke": { "name": "Karaoke / Bar Partitions", "desc": "52 dB sound insulation + fire spread protection", "tag": "EI 60–120" },
+      "floor": { "name": "Floors for Pre-Engineered Buildings", "desc": "Warehouses, steel factories, mezzanines", "tag": "REI 180" },
+      "factory": { "name": "Industrial Walls & Ceilings", "desc": "Cold storage enclosures, production halls", "tag": "EI 60" },
+      "door": { "name": "Fire-Rated Steel Door Cores", "desc": "Cores for emergency exit & stairwell doors", "tag": "EI 30–90" }
+    },
+    "projectsMenu": {
+      "heading": "Featured projects",
+      "samsung": { "name": "Samsung Yen Phong Factory", "desc": "Yen Phong IP, Bac Ninh · 45,000 m²", "tag": "IP" },
+      "lotte": { "name": "Lotte Mall West Lake", "desc": "Vo Chi Cong, Hanoi · 28,500 m²", "tag": "Retail" },
+      "viettel": { "name": "Viettel IDC Data Center", "desc": "Hoa Lac Hi-Tech Park, Hanoi · 16,000 m²", "tag": "Infra" }
+    },
+    "actions": {
+      "search": "Search",
+      "sample": "Get Free Samples",
+      "sampleShort": "Samples"
+    },
+    "mobile": {
+      "openMenu": "Menu",
+      "dialogLabel": "Mobile navigation menu",
+      "navLabel": "Mobile menu",
+      "closeMenu": "Close menu",
+      "logoAlt": "Remak Logo",
+      "projects": "Featured projects",
+      "guide": "Installation guide",
+      "quote": "2026 Price quote",
+      "dealer": "Dealer program",
+      "warehouse": "Warehouse: Lai Yen Industrial Cluster, Hoai Duc, Hanoi"
+    }
+  },
+  "Footer": {
+    "about": "Remak® MGO FireOFF – A pioneering manufacturer and distributor of next-generation magnesium oxide (MgO) fire-rated boards, tested to Vietnam fire safety standard QCVN 06:2022/BXD.",
+    "headOffice": "Head office: Lai Yen Industrial Cluster, Hoai Duc, Hanoi",
+    "factory": "Factory: Mong Hoa Industrial Park, Hoa Binh",
+    "email": "Email: {email}",
+    "productsTitle": "MgO Board Range",
+    "products": {
+      "all": "All Products (>)",
+      "duct": "MgO Duct Board (EI 30 - 120)",
+      "standard": "Standard MgO Board (Class A1)",
+      "floor": "MgO Structural Floor Board (15-18mm)",
+      "acoustic": "Acoustic & Decorative MgO Board",
+      "mos": "Corrosion-Free Sulfate MgO (MOS) Board"
+    },
+    "solutionsTitle": "Fire Protection Solutions",
+    "solutions": {
+      "duct": "Fire-rated duct encasement (EI 30 - 120)",
+      "karaoke": "Acoustic karaoke / bar partitions",
+      "floor": "Floors for pre-engineered steel buildings",
+      "factory": "Fire walls for industrial warehouses",
+      "ibst": "Download IBST fire test reports (PDF)"
+    },
+    "policyTitle": "Policies & Partnership",
+    "policy": {
+      "dealer": "Become a Distributor",
+      "delivery": "On-site delivery policy",
+      "warranty": "10-year rust-free warranty",
+      "faq": "Frequently asked questions (FAQ)",
+      "quote": "Get a Wholesale Project Quote"
+    },
+    "copyright": "© {year} Remak® Vietnam. All rights reserved by Remak Construction and Interior JSC.",
+    "standard": "Fire safety standard QCVN 06:2022/BXD",
+    "eco": "Asbestos-free - 100% eco-friendly"
+  },
+  "Search": {
+    "placeholder": "Type a thickness (10mm), duct, EI 60 wall, IBST...",
+    "popular": "Popular searches",
+    "categories": {
+      "product": "Products",
+      "application": "Solutions",
+      "document": "Documents"
+    },
+    "badges": {
+      "duct": "Duct",
+      "wall": "Partition",
+      "floor": "Floor",
+      "cert": "Certificate",
+      "guide": "Guide"
+    },
+    "moreResults": "Show {count} more results",
+    "noResults": "No results found",
+    "noResultsHint": "Try another keyword or contact a Remak engineer for advice",
+    "callHotline": "Call hotline: {phone}",
+    "resultCount": "{count} results",
+    "hint": "Search products, solutions and technical documents",
+    "close": "Close",
+    "open": "Open"
+  }
+}

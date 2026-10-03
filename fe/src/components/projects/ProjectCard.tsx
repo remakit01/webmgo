@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
+import { useLocale } from 'next-intl';
+import { toLocalePath } from '@/i18n/paths';
 import { MapPin, Ruler, Flame, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { ProjectItem } from '@/types';
 
@@ -56,7 +58,9 @@ function getSolutionHref(project: ProjectItem) {
 /* ── Standard card ── */
 export default function ProjectCard({ project }: { project: ProjectItem }) {
   const accent = CATEGORY_ACCENTS[project.category];
-  const href = getSolutionHref(project);
+  const locale = useLocale();
+  // Điều hướng bằng window.location -> phải tự đổi URL theo ngôn ngữ (LocaleLink không xử lý được chỗ này)
+  const href = toLocalePath(getSolutionHref(project), locale);
 
   return (
     <Link
@@ -137,7 +141,9 @@ export default function ProjectCard({ project }: { project: ProjectItem }) {
 /* ── Featured / hero card ── */
 export function ProjectCardFeatured({ project }: { project: ProjectItem }) {
   const accent = CATEGORY_ACCENTS[project.category];
-  const href = getSolutionHref(project);
+  const locale = useLocale();
+  // Điều hướng bằng window.location -> phải tự đổi URL theo ngôn ngữ (LocaleLink không xử lý được chỗ này)
+  const href = toLocalePath(getSolutionHref(project), locale);
 
   return (
     <Link

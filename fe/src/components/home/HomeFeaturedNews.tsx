@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { Calendar, Clock, ArrowRight, Newspaper, ChevronRight } from 'lucide-react';
 import SectionHeading from '@/components/ui/SectionHeading';
 

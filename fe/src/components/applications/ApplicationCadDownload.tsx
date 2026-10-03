@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from '@/components/ui/LocaleLink';
 import {
   FileCode2,
   Download,
@@ -166,13 +167,13 @@ export default function ApplicationCadDownload({
             File CAD mặt cắt cấu tạo cho kiến trúc sư và hồ sơ nghiệm thu thực tế cho nhà thầu PCCC
           </p>
         </div>
-        <a
+        <Link
           href="/bao-gia"
           className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-xs sm:text-sm transition-all flex-shrink-0 shadow-md shadow-[#5F8A03]/30 self-start md:self-auto"
         >
           <FolderArchive size={15} />
           <span>Tải Trọn Bộ (.ZIP)</span>
-        </a>
+        </Link>
       </div>
 
       <div className="p-6 sm:p-10">

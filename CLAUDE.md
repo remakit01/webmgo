@@ -81,3 +81,7 @@ Mỗi khi Claude (hoặc người) làm sai một điều mà đọc code chưa 
 - [cms] Đừng tạo code trong thư mục `cms/` hay dùng `pnpm dev:cms` → CMS đã gộp vào `fe/src/app/admin` + `fe/src/cms`.
 - [cms] Đừng lưu access token/session trong `localStorage` → auth dùng httpOnly cookie, client chỉ `credentials: 'include'`.
 - [git] Đừng mở PR vào `main` → base luôn là `dev`.
+- [infra] Đừng gửi JSON có tiếng Việt bằng `curl -d "$BIEN"` trong Git Bash/Windows → ghi ra file UTF-8 rồi `curl --data-binary @file.json`. Biến shell làm hỏng ký tự (thành `?`/`�`) và ghi đè dữ liệu thật.
+- [api] Đừng thử nghiệm bằng cách ghi vào dữ liệu CMS thật khi người khác có thể đang sửa → chỉ ghi lại đúng nội dung vừa đọc (kèm `If-Match`) hoặc dùng bản ghi test riêng.
+- [fe] Đừng viết `'\.'` trong regex `matcher` của `src/proxy.ts` → phải là `'\\.'`. Chuỗi JS `'\.'` thành `.`, matcher khớp mọi URL dài hơn "/" và proxy bỏ qua toàn bộ route tiếng Việt (404).
+- [fe] Đừng dùng `next/link` hoặc `<a href="/...">` cho link nội bộ ở web khách hàng → dùng `Link` từ `@/components/ui/LocaleLink` (href viết URL tiếng Việt), nếu không trang `/en` sẽ dẫn về bản tiếng Việt.

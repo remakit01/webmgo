@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { Search, Star, X, PhoneCall, ArrowRight } from 'lucide-react';
 import { DOCUMENTS, type DocType } from '@/data/documents';
 import { TYPE_CONFIG } from './config';

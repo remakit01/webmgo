@@ -8,7 +8,10 @@ import { ConfigService } from '@nestjs/config';
 import configuration from '../src/config/configuration.js';
 import { StorageService } from '../src/storage/storage.service.js';
 import { ImageProcessorService } from '../src/storage/image-processor.service.js';
+import { MediaService } from '../src/storage/media.service.js';
 import { BannersService } from '../src/banners/banners.service.js';
+import { HeroService, HERO_CONTENT_KEY } from '../src/homepage/hero.service.js';
+import type { UpdateHeroDto } from '../src/homepage/dto/hero.dto.js';
 
 // Ảnh banner gốc dùng một lần để nạp dữ liệu ban đầu; sau đó quản lý qua CMS (ảnh nằm trong MinIO)
 const BANNER_IMAGE_DIR = fileURLToPath(new URL('../../fe/public/images/banners/', import.meta.url));
@@ -33,6 +36,30 @@ const DEFAULT_BANNERS = [
     linkUrl: '/giai-phap-ung-dung#san-mgo',
   },
 ];
+
+// Nội dung hero ban đầu = đúng nội dung đang hiển thị trên web trước khi có CMS
+const HERO_IMAGE_FILE = fileURLToPath(new URL('../../fe/public/images/mgo-mesh.jpg', import.meta.url));
+const DEFAULT_HERO: UpdateHeroDto = {
+  title: 'Tấm Chống Cháy MGO Remak®',
+  subtitle: 'Bảo vệ kết cấu PCCC chuyên sâu',
+  paragraphs: [
+    'Khoáng vô cơ Magie Oxit chịu lửa **1.200°C**, kháng ẩm tuyệt đối và chống ăn mòn. Sản xuất từ MgO gốc Sulfate (MgSO₄) — loại bỏ hoàn toàn ăn mòn đinh vít và hiện tượng “chảy nước” mùa nồm ẩm.',
+    'Nhẹ hơn Cemboard 30%, dễ cắt khoan, không chứa Amiăng, đạt kiểm định PCCC QCVN 06:2022/BXD cho ống gió, vách ngăn chống cháy, lót sàn chịu tải và lõi cửa thép.',
+  ],
+  primaryCta: { text: 'Nhận Mẫu Thử Miễn Phí', link: '/nhan-mau-thu' },
+  secondaryCta: { text: 'Dự Toán Khối Lượng (m²)', link: '#du-toan-vat-tu' },
+  stats: [
+    { value: '1.200°C', label: 'Chịu nhiệt', sublabel: 'Chống cháy A1', accent: 'orange' },
+    { value: '0%', label: 'Trương nở ẩm', sublabel: 'Kháng nước tuyệt đối', accent: 'green-dark' },
+    { value: '-30%', label: 'Nhẹ hơn Cemboard', sublabel: 'Giảm tải kết cấu', accent: 'slate' },
+    { value: 'Zero', label: 'Chloride', sublabel: '0% rỉ sét đinh vít', accent: 'green' },
+  ],
+  media: {
+    frameTitle: 'Cấu Trúc Tấm MGO Thực Tế',
+    badge: 'Công Nghệ Sulfate',
+    alt: 'Tấm chống cháy MGO Remak kết cấu sợi lưới thủy tinh đa tầng',
+  },
+};
 
 const DEFAULT_SWIPER = { autoPlayInterval: 3500, pauseOnHover: true, showDots: false };
 const DEFAULT_TRASH_SETTINGS = { autoPurgeEnabled: true, retentionDays: 30 };
@@ -84,11 +111,25 @@ async function main() {
   console.log(`- Editor: Username: "${editor.username}" | Email: "${editor.email}" | Password: "${editorPassword}"`);
   console.log('----------------------------------------------------');
 
-  await seedBanners();
+  const media = await createMediaService();
+  await seedBanners(media);
+  await seedHero(media);
 }
 
+// Dùng lại đúng luồng của API: sharp -> biến thể WebP/AVIF -> MinIO -> DB
+async function createMediaService() {
+  const storage = new StorageService(new ConfigService(configuration()));
+  await storage.onModuleInit();
+  return new MediaService(storage, new ImageProcessorService());
+}
+
+// Seed không cần cache Redis / revalidate FE (build FE sau sẽ lấy dữ liệu mới)
+const noop = async () => undefined;
+const noCache = { get: async () => null, getJson: async () => null, set: noop, setJson: noop, del: noop, delCache: noop } as never;
+const noRevalidate = { trigger: noop } as never;
+
 /** Chỉ nạp khi bảng banners trống, để không ghi đè dữ liệu đã chỉnh trong CMS. */
-async function seedBanners() {
+async function seedBanners(media: MediaService) {
   await prisma.siteSetting.upsert({
     where: { key: 'homepage.banner.swiper' },
     create: { key: 'homepage.banner.swiper', value: DEFAULT_SWIPER },
@@ -106,23 +147,25 @@ async function seedBanners() {
     return;
   }
 
-  // Dùng lại đúng luồng của API: sharp -> biến thể WebP/AVIF -> MinIO -> DB
-  const storage = new StorageService(new ConfigService(configuration()));
-  await storage.onModuleInit();
-  const noop = async () => undefined;
-  const banners = new BannersService(
-    prisma as never,
-    { get: async () => null, set: noop, del: noop } as never, // không cần cache Redis khi seed
-    storage,
-    new ImageProcessorService(),
-    { trigger: noop } as never, // FE build sau sẽ lấy dữ liệu mới
-  );
+  const banners = new BannersService(prisma as never, noCache, media, noRevalidate);
 
   for (const { file, ...data } of DEFAULT_BANNERS) {
     const buffer = await readFile(`${BANNER_IMAGE_DIR}${file}`);
     const banner = await banners.create(data, { buffer } as Express.Multer.File);
     console.log(`✅ Banner "${banner.title}" -> ${banner.imageUrl}`);
   }
+}
+
+/** Chỉ nạp khi chưa có hero, để không ghi đè nội dung đã chỉnh trong CMS. */
+async function seedHero(media: MediaService) {
+  if (await prisma.siteSetting.findUnique({ where: { key: HERO_CONTENT_KEY } })) {
+    console.log('ℹ️  Hero đã có dữ liệu — bỏ qua seed hero');
+    return;
+  }
+  const hero = new HeroService(prisma as never, noCache, media, noRevalidate);
+  await hero.update(DEFAULT_HERO);
+  const withImage = await hero.updateImage({ buffer: await readFile(HERO_IMAGE_FILE) } as Express.Multer.File);
+  console.log(`✅ Hero "${withImage.vi?.title}" -> ${withImage.image?.imageUrl}`);
 }
 
 main()

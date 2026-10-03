@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { ArrowRight, ShieldCheck, Scale, Activity, Wrench, Layers } from 'lucide-react';
 import { MGO_SPECS, THICKNESS_DATA } from '@/data/products';
 import SectionHeading from '@/components/ui/SectionHeading';

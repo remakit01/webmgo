@@ -1,66 +1,10 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/san-pham',
-        destination: '/products',
-      },
-      {
-        source: '/san-pham/:slug',
-        destination: '/products/:slug',
-      },
-      {
-        source: '/giai-phap-ung-dung',
-        destination: '/applications',
-      },
-      {
-        source: '/giai-phap-ung-dung/:slug',
-        destination: '/applications/:slug',
-      },
-      {
-        source: '/du-an',
-        destination: '/projects',
-      },
-      {
-        source: '/du-an/:slug',
-        destination: '/projects/:slug',
-      },
-      {
-        source: '/thu-vien-tai-lieu',
-        destination: '/tech-library',
-      },
-      {
-        source: '/huong-dan-thi-cong',
-        destination: '/construction-guide',
-      },
-      {
-        source: '/bao-gia',
-        destination: '/quote',
-      },
-      {
-        source: '/dai-ly',
-        destination: '/dealer',
-      },
-      {
-        source: '/nhan-mau-thu',
-        destination: '/sample-request',
-      },
-      {
-        source: '/gioi-thieu',
-        destination: '/about',
-      },
-      {
-        source: '/tin-tuc',
-        destination: '/news',
-      },
-      {
-        source: '/tin-tuc/:slug',
-        destination: '/news/:slug',
-      },
-    ];
-  },
-};
+// URL tiếng Việt (/san-pham...) và tiếng Anh (/en/products...) khai báo ở src/i18n/routing.ts (pathnames),
+// proxy (src/proxy.ts) định tuyến — không dùng rewrites nữa.
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-export default nextConfig;
+const nextConfig: NextConfig = {};
+
+export default withNextIntl(nextConfig);

@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { MGO_SPECS } from '@/data/products';
 import SectionHeading from '@/components/ui/SectionHeading';

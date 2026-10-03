@@ -1,10 +1,9 @@
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
-import { PRIVATE_PREFIX, StorageService } from '../storage/storage.service.js';
-import { ImageProcessorService } from '../storage/image-processor.service.js';
+import { MediaService } from '../storage/media.service.js';
+import { CONFLICT_MESSAGE } from '../common/site-settings.js';
 import { RevalidateService } from '../revalidate/revalidate.service.js';
 import type { CreateBannerDto, SwiperSettingsDto, TrashSettingsDto, UpdateBannerDto } from './dto/banner.dto.js';
 
@@ -30,12 +29,6 @@ export interface PurgeRun {
   purged: number;
 }
 
-interface StoredVariant {
-  width: number;
-  format: 'webp' | 'avif';
-  url: string;
-}
-
 // '' (người dùng xoá trường) -> null; undefined (không gửi) -> giữ nguyên
 const blankToNull = (v: string | undefined) => (v === undefined ? undefined : v.trim() === '' ? null : v.trim());
 
@@ -46,16 +39,15 @@ export class BannersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-    private readonly storage: StorageService,
-    private readonly images: ImageProcessorService,
+    private readonly media: MediaService,
     private readonly revalidate: RevalidateService,
   ) {}
 
   // ── Public ────────────────────────────────────────────────────────────────
 
   async findPublic() {
-    const cached = await this.redis.get(CACHE_KEY);
-    if (cached) return JSON.parse(cached) as unknown;
+    const cached = await this.redis.getJson<unknown>(CACHE_KEY);
+    if (cached) return cached;
 
     const [banners, swiper] = await Promise.all([
       this.prisma.banner.findMany({
@@ -75,7 +67,7 @@ export class BannersService {
       this.getSwiperSettings(),
     ]);
     const payload = { banners, swiper };
-    await this.redis.set(CACHE_KEY, JSON.stringify(payload), 'EX', CACHE_TTL);
+    await this.redis.setJson(CACHE_KEY, payload, CACHE_TTL);
     return payload;
   }
 
@@ -115,8 +107,10 @@ export class BannersService {
     const upload = file ? await this.uploadImage(file.buffer) : undefined;
 
     try {
-      const banner = await this.prisma.banner.update({
-        where: { id },
+      // Ghi có điều kiện updated_at = lúc đọc: nếu request khác (vd người khác cũng thay ảnh) đã ghi chen vào
+      // -> 0 dòng -> 409 và dọn ảnh vừa upload; nhờ vậy chỉ xoá ĐÚNG ảnh bị thay, không sót file rác MinIO.
+      const { count } = await this.prisma.banner.updateMany({
+        where: { id, updatedAt: existing.updatedAt, ...NOT_DELETED },
         data: {
           title: dto.title,
           alt: dto.alt,
@@ -127,6 +121,8 @@ export class BannersService {
           ...upload,
         },
       });
+      if (count === 0) throw new ConflictException(CONFLICT_MESSAGE);
+      const banner = await this.getOrThrow(id);
       if (upload) await this.removeImage(existing.imageKey);
       await this.afterChange();
       return banner;
@@ -293,42 +289,19 @@ export class BannersService {
     return (last._max.sortOrder ?? -1) + 1;
   }
 
-  /**
-   * Sinh biến thể và đẩy lên MinIO; mỗi lần upload dùng prefix mới nên URL luôn mới (cache immutable).
-   * File gốc lưu riêng dưới `private/` (không công khai) để sau này tạo lại biến thể khi đổi cỡ/chất lượng.
-   */
   private async uploadImage(input: Buffer) {
-    const { sourceFormat, variants } = await this.images.process(input, { minWidth: BANNER_MIN_WIDTH });
-    const imageKey = `banners/${randomUUID()}`;
-    const stored: StoredVariant[] = [];
-    try {
-      await this.storage.putObject(
-        `${PRIVATE_PREFIX}${imageKey}/original.${sourceFormat === 'jpeg' ? 'jpg' : sourceFormat}`,
-        input,
-        `image/${sourceFormat}`,
-      );
-      for (const v of variants) {
-        const url = await this.storage.putObject(`${imageKey}/${v.width}.${v.format}`, v.buffer, `image/${v.format}`);
-        stored.push({ width: v.width, format: v.format, url });
-      }
-    } catch (err) {
-      await this.removeImage(imageKey);
-      throw err;
-    }
-    const fallback = stored.filter((s) => s.format === 'webp').sort((a, b) => b.width - a.width)[0];
-    return { imageKey, imageUrl: fallback.url, images: stored as unknown as object };
+    const { imageKey, imageUrl, images } = await this.media.uploadImage('banners', input, {
+      minWidth: BANNER_MIN_WIDTH,
+    });
+    return { imageKey, imageUrl, images: images as unknown as object };
   }
 
-  /** Xoá cả biến thể public lẫn file gốc private; lỗi dọn dẹp không chặn nghiệp vụ. */
-  private async removeImage(imageKey: string) {
-    await Promise.all([
-      this.storage.deletePrefix(`${imageKey}/`),
-      this.storage.deletePrefix(`${PRIVATE_PREFIX}${imageKey}/`),
-    ]).catch(() => undefined);
+  private removeImage(imageKey: string) {
+    return this.media.removeImage(imageKey);
   }
 
   private async afterChange() {
-    await this.redis.del(CACHE_KEY);
+    await this.redis.delCache(CACHE_KEY);
     await this.revalidate.trigger(REVALIDATE_TAG);
   }
 }

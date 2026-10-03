@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import StatsCounter from './StatsCounter';
 
 export default function ProjectsHero() {
