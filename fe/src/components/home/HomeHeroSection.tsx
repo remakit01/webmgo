@@ -1,149 +1,186 @@
-'use client';
-
 import React from 'react';
-import Link from 'next/link';
-import { Flame, Droplets, Feather, ShieldCheck, Package, Calculator } from 'lucide-react';
+import Link from '@/components/ui/LocaleLink';
+import InlineBold from '@/components/ui/InlineBold';
+import ResponsivePicture from '@/components/ui/ResponsivePicture';
+import type { HeroAccent, HeroCta, HeroContent, HomeHero } from '@/types/homepage';
 
-export default function HomeHeroSection() {
+/**
+ * Màu nhấn của 4 thẻ số liệu: chỉ các token brand (khai báo đủ chuỗi class để Tailwind sinh CSS).
+ * CMS dùng chung map này cho ô chọn màu.
+ */
+export const HERO_ACCENT_STYLES: Record<HeroAccent, { label: string; value: string; card: string; swatch: string }> = {
+  orange: {
+    label: 'Cam',
+    value: 'text-remak-orange',
+    card: 'hover:border-remak-orange hover:bg-remak-orange-light/40',
+    swatch: 'bg-remak-orange',
+  },
+  'green-dark': {
+    label: 'Xanh đậm',
+    value: 'text-remak-green-dark',
+    card: 'hover:border-remak-green-dark hover:bg-remak-green-light/40',
+    swatch: 'bg-remak-green-dark',
+  },
+  green: {
+    label: 'Xanh lá',
+    value: 'text-remak-green',
+    card: 'hover:border-remak-green hover:bg-remak-green-light/40',
+    swatch: 'bg-remak-green',
+  },
+  slate: {
+    label: 'Đen',
+    value: 'text-slate-900',
+    card: 'hover:border-remak-green-dark hover:bg-remak-green-light/40',
+    swatch: 'bg-slate-900',
+  },
+};
+
+/** Link nội bộ dùng next/link; anchor (#) và link ngoài dùng thẻ a */
+function CtaLink({ cta, className }: { cta: HeroCta; className: string }) {
+  if (cta.link.startsWith('/')) {
+    return (
+      <Link href={cta.link} className={className}>
+        {cta.text}
+      </Link>
+    );
+  }
+  const external = /^https?:\/\//.test(cta.link);
+  return (
+    <a
+      href={cta.link}
+      className={className}
+      {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
+      {cta.text}
+    </a>
+  );
+}
+
+interface HomeHeroSectionProps {
+  hero: HeroContent & { image: HomeHero['image'] | null };
+  /**
+   * Ảnh xem trước chưa upload (blob URL) — chỉ CMS dùng. Trang chủ luôn dùng hero.image.
+   */
+  previewImageUrl?: string;
+}
+
+/**
+ * Tiêu đề & điểm nhấn đầu trang chủ. Server Component: dữ liệu từ API (ISR), không có state.
+ * CMS cũng render chính component này để xem trước đúng như trang thật.
+ */
+export default function HomeHeroSection({ hero, previewImageUrl }: HomeHeroSectionProps) {
+  const hasImage = Boolean(previewImageUrl || hero.image);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-[#F8FAFC] pt-6 pb-16">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50/50 to-[#F8FAFC] pt-4 sm:pt-6 pb-12 sm:pb-16 font-sans">
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          
-          <div className="lg:col-span-7 space-y-6">
-            
-
-
-            {/* 2. Tiêu đề chính lớn */}
-            <h1 className="animate-hero-fade-up delay-200 text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight">
-              Tấm Chống Cháy MGO Remak®
-              <span className="block text-xl sm:text-2xl lg:text-3xl font-semibold text-slate-600 mt-2">
-                Bảo vệ kết cấu PCCC chuyên sâu
-              </span>
-            </h1>
-
-            {/* 3. Đoạn mô tả kỹ thuật */}
-            <div className="animate-hero-fade-up delay-300 max-w-2xl text-base text-slate-600 leading-relaxed space-y-3">
-              <p>
-                Khoáng vô cơ Magie Oxit chịu lửa <strong>1.200°C</strong>, kháng ẩm tuyệt đối và chống ăn mòn. Đốt thử nghiệm đạt chuẩn kiểm định IBST cho ống gió, vách ngăn và sàn chịu tải.
-              </p>
-              <p>
-                Sản xuất từ MgO gốc Sulfate (MgSO₄) — loại bỏ hoàn toàn ăn mòn vít ốc và hiện tượng &quot;chảy nước&quot; mùa nồm ẩm của MGO gốc Clorua truyền thống. Nhẹ hơn Cemboard 30%, dễ cắt khoan, không chứa Amiăng, không phát thải VOC.
-              </p>
-              <p>
-                Ứng dụng: bọc ống gió PCCC, vách ngăn chống cháy, lót sàn chịu tải và lõi cửa thép. Đạt chuẩn PCCC QCVN 06:2022/BXD, hồ sơ nghiệm thu đầy đủ.
-              </p>
-            </div>
-
-
-            {/* 4. Nút Call-To-Action xuất hiện đồng bộ */}
-            <div className="animate-hero-fade-up delay-400 flex flex-wrap gap-4 pt-2">
-              <Link
-                href="/nhan-mau-thu"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] text-white font-bold text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all flex items-center gap-2"
-              >
-                <Package size={18} />
-                <span>Nhận Mẫu Thử Miễn Phí</span>
-              </Link>
-
-              <a 
-                href="#du-toan" 
-                className="px-6 py-3 rounded-xl bg-white border-2 border-slate-200 text-slate-800 font-bold text-base hover:border-[#7CB305] hover:text-[#5F8A03] hover:bg-[#F4F9E8] transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-              >
-                <Calculator size={18} className="text-[#7CB305]" />
-                <span>Dự Toán Khối Lượng (m²)</span>
-              </a>
-            </div>
-
-            {/* 5. 4 Trust Stat Cards */}
-            <div className="animate-hero-fade-up delay-500 pt-6 border-t border-slate-200">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-
-                {/* Card 1 — Chống Cháy */}
-                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-[#F26522] p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#F26522' }}>
-                  <Flame size={16} className="mb-2.5 text-[#F26522]" />
-                  <div className="text-2xl font-black leading-none tracking-tight text-[#F26522]">1.200°C</div>
-                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Chịu nhiệt</div>
-                  <div className="text-[10px] mt-0.5 text-slate-400">Chống Cháy A1</div>
-                </div>
-
-                {/* Card 2 — Kháng Nước */}
-                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-[#5F8A03] p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#5F8A03' }}>
-                  <Droplets size={16} className="mb-2.5 text-[#5F8A03]" />
-                  <div className="text-2xl font-black leading-none tracking-tight text-[#5F8A03]">0%</div>
-                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Trương nở ẩm</div>
-                  <div className="text-[10px] mt-0.5 text-slate-400">Kháng nước tuyệt đối</div>
-                </div>
-
-                {/* Card 3 — Siêu Nhẹ */}
-                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-slate-600 p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#475569' }}>
-                  <Feather size={16} className="mb-2.5 text-slate-500" />
-                  <div className="text-2xl font-black leading-none tracking-tight text-slate-800">-30%</div>
-                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Nhẹ hơn Cemboard</div>
-                  <div className="text-[10px] mt-0.5 text-slate-400">Thi công nhanh hơn</div>
-                </div>
-
-                {/* Card 4 — Zero Chloride */}
-                <div className="group rounded-2xl bg-white border border-slate-200 border-t-4 hover:border-[#7CB305] p-4 hover:-translate-y-0.5 transition-all duration-200" style={{ borderTopColor: '#7CB305' }}>
-                  <ShieldCheck size={16} className="mb-2.5 text-[#7CB305]" />
-                  <div className="text-2xl font-black leading-none tracking-tight text-[#7CB305]">Zero</div>
-                  <div className="text-[11px] font-bold mt-1.5 text-slate-800">Chloride</div>
-                  <div className="text-[10px] mt-0.5 text-slate-400">0% rỉ sét đinh vít</div>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
-
-          {/* CỘT PHẢI: KHUNG TRÌNH DIỄN SẢN PHẨM CHUẨN THIẾT KẾ B2B (KHÔNG CHE KHUẤT ẢNH, GỌN GÀNG TINH TẾ) */}
-          <div className="lg:col-span-5">
-            <div className="animate-hero-scale-in delay-300 bg-white rounded-3xl p-3.5 sm:p-4 shadow-xl border border-slate-200/90 transition-all duration-500 hover:shadow-2xl">
-              
-              {/* Card Header: Tiêu đề mẫu + Badge bảo hành gọn gàng bên trong khung */}
-              <div className="flex items-center justify-between px-2 py-1.5 mb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#7CB305]"></span>
-                  <span className="text-xs font-bold text-slate-800 tracking-wide uppercase">
-                    Cấu Trúc Tấm MGO Thực Tế
-                  </span>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-stretch">
+          {/* CỘT TRÁI: TIÊU ĐỀ, MÔ TẢ & 4 KHỐI THÔNG SỐ (7/12; toàn chiều rộng nếu không có ảnh) */}
+          <div className={`${hasImage ? 'lg:col-span-7' : 'lg:col-span-12'} flex flex-col justify-between space-y-6`}>
+            <div className="space-y-6">
+              {/* 1. Tiêu đề chính */}
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight text-balance">
+                  {hero.title}
+                  {hero.subtitle && (
+                    <span className="block text-xl sm:text-2xl lg:text-3xl font-bold text-remak-green-dark mt-2">
+                      {hero.subtitle}
+                    </span>
+                  )}
+                </h1>
               </div>
 
-              {/* Hình ảnh sản phẩm thông thoáng 100%, KHÔNG BỊ BẤT KỲ BADGE NÀO CHE KHUẤT */}
-              <div className="relative rounded-2xl overflow-hidden bg-slate-100 aspect-[4/3] group">
-                <img 
-                  src="/images/mgo-mesh.jpg" 
-                  alt="Tấm chống cháy MGO Remak kết cấu sợi lưới thủy tinh đa tầng"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              {/* 2. Đoạn mô tả kỹ thuật (hỗ trợ **in đậm** từ CMS) */}
+              <div className="max-w-2xl text-sm sm:text-base text-slate-600 leading-relaxed space-y-2.5 font-normal">
+                {hero.paragraphs.map((p, i) => (
+                  <p key={i}>
+                    <InlineBold text={p} strongClassName="font-bold text-slate-900" />
+                  </p>
+                ))}
+              </div>
+
+              {/* 3. Nút Call-To-Action */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-1">
+                <CtaLink
+                  cta={hero.primaryCta}
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-remak-orange to-[#EA580C] text-white font-bold text-sm sm:text-base shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all text-center"
                 />
+                {hero.secondaryCta && (
+                  <CtaLink
+                    cta={hero.secondaryCta}
+                    className="px-6 py-3.5 rounded-xl bg-white border-2 border-slate-200 text-slate-800 font-bold text-sm sm:text-base hover:border-remak-green hover:text-remak-green-dark hover:bg-remak-green-light transition-all shadow-2xs text-center cursor-pointer"
+                  />
+                )}
               </div>
+            </div>
 
-              {/* Thông tin kiểm định và nghiệm thu đặt trang trọng BÊN DƯỚI ẢNH */}
-              <div className="mt-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#7CB305] text-white flex items-center justify-center flex-shrink-0 font-extrabold text-xs shadow-sm">
-                    PCCC
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-slate-900">
-                      Đốt thử nghiệm thực tế tại Viện IBST
+            {/* 4. 4 KHỐI THÔNG SỐ (TEXT-ONLY, MÀU NHẤN THEO BẢNG BRAND) */}
+            <div className="pt-4 border-t border-slate-200/90 mt-auto">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {hero.stats.map((stat, i) => {
+                  const style = HERO_ACCENT_STYLES[stat.accent] ?? HERO_ACCENT_STYLES.slate;
+                  return (
+                    <div
+                      key={i}
+                      className={`rounded-2xl bg-white border-2 border-slate-200 ${style.card} p-4 sm:p-4.5 hover:-translate-y-0.5 transition-all duration-200 shadow-2xs flex flex-col justify-between h-full`}
+                    >
+                      <div
+                        className={`text-2xl sm:text-3xl font-black leading-none tracking-tight ${style.value} tabular-nums`}
+                      >
+                        {stat.value}
+                      </div>
+                      <div className="mt-3">
+                        <div className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">{stat.label}</div>
+                        {stat.sublabel && (
+                          <div className="text-[11px] font-medium text-slate-500 mt-0.5">{stat.sublabel}</div>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-slate-500">
-                      QCVN 06:2022/BXD • Hồ sơ nghiệm thu đầy đủ
-                    </div>
-                  </div>
-                </div>
-
-                <span className="hidden sm:inline-block text-xs font-bold text-[#F26522] bg-[#FEF3EC] border border-[#F26522]/20 px-2.5 py-1 rounded-lg flex-shrink-0">
-                  CO/CQ Đầy Đủ
-                </span>
+                  );
+                })}
               </div>
-
             </div>
           </div>
 
+          {/* CỘT PHẢI: KHUNG TRÌNH DIỄN HÌNH ẢNH SẢN PHẨM (5/12) */}
+          {hasImage && (
+            <div className="lg:col-span-5 flex flex-col">
+              <div className="bg-white rounded-3xl p-3.5 sm:p-4 shadow-lg border-2 border-slate-200 transition-all duration-300 hover:shadow-xl flex flex-col flex-1 h-full">
+                {(hero.media.frameTitle || hero.media.badge) && (
+                  <div className="flex items-center justify-between gap-2 px-1.5 py-1 mb-2.5">
+                    <span className="text-xs font-bold text-slate-800 tracking-wide uppercase">
+                      {hero.media.frameTitle}
+                    </span>
+                    {hero.media.badge && (
+                      <span className="text-[11px] font-bold text-remak-green-dark bg-remak-green-light border border-remak-green/30 px-2.5 py-0.5 rounded-full shrink-0">
+                        {hero.media.badge}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div className="relative flex-1 min-h-[280px] rounded-2xl overflow-hidden bg-slate-100 group">
+                  {previewImageUrl ? (
+                    <img
+                      src={previewImageUrl}
+                      alt={hero.media.alt}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    hero.image && (
+                      <ResponsivePicture
+                        image={hero.image}
+                        alt={hero.media.alt}
+                        sizes="(min-width: 1024px) 40vw, 100vw"
+                        priority
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

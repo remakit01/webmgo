@@ -5,6 +5,12 @@ export default () => ({
   cmsUrl: process.env.CMS_URL ?? 'http://localhost:3001',
   database: {
     url: process.env.DATABASE_URL,
+    // Pool kết nối mỗi instance API; tổng mọi instance phải < max_connections của Postgres (mặc định 100)
+    poolMax: parseInt(process.env.DB_POOL_MAX ?? '10', 10),
+    // Query treo quá lâu -> Postgres tự huỷ, không giữ kết nối/khoá mãi
+    statementTimeoutMs: parseInt(process.env.DB_STATEMENT_TIMEOUT_MS ?? '15000', 10),
+    // Transaction mở mà không làm gì (quên commit) -> Postgres tự cắt, nhả khoá
+    idleInTransactionTimeoutMs: parseInt(process.env.DB_IDLE_IN_TX_TIMEOUT_MS ?? '30000', 10),
   },
   jwt: {
     accessSecret: process.env.JWT_ACCESS_SECRET,

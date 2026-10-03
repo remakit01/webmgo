@@ -3,7 +3,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
 
 // Chỉ cho phép revalidate các tag đã biết
-const ALLOWED_TAGS = new Set(['banners']);
+const ALLOWED_TAGS = new Set(['banners', 'homepage-hero']);
 
 function secretMatches(provided: string | null, expected: string) {
   if (!provided) return false;

@@ -10,9 +10,12 @@ Dự án dùng **Next.js 16.3 + React 19.2**. API, quy ước và cấu trúc fi
 
 ```
 src/
-  app/                 # App Router. Route tiếng Anh; URL tiếng Việt map qua rewrites trong next.config.ts
-    admin/             # CMS (client-side, cần đăng nhập) — layout riêng, không dùng AppShell
+  app/                 # App Router — KHÔNG có app/layout.tsx; 2 root layout riêng:
+    [locale]/          # Web khách hàng (vi/en). Thư mục tên tiếng Anh; URL theo ngôn ngữ khai báo ở i18n/routing.ts
+    admin/             # CMS (client-side, cần đăng nhập) — root layout riêng, chỉ tiếng Việt, không i18n
     api/               # Route handlers (vd: /api/revalidate)
+  i18n/                # next-intl: routing.ts (bảng URL vi/en), paths.ts, request.ts
+  proxy.ts             # Định tuyến ngôn ngữ (Next 16: middleware -> proxy)
   cms/                 # Code riêng của CMS — import qua alias @cms/*
     components/  lib/
   components/
@@ -25,7 +28,16 @@ src/
 ```
 
 - Alias: `@/*` → `src/*`, `@cms/*` → `src/cms/*`. Dùng alias thay cho đường dẫn tương đối dài.
-- Thêm route public mới có slug tiếng Việt → thêm rewrite trong [next.config.ts](next.config.ts) và cập nhật [docs/ROUTES_CONTENT_MAP.md](docs/ROUTES_CONTENT_MAP.md).
+- Thêm route public mới → tạo thư mục trong `app/[locale]/`, khai báo URL vi/en trong `pathnames` của [src/i18n/routing.ts](src/i18n/routing.ts) và cập nhật [docs/ROUTES_CONTENT_MAP.md](docs/ROUTES_CONTENT_MAP.md). Không dùng `rewrites`.
+
+## Đa ngôn ngữ (next-intl)
+
+- Tiếng Việt mặc định **không tiền tố** (`/san-pham`), tiếng Anh dưới `/en` (`/en/products`).
+- **Link nội bộ ở web khách hàng:** dùng `Link` từ [@/components/ui/LocaleLink](src/components/ui/LocaleLink.tsx), href **viết bằng URL tiếng Việt** như cũ — tự đổi sang `/en/...` khi đang xem tiếng Anh. Không dùng `next/link` hay `<a href="/...">` cho link nội bộ; điều hướng bằng code thì bọc `toLocalePath()` ([src/i18n/paths.ts](src/i18n/paths.ts)).
+- **Nhãn giao diện** (menu, nút, footer…) nằm trong `messages/vi.json` + `messages/en.json`, dùng `useTranslations` / `getTranslations`. Thêm key ở **cả hai** file; key được kiểm tra kiểu theo `vi.json`.
+- **Nội dung** (tiêu đề, mô tả, thông số…) vẫn đến từ API/DB, không đưa vào messages.
+- Page/layout Server Component trong `[locale]` phải gọi `setRequestLocale(locale)` để giữ SSG/ISR.
+- Giai đoạn chuyển tiếp: trang `/en` đặt `noindex` (nội dung phần lớn còn tiếng Việt); chưa có `/en` trong sitemap/hreflang.
 
 ## Lấy dữ liệu
 

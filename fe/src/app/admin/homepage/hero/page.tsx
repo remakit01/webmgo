@@ -1,350 +1,413 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Eye, EyeOff, Filter, Loader2, RefreshCw } from 'lucide-react';
+import { NextIntlClientProvider } from 'next-intl';
 import AdminHeader from '@/cms/components/AdminHeader';
+import { useToast } from '@/cms/components/ConfirmDialog';
+import { apiFetch, ApiError } from '@/cms/lib/api-client';
+import HomeHeroSection from '@/components/home/HomeHeroSection';
+import { mergeHeroTranslation } from '@/lib/hero-i18n';
+import type { HeroContent, HomeHeroForCms } from '@/types/homepage';
+import HeroViForm from '@/cms/components/hero/HeroViForm';
+import HeroEnForm from '@/cms/components/hero/HeroEnForm';
+import LocaleTabs, { type CmsLocale } from '@/cms/components/hero/LocaleTabs';
+import {
+  EMPTY_CONTENT,
+  HERO_IMAGE_MIN_WIDTH,
+  ifMatch,
+  isTranslated,
+  linkErrors,
+  toTranslationDraft,
+  translatableEntries,
+  translationPatch,
+  type HeroTranslationDraft,
+} from '@/cms/components/hero/hero-form';
 
-interface HeroData {
-  title: string;
-  subtitle: string;
-  paragraph1: string;
-  paragraph2: string;
-  paragraph3: string;
-  cta1Text: string;
-  cta1Link: string;
-  cta2Text: string;
-  cta2Link: string;
-  trustCards: {
-    id: number;
-    value: string;
-    label: string;
-    sublabel: string;
-    accentColor: string;
-  }[];
-}
-
-const DEFAULT_HERO_DATA: HeroData = {
-  title: 'Tấm Chống Cháy MGO Remak®',
-  subtitle: 'Bảo vệ kết cấu phòng cháy chữa cháy chuyên sâu',
-  paragraph1: 'Khoáng vô cơ Magie Oxit chịu lửa 1.200°C, kháng ẩm tuyệt đối và chống ăn mòn. Đốt thử nghiệm đạt chuẩn kiểm định IBST cho ống gió, vách ngăn và sàn chịu tải.',
-  paragraph2: 'Sản xuất từ MgO gốc Sulfate (MgSO₄) — loại bỏ hoàn toàn ăn mòn vít ốc và hiện tượng "chảy nước" mùa nồm ẩm của MGO gốc Clorua truyền thống. Nhẹ hơn Cemboard 30%, dễ cắt khoan, không chứa Amiăng, an toàn tuyệt đối.',
-  paragraph3: 'Ứng dụng: bọc ống gió PCCC, vách ngăn chống cháy, lót sàn chịu tải và lõi cửa thép. Đạt chuẩn PCCC QCVN 06:2022/BXD, hồ sơ nghiệm thu đầy đủ.',
-  cta1Text: 'Nhận Mẫu Thử Miễn Phí',
-  cta1Link: '/nhan-mau-thu',
-  cta2Text: 'Dự Toán Khối Lượng',
-  cta2Link: '#du-toan',
-  trustCards: [
-    { id: 1, value: '1.200°C', label: 'Chịu nhiệt', sublabel: 'Chống Cháy A1', accentColor: '#F26522' },
-    { id: 2, value: '100%', label: 'Kháng nước', sublabel: 'Không rã ẩm ngâm 24h', accentColor: '#0EA5E9' },
-    { id: 3, value: '-30%', label: 'Trọng lượng', sublabel: 'Nhẹ hơn Cemboard', accentColor: '#5F8A03' },
-    { id: 4, value: '0%', label: 'Amiăng & Độc hại', sublabel: 'An toàn tuyệt đối', accentColor: '#10B981' },
-  ]
-};
+const PANEL_ID = 'hero-locale-panel';
 
 export default function AdminHeroManagerPage() {
-  const [heroData, setHeroData] = useState<HeroData>(DEFAULT_HERO_DATA);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = useToast();
+  const [saved, setSaved] = useState<HomeHeroForCms>({
+    vi: null,
+    en: {},
+    image: null,
+    versions: { vi: null, en: null, image: null },
+  });
+  const [draftVi, setDraftVi] = useState<HeroContent>(EMPTY_CONTENT);
+  const [draftEn, setDraftEn] = useState<HeroTranslationDraft>(toTranslationDraft(EMPTY_CONTENT, {}));
+  const [tab, setTab] = useState<CmsLocale>('vi');
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
+  const [fileError, setFileError] = useState<string | null>(null);
+  // conflict = 409: người khác đã lưu trong lúc đang sửa -> cần tải bản mới nhất
+  const [apiError, setApiError] = useState<{ tab: CmsLocale; message: string; conflict: boolean } | null>(null);
+  // Bộ lọc "chỉ hiện trường chưa dịch": chụp tập khoá lúc bật để ô không biến mất khi đang gõ
+  const [untranslatedFilter, setUntranslatedFilter] = useState<Set<string> | null>(null);
+  const [showPreview, setShowPreview] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const applySaved = (data: HomeHeroForCms) => {
+    setSaved(data);
+    const vi = data.vi ?? EMPTY_CONTENT;
+    setDraftVi(vi);
+    setDraftEn(toTranslationDraft(vi, data.en));
+  };
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('remak_admin_hero_data');
-      if (saved) {
-        setHeroData(JSON.parse(saved));
+    apiFetch<HomeHeroForCms>('/homepage/hero')
+      .then(applySaved)
+      .catch((err: unknown) => showToast(err instanceof Error ? err.message : 'Không tải được dữ liệu', 'error'))
+      .finally(() => setLoading(false));
+  }, [showToast]);
+
+  const savedVi = saved.vi ?? EMPTY_CONTENT;
+  const savedEnDraft = useMemo(() => toTranslationDraft(savedVi, saved.en), [savedVi, saved.en]);
+  const viDirty = file !== null || JSON.stringify(draftVi) !== JSON.stringify(savedVi);
+  const enDirty = JSON.stringify(draftEn) !== JSON.stringify(savedEnDraft);
+  const isDirty = viDirty || enDirty;
+
+  const entries = useMemo(() => translatableEntries(draftVi, draftEn), [draftVi, draftEn]);
+  const progress = { done: entries.filter(isTranslated).length, total: entries.length };
+
+  // Lỗi định dạng link (kiểm tra ngay trên máy, API kiểm tra lại): khoá "en." cho tab tiếng Anh
+  const errors = useMemo(
+    () =>
+      linkErrors({
+        'primaryCta.link': draftVi.primaryCta.link,
+        ...(draftVi.secondaryCta ? { 'secondaryCta.link': draftVi.secondaryCta.link } : {}),
+        'en.primaryCta.link': draftEn.primaryCta.link,
+        'en.secondaryCta.link': draftEn.secondaryCta.link,
+      }),
+    [draftVi, draftEn],
+  );
+
+  // Rời trang khi còn thay đổi chưa lưu -> trình duyệt hỏi lại
+  useEffect(() => {
+    if (!isDirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isDirty]);
+
+  // Kiểm tra kích thước ngay khi chọn (API kiểm tra lại); ảnh nhỏ sẽ mờ trên màn hình retina
+  const handlePickFile = (picked: File) => {
+    const url = URL.createObjectURL(picked);
+    const img = new Image();
+    img.onload = () => {
+      if (img.naturalWidth < HERO_IMAGE_MIN_WIDTH) {
+        URL.revokeObjectURL(url);
+        setFileError(
+          `Ảnh quá nhỏ (${img.naturalWidth}×${img.naturalHeight}px). Cần chiều rộng tối thiểu ${HERO_IMAGE_MIN_WIDTH}px, khuyến nghị 1200px trở lên.`,
+        );
+        return;
       }
-    } catch {
-      // Dùng dữ liệu mặc định
-    }
-  }, []);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setFile(picked);
+      setPreviewUrl(url);
+      setFileError(null);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      setFileError('Không đọc được tệp ảnh này');
+    };
+    img.src = url;
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const discardFile = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setFile(null);
+    setPreviewUrl(undefined);
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(null);
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length) {
+      setTab(errorKeys[0].startsWith('en.') ? 'en' : 'vi');
+      showToast('Vui lòng sửa các ô đang báo lỗi', 'error');
+      return;
+    }
+    if (!saved.image && !file) {
+      setTab('vi');
+      setFileError('Vui lòng chọn ảnh sản phẩm cho khung bên phải');
+      return;
+    }
+
+    setSaving(true);
+    let step: CmsLocale = 'vi';
+    // Mỗi phần ghi kèm phiên bản đang sửa (If-Match); phần nào lưu xong thì cập nhật ngay vào `saved`
+    // để nếu bước sau lỗi, phần đã lưu không bị coi là "chưa lưu" nữa.
+    let current = saved;
     try {
-      localStorage.setItem('remak_admin_hero_data', JSON.stringify(heroData));
-      showToast('Đã lưu thông tin tiêu đề và cam kết thành công!');
+      if (JSON.stringify(draftVi) !== JSON.stringify(savedVi)) {
+        // PUT: thay toàn bộ bản tiếng Việt (mọi trường bắt buộc)
+        current = await apiFetch<HomeHeroForCms>('/homepage/hero', {
+          method: 'PUT',
+          headers: ifMatch(current.versions.vi),
+          body: JSON.stringify(draftVi),
+        });
+        setSaved(current);
+      }
+      if (enDirty) {
+        step = 'en';
+        // PATCH: chỉ gửi các nhóm trường đã đổi
+        current = await apiFetch<HomeHeroForCms>('/homepage/hero/translations/en', {
+          method: 'PATCH',
+          headers: ifMatch(current.versions.en),
+          body: JSON.stringify(translationPatch(draftEn, savedEnDraft)),
+        });
+        setSaved(current);
+      }
+      if (file) {
+        step = 'vi';
+        const form = new FormData();
+        form.append('image', file);
+        current = await apiFetch<HomeHeroForCms>('/homepage/hero/image', {
+          method: 'PUT',
+          headers: ifMatch(current.versions.image),
+          body: form,
+        });
+        discardFile();
+      }
+      applySaved(current);
+      setUntranslatedFilter(null);
+      showToast('Đã lưu — trang chủ tiếng Việt và tiếng Anh đã được cập nhật', 'success');
     } catch (err) {
-      alert('Không thể lưu cấu hình: ' + err);
+      const message = err instanceof Error ? err.message : 'Lưu không thành công';
+      const conflict = err instanceof ApiError && err.status === 409;
+      setTab(step);
+      setApiError({ tab: step, message, conflict });
+      showToast(conflict ? 'Có người khác vừa lưu nội dung này' : message, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleReset = () => {
-    if (confirm('Khôi phục toàn bộ nội dung về thiết lập mặc định ban đầu?')) {
-      setHeroData(DEFAULT_HERO_DATA);
-      localStorage.removeItem('remak_admin_hero_data');
-      showToast('Đã khôi phục nội dung mặc định!');
+  /** Bỏ thay đổi đang sửa, tải bản mới nhất từ máy chủ (sau khi bị 409) */
+  const handleReloadLatest = async () => {
+    try {
+      applySaved(await apiFetch<HomeHeroForCms>('/homepage/hero'));
+      discardFile();
+      setApiError(null);
+      showToast('Đã tải bản mới nhất', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Không tải được dữ liệu', 'error');
     }
   };
 
-  const handleCardChange = (id: number, field: string, value: string) => {
-    setHeroData(prev => ({
-      ...prev,
-      trustCards: prev.trustCards.map(c => c.id === id ? { ...c, [field]: value } : c)
-    }));
+  const handleDiscard = () => {
+    applySaved(saved);
+    discardFile();
+    setFileError(null);
+    setApiError(null);
   };
+
+  const toggleFilter = () =>
+    setUntranslatedFilter((cur) => (cur ? null : new Set(entries.filter((en) => !isTranslated(en)).map((en) => en.key))));
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
+        <AdminHeader title="Quản Lý Tiêu Đề & Điểm Nhấn" />
+        <div className="p-8 text-xs text-slate-500 flex items-center gap-2" role="status">
+          <Loader2 size={14} className="animate-spin" /> Đang tải nội dung…
+        </div>
+      </div>
+    );
+  }
+
+  const previewHero =
+    tab === 'en'
+      ? { ...mergeHeroTranslation(draftVi, draftEn), image: saved.image }
+      : { ...draftVi, image: saved.image };
 
   return (
     <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
-        title="Quản Lý Tiêu Đề & Điểm Nhấn" 
+      <AdminHeader
+        title="Quản Lý Tiêu Đề & Điểm Nhấn"
         subtitle="Quản trị tiêu đề chính, mô tả kỹ thuật và các cam kết chất lượng ở đầu trang chủ"
       />
 
-      {/* Thông báo thao tác */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl text-xs font-semibold border border-slate-700">
-          {toastMessage}
-        </div>
-      )}
-
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
-        
-        {/* Thanh công cụ xem trước & khôi phục */}
-        <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
-          <div>
-            <h3 className="text-base font-bold text-slate-900">
-              Cấu Hình Nội Dung Giới Thiệu
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Nội dung hiển thị ngay phía dưới banner trên trang chủ
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
+      <form onSubmit={handleSave} className="p-4 sm:p-6 lg:p-8 space-y-6 w-full" noValidate={tab === 'en'}>
+        {/* CHỌN NGÔN NGỮ */}
+        <div className="flex items-end justify-between gap-3 flex-wrap">
+          <LocaleTabs
+            panelId={PANEL_ID}
+            active={tab}
+            onChange={setTab}
+            tabs={[
+              { locale: 'vi', label: 'Tiếng Việt', hint: 'Bản gốc · bắt buộc', dirty: viDirty },
+              { locale: 'en', label: 'English', hint: 'Bản dịch · trống = dùng tiếng Việt', dirty: enDirty, progress },
+            ]}
+          />
+          {tab === 'en' && progress.total > 0 && (
             <button
               type="button"
-              onClick={handleReset}
-              className="px-3.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 transition-colors cursor-pointer"
+              onClick={toggleFilter}
+              aria-pressed={untranslatedFilter !== null}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer shadow-2xs ${
+                untranslatedFilter
+                  ? 'border-[#7CB305]/50 bg-[#F4F9E8] text-[#5F8A03]'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              Khôi phục mặc định
+              <Filter size={13} aria-hidden="true" />
+              {untranslatedFilter ? `Đang lọc ${untranslatedFilter.size} trường chưa dịch — Hiện tất cả` : 'Chỉ hiện trường chưa dịch'}
             </button>
-          </div>
+          )}
         </div>
 
-        {/* KHUNG XEM TRƯỚC GIAO DIỆN */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
-          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700">
-              Xem Trước Trực Quan
-            </span>
-            <span className="text-[11px] text-slate-400">
-              Tự động phản ánh các thay đổi bên dưới
-            </span>
-          </div>
+        {/* XEM TRƯỚC THÔNG MINH (CÓ NÚT THU GỌN / MỞ RỘNG) */}
+        <div className="bg-white rounded-2xl border-2 border-slate-200/90 shadow-2xs overflow-hidden transition-all font-sans">
+          <div className="px-5 py-3 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#5F8A03]" />
+              <span className="text-xs font-bold text-slate-800">
+                Xem trước trực tiếp:
+              </span>
+              <span className="text-xs font-medium text-slate-500">
+                {tab === 'en'
+                  ? 'English (trường chưa dịch hiển thị bản tiếng Việt)'
+                  : 'Tiếng Việt (khớp 100% trang chủ)'}
+              </span>
+            </div>
 
-          <div className="p-6 sm:p-8 space-y-5 bg-gradient-to-b from-white to-slate-50/40">
-            <div className="max-w-4xl space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                {heroData.title}
-                <span className="block text-base sm:text-lg font-semibold text-slate-600 mt-1">
-                  {heroData.subtitle}
-                </span>
-              </h1>
-
-              <div className="text-xs sm:text-sm text-slate-600 space-y-2 leading-relaxed">
-                <p>{heroData.paragraph1}</p>
-                <p className="text-slate-500">{heroData.paragraph2}</p>
-              </div>
-
-              {/* Hai nút hành động */}
-              <div className="flex flex-wrap gap-2.5 pt-1">
-                <span className="px-4 py-2 rounded-lg bg-[#F26522] text-white font-bold text-xs shadow-xs">
-                  {heroData.cta1Text}
-                </span>
-                <span className="px-4 py-2 rounded-lg bg-white border border-slate-300 text-slate-800 font-semibold text-xs shadow-2xs">
-                  {heroData.cta2Text}
-                </span>
-              </div>
-
-              {/* 4 Thẻ Cam Kết */}
-              <div className="pt-4 border-t border-slate-200/80">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {heroData.trustCards.map(c => (
-                    <div 
-                      key={c.id} 
-                      className="rounded-lg bg-white border border-slate-200 border-t-2 p-3 shadow-2xs" 
-                      style={{ borderTopColor: c.accentColor }}
-                    >
-                      <div className="text-lg sm:text-xl font-bold leading-tight" style={{ color: c.accentColor }}>
-                        {c.value}
-                      </div>
-                      <div className="text-xs font-bold mt-1 text-slate-800">
-                        {c.label}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {c.sublabel}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowPreview(!showPreview)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition-all cursor-pointer shadow-2xs"
+              >
+                {showPreview ? (
+                  <>
+                    <EyeOff size={13} /> Thu gọn xem trước
+                  </>
+                ) : (
+                  <>
+                    <Eye size={13} /> Mở rộng xem trước
+                  </>
+                )}
+              </button>
             </div>
           </div>
+
+          {showPreview ? (
+            <div className="pointer-events-none select-none transition-all" lang={tab}>
+              {/* CMS không chạy dưới [locale] -> cấp ngữ cảnh ngôn ngữ cho link trong bản xem trước */}
+              <NextIntlClientProvider locale={tab} messages={{}}>
+                <HomeHeroSection hero={previewHero} previewImageUrl={previewUrl} />
+              </NextIntlClientProvider>
+            </div>
+          ) : (
+            <div className="px-5 py-3 text-center text-xs text-slate-500 bg-slate-50/50 flex items-center justify-center gap-2">
+              <span>Bản xem trước đang được thu gọn để bạn dễ dàng tập trung điền form bên dưới.</span>
+              <button
+                type="button"
+                onClick={() => setShowPreview(true)}
+                className="font-bold text-[#5F8A03] hover:underline cursor-pointer"
+              >
+                Hiện xem trước
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* FORM CHỈNH SỬA DỮ LIỆU */}
-        <form onSubmit={handleSave} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Cột trái: Văn bản & Nút bấm (8/12) */}
-            <div className="lg:col-span-8 bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-2xs space-y-4">
-              <h4 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2.5">
-                Văn Bản Giới Thiệu & Nút Hành Động
-              </h4>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">Tiêu đề chính *</label>
-                  <input
-                    type="text"
-                    required
-                    value={heroData.title}
-                    onChange={(e) => setHeroData({ ...heroData, title: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold focus:outline-none focus:border-[#5F8A03]"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-700">Tiêu đề phụ *</label>
-                  <input
-                    type="text"
-                    required
-                    value={heroData.subtitle}
-                    onChange={(e) => setHeroData({ ...heroData, subtitle: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold focus:outline-none focus:border-[#5F8A03]"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Đoạn văn mở đầu (Thông số và chuẩn kiểm định) *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={heroData.paragraph1}
-                  onChange={(e) => setHeroData({ ...heroData, paragraph1: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs leading-relaxed focus:outline-none focus:border-[#5F8A03]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700">Đoạn phân tích công nghệ (Gốc Sulfate không rỉ sét ốc vít) *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={heroData.paragraph2}
-                  onChange={(e) => setHeroData({ ...heroData, paragraph2: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs leading-relaxed focus:outline-none focus:border-[#5F8A03]"
-                />
-              </div>
-
-              {/* Cấu hình 2 Nút hành động */}
-              <div className="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
-                  <div className="text-xs font-bold text-slate-800">Nút Hành Động Chính (Cam)</div>
-                  <input
-                    type="text"
-                    value={heroData.cta1Text}
-                    onChange={(e) => setHeroData({ ...heroData, cta1Text: e.target.value })}
-                    placeholder="Chữ trên nút..."
-                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs font-semibold bg-white"
-                  />
-                  <input
-                    type="text"
-                    value={heroData.cta1Link}
-                    onChange={(e) => setHeroData({ ...heroData, cta1Link: e.target.value })}
-                    placeholder="Đường dẫn liên kết (VD: /nhan-mau-thu)..."
-                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white"
-                  />
-                </div>
-
-                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
-                  <div className="text-xs font-bold text-slate-800">Nút Hành Động Phụ (Trắng)</div>
-                  <input
-                    type="text"
-                    value={heroData.cta2Text}
-                    onChange={(e) => setHeroData({ ...heroData, cta2Text: e.target.value })}
-                    placeholder="Chữ trên nút..."
-                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs font-semibold bg-white"
-                  />
-                  <input
-                    type="text"
-                    value={heroData.cta2Link}
-                    onChange={(e) => setHeroData({ ...heroData, cta2Link: e.target.value })}
-                    placeholder="Đường dẫn liên kết (VD: #du-toan)..."
-                    className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Cột phải: 4 Thẻ Cam Kết (4/12) */}
-            <div className="lg:col-span-4 bg-white rounded-xl p-5 sm:p-6 border border-slate-200 shadow-2xs space-y-3">
-              <h4 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2.5">
-                4 Cam Kết Chất Lượng
-              </h4>
-
-              <div className="space-y-3">
-                {heroData.trustCards.map((card, idx) => (
-                  <div key={card.id} className="p-3 rounded-lg border border-slate-200 bg-slate-50/50 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700">Cam kết #{idx + 1}</span>
-                      <input 
-                        type="color" 
-                        value={card.accentColor} 
-                        onChange={(e) => handleCardChange(card.id, 'accentColor', e.target.value)}
-                        className="w-5 h-5 rounded cursor-pointer border-0"
-                        title="Màu viền thẻ"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="text"
-                        value={card.value}
-                        onChange={(e) => handleCardChange(card.id, 'value', e.target.value)}
-                        placeholder="Số liệu (1.200°C)"
-                        className="px-2.5 py-1.5 rounded border border-slate-300 text-xs font-bold bg-white"
-                      />
-                      <input
-                        type="text"
-                        value={card.label}
-                        onChange={(e) => handleCardChange(card.id, 'label', e.target.value)}
-                        placeholder="Tiêu đề (Chịu nhiệt)"
-                        className="px-2.5 py-1.5 rounded border border-slate-300 text-xs font-semibold bg-white"
-                      />
-                    </div>
-                    <input
-                      type="text"
-                      value={card.sublabel}
-                      onChange={(e) => handleCardChange(card.id, 'sublabel', e.target.value)}
-                      placeholder="Mô tả phụ (Chống Cháy A1)"
-                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 text-xs bg-white"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Thanh lưu cố định */}
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">
-              Các thay đổi sẽ được lưu trữ và cập nhật vào mục số 2 trên trang chủ
+        {apiError && apiError.tab === tab && (
+          <div role="alert" className="flex items-start gap-2 rounded-2xl border-2 border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-700 font-sans">
+            <AlertCircle size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
+            <span className="flex-1">
+              <strong className="font-bold">Không lưu được {tab === 'en' ? 'bản tiếng Anh' : 'bản tiếng Việt'}:</strong>{' '}
+              {apiError.message}
+              {apiError.conflict && (
+                <span className="block mt-1 text-rose-600">
+                  Nội dung bạn đang sửa vẫn còn trên màn hình — hãy chép lại phần cần giữ trước khi tải bản mới.
+                </span>
+              )}
             </span>
+            {apiError.conflict && (
+              <button
+                type="button"
+                onClick={handleReloadLatest}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-300 bg-white text-rose-700 font-semibold hover:bg-rose-100 transition-colors cursor-pointer"
+              >
+                <RefreshCw size={13} aria-hidden="true" /> Tải bản mới nhất
+              </button>
+            )}
+          </div>
+        )}
+
+        <div role="tabpanel" id={PANEL_ID} aria-labelledby={`tab-${tab}`}>
+          {tab === 'vi' ? (
+            <HeroViForm
+              draft={draftVi}
+              setDraft={setDraftVi}
+              image={saved.image}
+              file={file}
+              previewUrl={previewUrl}
+              fileError={fileError}
+              onPickFile={handlePickFile}
+              onDiscardFile={discardFile}
+              errors={errors}
+            />
+          ) : progress.total === 0 ? (
+            <div className="bg-white rounded-2xl p-8 border-2 border-slate-200 text-center text-sm text-slate-600 font-sans">
+              Hãy nhập và lưu bản tiếng Việt trước — bản tiếng Anh được dịch từ bản tiếng Việt.
+            </div>
+          ) : (
+            <HeroEnForm
+              vi={draftVi}
+              draft={draftEn}
+              setDraft={setDraftEn}
+              image={saved.image}
+              previewUrl={previewUrl}
+              errors={errors}
+              visibleKeys={untranslatedFilter}
+            />
+          )}
+        </div>
+
+        {/* THANH LƯU CỐ ĐỊNH CHUẨN BRAND REMAK */}
+        <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-md p-4 rounded-2xl border-2 border-slate-200/90 shadow-lg flex items-center justify-between gap-3 flex-wrap font-sans">
+          <div className="flex items-center gap-2">
+            {isDirty ? (
+              <>
+                <span className="w-2.5 h-2.5 rounded-full bg-[#F26522] animate-pulse" />
+                <span className="text-xs font-bold text-[#EA580C]">
+                  Có thay đổi chưa lưu: {[viDirty && 'Tiếng Việt', enDirty && 'English'].filter(Boolean).join(', ')}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="w-2.5 h-2.5 rounded-full bg-[#5F8A03]" />
+                <span className="text-xs font-bold text-slate-600">
+                  Nội dung đã lưu khớp với trang chủ
+                </span>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleDiscard}
+              disabled={!isDirty || saving}
+              className="px-4 py-2.5 rounded-xl border-2 border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            >
+              Huỷ thay đổi
+            </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-lg bg-[#5F8A03] hover:bg-[#4E7202] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              disabled={!isDirty || saving}
+              className="px-6 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#4E7202] text-white text-xs font-black shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
             >
-              Lưu Thông Tin
+              {saving && <Loader2 size={13} className="animate-spin" />}
+              Lưu & Cập Nhật Trang Chủ
             </button>
           </div>
-        </form>
-
-      </div>
+        </div>
+      </form>
     </div>
   );
 }

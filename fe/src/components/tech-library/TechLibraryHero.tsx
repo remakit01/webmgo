@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { Shield, FileCheck2, FileCode2, BookOpen } from 'lucide-react';
 import TechLibraryStats from './TechLibraryStats';
 

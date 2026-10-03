@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from '@/components/ui/LocaleLink';
 import { PhoneCall, FileCheck } from 'lucide-react';
 import { PROJECTS, PROJECT_CATEGORIES } from '@/data/projects';
 import ProjectCard, { ProjectCardFeatured } from './ProjectCard';
@@ -110,13 +111,13 @@ export default function ProjectsClientView() {
                 <PhoneCall size={15} />
                 <span>Hotline Kỹ Thuật: 0902.441.981</span>
               </a>
-              <a
+              <Link
                 href="/bao-gia"
                 className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-colors border border-white/20 flex items-center justify-center gap-2"
               >
                 <FileCheck size={15} />
                 <span>Nhận Hồ Sơ Năng Lực</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

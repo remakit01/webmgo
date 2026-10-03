@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { MapPin, ShieldCheck, ArrowRight } from 'lucide-react';
 import { FEATURED_PROJECTS } from '@/data/products';
 import { FeaturedProject } from '@/types';

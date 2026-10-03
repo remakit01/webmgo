@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 import { CheckCircle2 } from 'lucide-react';
 import AboutStats from './AboutStats';
 

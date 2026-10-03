@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Bug, Flame, Droplets, Leaf, ArrowRight, CheckCircle2, FileCheck, Sparkles, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
 
 interface BenefitItem {
   id: string;

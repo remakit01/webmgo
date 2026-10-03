@@ -1,40 +1,24 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import type { BannerSwiperConfig, PublicBanner } from '@/lib/api';
+import Link from '@/components/ui/LocaleLink';
+import ResponsivePicture from '@/components/ui/ResponsivePicture';
+import type { BannerSwiperConfig, PublicBanner } from '@/types/homepage';
 
 interface HomeBannerSwiperProps {
   banners: PublicBanner[];
   config: BannerSwiperConfig;
 }
 
-const SIZES = '100vw';
-
-function srcSet(banner: PublicBanner, format: 'webp' | 'avif') {
-  return banner.images
-    .filter((v) => v.format === format)
-    .sort((a, b) => a.width - b.width)
-    .map((v) => `${v.url} ${v.width}w`)
-    .join(', ');
-}
-
 function BannerPicture({ banner, priority }: { banner: PublicBanner; priority: boolean }) {
-  const avif = srcSet(banner, 'avif');
-  const webp = srcSet(banner, 'webp');
   return (
-    <picture>
-      {avif && <source type="image/avif" srcSet={avif} sizes={SIZES} />}
-      {webp && <source type="image/webp" srcSet={webp} sizes={SIZES} />}
-      <img
-        src={banner.imageUrl}
-        alt={banner.alt}
-        className="w-full h-full object-cover object-center"
-        loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : 'auto'}
-        decoding={priority ? 'sync' : 'async'}
-      />
-    </picture>
+    <ResponsivePicture
+      image={banner}
+      alt={banner.alt}
+      sizes="100vw"
+      priority={priority}
+      className="w-full h-full object-cover object-center"
+    />
   );
 }
 

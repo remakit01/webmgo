@@ -1,0 +1,152 @@
+{
+  "Metadata": {
+    "title": "Tấm Chống Cháy MGO Remak® FireOFF - Chuẩn PCCC QCVN 06:2022/BXD",
+    "description": "Tổng kho tấm chống cháy MGO (Magie Oxit) đạt chuẩn PCCC A1, EI 15 - EI 120. Kháng nước 100%, không rỉ sét, nhẹ hơn cemboard 30%. Báo giá sỉ nhà máy, nhận mẫu thử miễn phí!",
+    "ogDescription": "Tổng kho tấm chống cháy MGO (Magie Oxit) đạt chuẩn PCCC A1, EI 15 - EI 120. Kháng nước 100%, không rỉ sét, nhẹ hơn cemboard 30%.",
+    "keywords": "tấm mgo, tấm chống cháy mgo, mgo remak, bọc ống gió chống cháy, vách ngăn chống cháy ei 60, vách karaoke, sàn chịu lực mgo",
+    "ogLocale": "vi_VN"
+  },
+  "Common": {
+    "skipToContent": "Chuyển đến nội dung chính",
+    "hotline": "Hotline: {phone}",
+    "logoAlt": "Remak MGO Fireproof Board",
+    "viewAll": "Xem tất cả →",
+    "hot": "HOT"
+  },
+  "LanguageSwitcher": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
+  "Header": {
+    "topBar": {
+      "brand": "Remak® FireOFF:",
+      "tagline": "Tổng kho Tấm Chống Cháy MGO chuẩn PCCC QCVN 06:2022/BXD",
+      "about": "Giới thiệu",
+      "news": "Tin tức"
+    },
+    "nav": {
+      "home": "Trang chủ",
+      "products": "Sản phẩm",
+      "applications": "Giải pháp Ứng dụng",
+      "projects": "Dự án",
+      "guide": "Hướng dẫn",
+      "quote": "Báo giá",
+      "dealer": "Đại lý"
+    },
+    "homeMenu": {
+      "heading": "Các Khu Vực Trên Trang Chủ",
+      "backToTop": "Về đầu trang →",
+      "toggle": "Xem các mục trong Trang chủ"
+    },
+    "sections": {
+      "banner": { "name": "Banner Trình Chiếu", "desc": "Slider ảnh & chứng nhận chất lượng PCCC" },
+      "hero": { "name": "Giới Thiệu & Chứng Nhận", "desc": "Thương hiệu Remak® FireOFF chuẩn A1" },
+      "benefits": { "name": "4 Đặc Tính Vượt Trội", "desc": "Chống cháy 1200°C, kháng nước, không rỉ" },
+      "specs": { "name": "Bảng Thông Số MGO", "desc": "Độ dày 5mm - 18mm & thông số kỹ thuật" },
+      "comparison": { "name": "Đối Chuẩn Vật Liệu", "desc": "MGO vs Cemboard vs Thạch Cao vs Ván Ép" },
+      "applications": { "name": "4 Ứng Dụng Hàng Đầu", "desc": "Ống gió, vách ngăn, lót sàn, cửa PCCC" },
+      "sample": { "name": "Hộp Mẫu Thử Miễn Phí", "desc": "Giao tận nơi 6 mẫu cắt thực tế + hồ sơ IBST" },
+      "projectsNews": { "name": "Dự Án & Tin Tức", "desc": "Công trình trọng điểm & kiến thức kỹ thuật" },
+      "calculator": { "name": "Dự Toán Vật Tư Online", "desc": "Tính nhanh số tấm & chi phí dự kiến" },
+      "faq": { "name": "Hỏi Đáp FAQ PCCC", "desc": "Giải đáp quy chuẩn QCVN 06:2022/BXD" }
+    },
+    "productsMenu": {
+      "heading": "Dòng sản phẩm Remak® FireOFF",
+      "all": "• Tất cả sản phẩm (>)",
+      "duct": { "name": "MGO Bọc Ống Gió PCCC", "desc": "DuctBoard 5–12mm, kháng ẩm ngưng tụ", "tag": "EI 30–120" },
+      "standard": { "name": "MGO Tiêu Chuẩn Chống Cháy", "desc": "Vách, trần, chuẩn Euroclass A1", "tag": "Class A1" },
+      "floor": { "name": "MGO Lót Sàn Chịu Tải", "desc": "Chịu tải 850 kg/m², dày 15–18mm", "tag": "REI 180" },
+      "acoustic": { "name": "MGO Tiêu Âm & Trang Trí", "desc": "Cách âm STC 50–55 dB, bề mặt đẹp", "tag": "Tiêu âm" }
+    },
+    "applicationsMenu": {
+      "heading": "Hệ thống thi công PCCC",
+      "duct": { "name": "Bọc Ống Gió PCCC", "desc": "Hút khói sự cố, cấp khí tươi, tăng áp", "tag": "EI 30–120" },
+      "karaoke": { "name": "Vách Ngăn Karaoke / Bar", "desc": "Cách âm 52 dB + chống cháy lan", "tag": "EI 60–120" },
+      "floor": { "name": "Sàn Chịu Lực Nhà Tiền Chế", "desc": "Nhà kho, xưởng thép, sàn gác lửng", "tag": "REI 180" },
+      "factory": { "name": "Vách Trần Nhà Xưởng KCN", "desc": "Tường bao kho lạnh, phân xưởng sản xuất", "tag": "EI 60" },
+      "door": { "name": "Lõi Cửa Thép Chống Cháy", "desc": "Điền lõi cửa thoát hiểm, cửa buồng thang", "tag": "EI 30–90" }
+    },
+    "projectsMenu": {
+      "heading": "Dự án tiêu biểu",
+      "samsung": { "name": "Nhà Máy Samsung Yên Phong", "desc": "KCN Yên Phong, Bắc Ninh · 45.000 m²", "tag": "KCN" },
+      "lotte": { "name": "TTTM Lotte Mall Tây Hồ", "desc": "Võ Chí Công, Hà Nội · 28.500 m²", "tag": "TM" },
+      "viettel": { "name": "Data Center Viettel IDC", "desc": "Khu CNC Hòa Lạc, Hà Nội · 16.000 m²", "tag": "HT" }
+    },
+    "actions": {
+      "search": "Tìm kiếm",
+      "sample": "Nhận Mẫu Thử Miễn Phí",
+      "sampleShort": "Nhận Mẫu"
+    },
+    "mobile": {
+      "openMenu": "Menu",
+      "dialogLabel": "Menu điều hướng di động",
+      "navLabel": "Menu di động",
+      "closeMenu": "Đóng menu",
+      "logoAlt": "Remak Logo",
+      "projects": "Dự án tiêu biểu",
+      "guide": "Hướng dẫn thi công",
+      "quote": "Báo giá 2026",
+      "dealer": "Chính sách đại lý",
+      "warehouse": "Tổng kho Cụm CN Lại Yên, Hoài Đức, Hà Nội"
+    }
+  },
+  "Footer": {
+    "about": "Remak® MGO FireOFF – Nhà máy tiên phong sản xuất và phân phối tấm chống cháy Magie Oxit (MGO) thế hệ mới đạt chuẩn kiểm định PCCC QCVN 06:2022/BXD.",
+    "headOffice": "Trụ sở: Cụm Công Nghiệp Lại Yên, Hoài Đức, TP. Hà Nội",
+    "factory": "Nhà máy: KCN Mông Hóa, TP. Hòa Bình",
+    "email": "Email: {email}",
+    "productsTitle": "Quy Cách Tấm MGO",
+    "products": {
+      "all": "Tất Cả Sản Phẩm (>)",
+      "duct": "Tấm MGO Bọc Ống Gió (EI 30 - 120)",
+      "standard": "Tấm MGO Tiêu Chuẩn (Class A1)",
+      "floor": "Tấm MGO Lót Sàn Chịu Tải (15-18mm)",
+      "acoustic": "Tấm MGO Tiêu Âm & Trang Trí",
+      "mos": "Tấm MGO Sulfate (MOS) Không Ăn Mòn"
+    },
+    "solutionsTitle": "Giải Pháp Chống Cháy",
+    "solutions": {
+      "duct": "Bọc ống gió PCCC (EI 30 - 120)",
+      "karaoke": "Vách ngăn Karaoke / Bar tiêu âm",
+      "floor": "Sàn chịu lực nhà thép tiền chế",
+      "factory": "Vách ngăn cháy kho xưởng KCN",
+      "ibst": "Tải kết quả đốt mẫu IBST (PDF)"
+    },
+    "policyTitle": "Chính Sách & Hợp Tác",
+    "policy": {
+      "dealer": "Đăng ký Đại lý Phân phối",
+      "delivery": "Chính sách giao hàng tận công trình",
+      "warranty": "Bảo hành 10 năm không rỉ sét",
+      "faq": "Câu hỏi thường gặp (FAQ)",
+      "quote": "Nhận Báo Giá Sỉ Dự Án"
+    },
+    "copyright": "© {year} Remak® Vietnam. Bản quyền thuộc về Công ty Cổ phần Xây dựng và Nội thất Remak.",
+    "standard": "Tiêu chuẩn PCCC QCVN 06:2022/BXD",
+    "eco": "Không Amiăng - 100% Thân thiện môi trường"
+  },
+  "Search": {
+    "placeholder": "Nhập độ dày (10mm), ống gió, vách EI 60, IBST...",
+    "popular": "Tìm kiếm phổ biến",
+    "categories": {
+      "product": "Sản Phẩm",
+      "application": "Giải Pháp",
+      "document": "Tài Liệu"
+    },
+    "badges": {
+      "duct": "Ống gió",
+      "wall": "Vách ngăn",
+      "floor": "Sàn",
+      "cert": "Chứng chỉ",
+      "guide": "Hướng dẫn"
+    },
+    "moreResults": "Xem thêm {count} kết quả",
+    "noResults": "Không tìm thấy kết quả",
+    "noResultsHint": "Thử từ khóa khác hoặc liên hệ kỹ sư Remak để được tư vấn",
+    "callHotline": "Gọi Hotline: {phone}",
+    "resultCount": "{count} kết quả",
+    "hint": "Tìm theo sản phẩm, giải pháp, tài liệu kỹ thuật",
+    "close": "Đóng",
+    "open": "Mở"
+  }
+}

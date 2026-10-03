@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 import { BannersService } from './banners.service.js';
+import { MediaService } from '../storage/media.service.js';
 
 function setup(existingIds: string[]) {
   const update = vi.fn((args: unknown) => args);
@@ -13,9 +14,9 @@ function setup(existingIds: string[]) {
     },
     $transaction: vi.fn(async (ops: unknown[]) => ops),
   };
-  const redis = { del: vi.fn(), get: vi.fn(), set: vi.fn() };
+  const redis = { del: vi.fn(), delCache: vi.fn(), get: vi.fn(), set: vi.fn() };
   const revalidate = { trigger: vi.fn() };
-  const service = new BannersService(prisma as never, redis as never, {} as never, {} as never, revalidate as never);
+  const service = new BannersService(prisma as never, redis as never, {} as never, revalidate as never);
   return { service, prisma, redis, revalidate };
 }
 
@@ -25,7 +26,7 @@ describe('BannersService.reorder', () => {
     await service.reorder(['c', 'a', 'b']);
     expect(prisma.banner.update).toHaveBeenCalledWith({ where: { id: 'c' }, data: { sortOrder: 0 } });
     expect(prisma.banner.update).toHaveBeenCalledWith({ where: { id: 'b' }, data: { sortOrder: 2 } });
-    expect(redis.del).toHaveBeenCalledWith('banners:public');
+    expect(redis.delCache).toHaveBeenCalledWith('banners:public');
     expect(revalidate.trigger).toHaveBeenCalledWith('banners');
   });
 
@@ -60,10 +61,11 @@ describe('BannersService thùng rác', () => {
         upsert: vi.fn(async () => ({})),
       },
     };
-    const redis = { del: vi.fn(), get: vi.fn(), set: vi.fn(), acquireLock: vi.fn(async () => opts.lock ?? true) };
+    const redis = { del: vi.fn(), delCache: vi.fn(), get: vi.fn(), set: vi.fn(), acquireLock: vi.fn(async () => opts.lock ?? true) };
     const storage = { deletePrefix: vi.fn(async () => undefined) };
+    const media = new MediaService(storage as never, {} as never);
     const revalidate = { trigger: vi.fn() };
-    const service = new BannersService(prisma as never, redis as never, storage as never, {} as never, revalidate as never);
+    const service = new BannersService(prisma as never, redis as never, media, revalidate as never);
     return { service, prisma, redis, storage, revalidate };
   }
 
@@ -120,5 +122,31 @@ describe('BannersService thùng rác', () => {
     const on = trashSetup({ settings: { autoPurgeEnabled: true } });
     await on.service.scheduledPurge();
     expect(on.prisma.banner.findMany).toHaveBeenCalled();
+  });
+});
+
+describe('BannersService.update khi có request ghi chen vào', () => {
+  it('banner đã bị sửa sau lúc đọc -> 409, dọn ảnh vừa upload, không xoá ảnh cũ', async () => {
+    const existing = { id: 'a', imageKey: 'banners/old', updatedAt: new Date('2026-10-03T00:00:00.000Z') };
+    const prisma = {
+      banner: {
+        findFirst: vi.fn(async () => existing),
+        updateMany: vi.fn(async () => ({ count: 0 })), // người khác đã ghi -> updated_at đã đổi
+      },
+    };
+    const media = {
+      uploadImage: vi.fn(async () => ({ imageKey: 'banners/new', imageUrl: 'n', images: [] })),
+      removeImage: vi.fn(async () => undefined),
+    };
+    const service = new BannersService(prisma as never, { delCache: vi.fn() } as never, media as never, { trigger: vi.fn() } as never);
+
+    await expect(service.update('a', { title: 'x' }, { buffer: Buffer.from('x') } as Express.Multer.File)).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    expect(prisma.banner.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ id: 'a', updatedAt: existing.updatedAt }) }),
+    );
+    expect(media.removeImage).toHaveBeenCalledTimes(1);
+    expect(media.removeImage).toHaveBeenCalledWith('banners/new');
   });
 });

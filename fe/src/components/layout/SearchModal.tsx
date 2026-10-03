@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import Link from 'next/link';
+import Link from '@/components/ui/LocaleLink';
+import { useTranslations } from 'next-intl';
 import { Search, X, PackageOpen, Layers, FileText, ArrowRight, Flame } from 'lucide-react';
 
 import { PRODUCTS } from '@/data/products';
 import { APPLICATIONS } from '@/data/applications';
 import { DOCUMENTS } from '@/data/documents';
 
+// Gợi ý là từ khoá tìm trong dữ liệu (tiếng Việt) — chưa dịch cho tới khi dữ liệu có bản tiếng Anh
 const SUGGESTIONS = [
   'Ống gió EI 60',
   'Vách chống cháy EI 120',
@@ -23,7 +25,10 @@ interface SearchResult {
   subtitle: string;
   href: string;
   category: 'product' | 'application' | 'document';
+  /** Nhãn dữ liệu (EI 60, CAD...) — không dịch */
   badge?: string;
+  /** Nhãn giao diện — dịch qua messages Search.badges */
+  badgeKey?: 'duct' | 'wall' | 'floor' | 'cert' | 'guide';
 }
 
 function normalize(s: string) {
@@ -53,7 +58,7 @@ function useSearchResults(query: string): SearchResult[] {
           subtitle: p.fireRating ?? '',
           href: `/san-pham/${p.slug}`,
           category: 'product',
-          badge: p.category === 'duct' ? 'Ống gió' : p.category === 'wall' ? 'Vách ngăn' : 'Sàn',
+          badgeKey: p.category === 'duct' ? 'duct' : p.category === 'wall' ? 'wall' : 'floor',
         });
       }
     }
@@ -87,7 +92,7 @@ function useSearchResults(query: string): SearchResult[] {
           subtitle: `${d.format} · ${d.size}`,
           href: '/thu-vien-tai-lieu',
           category: 'document',
-          badge: d.type === 'cad' ? 'CAD' : d.type === 'ibst' ? 'IBST' : d.type === 'cert' ? 'Chứng chỉ' : 'Hướng dẫn',
+          ...(d.type === 'cad' ? { badge: 'CAD' } : d.type === 'ibst' ? { badge: 'IBST' } : { badgeKey: d.type === 'cert' ? 'cert' : 'guide' }),
         });
       }
     }
@@ -97,9 +102,9 @@ function useSearchResults(query: string): SearchResult[] {
 }
 
 const CATEGORY_META = {
-  product:     { label: 'Sản Phẩm',       icon: PackageOpen, iconCls: 'text-[#5F8A03]', bgCls: 'bg-[#F4F9E8]', badgeCls: 'bg-[#F4F9E8] text-[#5F8A03]' },
-  application: { label: 'Giải Pháp',      icon: Layers,      iconCls: 'text-blue-600',  bgCls: 'bg-blue-50',   badgeCls: 'bg-blue-50 text-blue-700' },
-  document:    { label: 'Tài Liệu',       icon: FileText,    iconCls: 'text-amber-600', bgCls: 'bg-amber-50',  badgeCls: 'bg-amber-50 text-amber-700' },
+  product:     { icon: PackageOpen, iconCls: 'text-[#5F8A03]', bgCls: 'bg-[#F4F9E8]', badgeCls: 'bg-[#F4F9E8] text-[#5F8A03]' },
+  application: { icon: Layers,      iconCls: 'text-blue-600',  bgCls: 'bg-blue-50',   badgeCls: 'bg-blue-50 text-blue-700' },
+  document:    { icon: FileText,    iconCls: 'text-amber-600', bgCls: 'bg-amber-50',  badgeCls: 'bg-amber-50 text-amber-700' },
 } as const;
 
 type Category = keyof typeof CATEGORY_META;
@@ -111,6 +116,7 @@ function ResultGroup({ category, results, onClose }: {
   results: SearchResult[];
   onClose: () => void;
 }) {
+  const t = useTranslations('Search');
   const meta = CATEGORY_META[category];
   const Icon = meta.icon;
   const shown = results.slice(0, MAX_PER_CAT);
@@ -121,7 +127,7 @@ function ResultGroup({ category, results, onClose }: {
         <div className={`w-5 h-5 rounded-md flex items-center justify-center ${meta.bgCls}`}>
           <Icon size={11} className={meta.iconCls} />
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{meta.label}</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{t(`categories.${category}`)}</span>
         <span className="text-[10px] text-slate-300">({results.length})</span>
       </div>
       {shown.map(r => (
@@ -138,8 +144,10 @@ function ResultGroup({ category, results, onClose }: {
             <p className="text-sm font-semibold text-slate-800 group-hover:text-[#5F8A03] transition-colors truncate">{r.title}</p>
             <p className="text-[11px] text-slate-400 truncate">{r.subtitle}</p>
           </div>
-          {r.badge && (
-            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${meta.badgeCls}`}>{r.badge}</span>
+          {(r.badge || r.badgeKey) && (
+            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${meta.badgeCls}`}>
+              {r.badgeKey ? t(`badges.${r.badgeKey}`) : r.badge}
+            </span>
           )}
           <ArrowRight size={13} className="text-slate-300 group-hover:text-[#7CB305] flex-shrink-0 transition-colors" />
         </Link>
@@ -150,7 +158,7 @@ function ResultGroup({ category, results, onClose }: {
           onClick={onClose}
           className="flex items-center justify-center gap-1.5 px-4 py-2 text-[11px] text-[#5F8A03] hover:text-[#7CB305] font-semibold transition-colors"
         >
-          Xem thêm {results.length - MAX_PER_CAT} kết quả
+          {t('moreResults', { count: results.length - MAX_PER_CAT })}
           <ArrowRight size={11} />
         </Link>
       )}
@@ -164,6 +172,7 @@ interface Props {
 }
 
 export default function SearchModal({ open, onClose }: Props) {
+  const t = useTranslations('Search');
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const results = useSearchResults(query);
@@ -210,7 +219,7 @@ export default function SearchModal({ open, onClose }: Props) {
             type="text"
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Nhập độ dày (10mm), ống gió, vách EI 60, IBST..."
+            placeholder={t('placeholder')}
             className="flex-1 outline-none text-slate-800 text-sm placeholder:text-slate-400"
           />
           {query && (
@@ -235,7 +244,7 @@ export default function SearchModal({ open, onClose }: Props) {
           {/* No query — suggestions */}
           {!query.trim() && (
             <div className="p-4">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">Tìm kiếm phổ biến</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3">{t('popular')}</p>
               <div className="flex flex-wrap gap-2">
                 {SUGGESTIONS.map(s => (
                   <button
@@ -252,10 +261,10 @@ export default function SearchModal({ open, onClose }: Props) {
               {/* Quick nav */}
               <div className="mt-5 grid grid-cols-3 gap-2">
                 {([
-                  { href: '/san-pham',          label: 'Sản Phẩm',  icon: PackageOpen, cls: 'text-[#5F8A03]', bg: 'bg-[#F4F9E8]' },
-                  { href: '/giai-phap-ung-dung', label: 'Giải Pháp', icon: Layers,      cls: 'text-blue-600',  bg: 'bg-blue-50' },
-                  { href: '/thu-vien-tai-lieu',  label: 'Tài Liệu',  icon: FileText,    cls: 'text-amber-600', bg: 'bg-amber-50' },
-                ] as const).map(({ href, label, icon: Icon, cls, bg }) => (
+                  { href: '/san-pham',          category: 'product',     icon: PackageOpen, cls: 'text-[#5F8A03]', bg: 'bg-[#F4F9E8]' },
+                  { href: '/giai-phap-ung-dung', category: 'application', icon: Layers,      cls: 'text-blue-600',  bg: 'bg-blue-50' },
+                  { href: '/thu-vien-tai-lieu',  category: 'document',    icon: FileText,    cls: 'text-amber-600', bg: 'bg-amber-50' },
+                ] as const).map(({ href, category, icon: Icon, cls, bg }) => (
                   <Link
                     key={href}
                     href={href}
@@ -265,7 +274,7 @@ export default function SearchModal({ open, onClose }: Props) {
                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${bg}`}>
                       <Icon size={15} className={cls} />
                     </div>
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">{label}</span>
+                    <span className="text-xs font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">{t(`categories.${category}`)}</span>
                   </Link>
                 ))}
               </div>
@@ -289,16 +298,16 @@ export default function SearchModal({ open, onClose }: Props) {
               <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
                 <Search size={20} className="text-slate-400" />
               </div>
-              <p className="text-sm font-bold text-slate-700 mb-1">Không tìm thấy kết quả</p>
+              <p className="text-sm font-bold text-slate-700 mb-1">{t('noResults')}</p>
               <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-                Thử từ khóa khác hoặc liên hệ kỹ sư Remak để được tư vấn
+                {t('noResultsHint')}
               </p>
               <a
                 href="tel:0902441981"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F26522] hover:bg-[#EA580C] text-white text-xs font-bold transition-colors"
               >
                 <Flame size={13} />
-                Gọi Hotline: 0902.441.981
+                {t('callHotline', { phone: '0902.441.981' })}
               </a>
             </div>
           )}
@@ -307,11 +316,11 @@ export default function SearchModal({ open, onClose }: Props) {
         {/* Footer */}
         <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 bg-slate-50/50">
           <span className="text-[10px] text-slate-400">
-            {hasResults ? `${results.length} kết quả` : 'Tìm theo sản phẩm, giải pháp, tài liệu kỹ thuật'}
+            {hasResults ? t('resultCount', { count: results.length }) : t('hint')}
           </span>
           <div className="flex items-center gap-3 text-[10px] text-slate-400">
-            <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">Esc</kbd> Đóng</span>
-            <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">↵</kbd> Mở</span>
+            <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">Esc</kbd> {t('close')}</span>
+            <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 rounded bg-slate-200 text-slate-500 font-mono text-[9px]">↵</kbd> {t('open')}</span>
           </div>
         </div>
       </div>
