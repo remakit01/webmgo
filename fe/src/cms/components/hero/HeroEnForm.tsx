@@ -365,7 +365,7 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
                     </div>
                   )}
 
-                  <div className="relative w-full h-52 sm:h-56 rounded-lg overflow-hidden bg-slate-100 border border-slate-300 flex items-center justify-center shadow-2xs">
+                  <div className="relative w-full h-72 sm:h-80 rounded-lg overflow-hidden bg-slate-100 border border-slate-300 flex items-center justify-center shadow-2xs">
                     {(previewUrl || image) ? (
                       <img
                         src={previewUrl ?? image?.imageUrl}
@@ -385,7 +385,7 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
 
               {/* MÔ TẢ ẢNH (ALT SEO) */}
               {show('media.alt', vi.media.alt) && (
-                <div className="pt-2 border-t border-slate-200 mt-1">
+                <div className="pt-1">
                   <TranslatableField
                     label="Mô tả ảnh"
                     source={vi.media.alt}

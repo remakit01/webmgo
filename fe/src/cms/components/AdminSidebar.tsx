@@ -226,7 +226,7 @@ export default function AdminSidebar() {
           rel="noopener noreferrer"
           className="flex items-center justify-between px-3.5 py-2.5 rounded-lg bg-white hover:bg-[#F4F9E8] text-slate-700 hover:text-[#5F8A03] text-xs font-semibold transition-[background-color,color,border-color] duration-150 border border-slate-300 hover:border-[#7CB305]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305]"
         >
-          <span>Xem trang chủ ngoài</span>
+          <span>Xem trang</span>
           <span className="text-slate-400 font-normal text-sm" aria-hidden="true">↗</span>
           <span className="sr-only">(mở trong tab mới)</span>
         </a>
@@ -236,7 +236,7 @@ export default function AdminSidebar() {
           onClick={handleLogout}
           className="w-full flex items-center justify-center px-3.5 py-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-colors duration-150 border border-rose-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
         >
-          <span>Đăng xuất tài khoản</span>
+          <span>Đăng xuất</span>
         </button>
       </div>
     </aside>

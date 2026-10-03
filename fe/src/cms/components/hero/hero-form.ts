@@ -1,7 +1,5 @@
 import { HERO_ACCENTS, type HeroContent, type HeroTranslation } from '@/types/homepage';
 
-// Khớp HERO_IMAGE_MIN_WIDTH ở API (homepage/hero.service.ts)
-export const HERO_IMAGE_MIN_WIDTH = 800;
 export const MAX_PARAGRAPHS = 3;
 
 // Khớp LINK_PATTERN ở API (homepage/dto/hero.dto.ts): "/...", "#..." hoặc http(s)

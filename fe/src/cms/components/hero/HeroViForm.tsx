@@ -4,7 +4,7 @@ import React from 'react';
 import { AlertCircle, Check, ImageIcon, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { HERO_ACCENT_STYLES } from '@/components/home/HomeHeroSection';
 import { HERO_ACCENTS, type HeroContent, type HeroCta, type HomeHero } from '@/types/homepage';
-import { HERO_IMAGE_MIN_WIDTH, MAX_PARAGRAPHS, inputClass } from './hero-form';
+import { MAX_PARAGRAPHS, inputClass } from './hero-form';
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -126,8 +126,8 @@ export default function HeroViForm({
               ))}
 
               <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
-                <span className="text-[11px] text-slate-500 font-normal">
-                  Định dạng in đậm bằng <code className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold">**hai dấu sao**</code>, ví dụ <code className="px-1.5 py-0.5 rounded bg-[#F4F9E8] text-[#5F8A03] font-bold">**1.200°C**</code>
+                <span className="text-xs text-slate-700 font-medium">
+                  Định dạng in đậm bằng <code className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-800 font-bold border border-slate-300">**hai dấu sao**</code>, ví dụ <code className="px-1.5 py-0.5 rounded bg-[#F4F9E8] text-[#5F8A03] font-bold border border-[#7CB305]/40">**1.200°C**</code>
                 </span>
                 {draft.paragraphs.length < MAX_PARAGRAPHS && (
                   <button
@@ -154,7 +154,7 @@ export default function HeroViForm({
 
             {/* TIÊU ĐỀ KHUNG & NHÃN CÔNG NGHỆ (ĐẶT Ở TRÊN KHỐI ẢNH) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <Field label="Tiêu đề khung (trên ảnh)">
+              <Field label="Tiêu đề khung">
                 <input
                   maxLength={60}
                   placeholder="Cấu Trúc Tấm MGO Thực Tế"
@@ -163,7 +163,7 @@ export default function HeroViForm({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Nhãn công nghệ (badge xanh)">
+              <Field label="Nhãn công nghệ">
                 <input
                   maxLength={40}
                   placeholder="Công Nghệ Sulfate"
@@ -189,7 +189,7 @@ export default function HeroViForm({
                 </div>
               )}
 
-              <div className="relative w-full h-52 sm:h-56 rounded-lg overflow-hidden bg-slate-100 border border-slate-300 flex items-center justify-center group shadow-2xs">
+              <div className="relative w-full h-72 sm:h-80 rounded-lg overflow-hidden bg-slate-100 border border-slate-300 flex items-center justify-center group shadow-2xs">
                 {previewUrl || image ? (
                   <img
                     src={previewUrl ?? image?.imageUrl}
@@ -207,8 +207,8 @@ export default function HeroViForm({
 
             {/* NÚT THAY / TẢI ẢNH FULL WIDTH */}
             <div className="space-y-1.5 pt-0.5">
-              <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 hover:border-slate-400 text-xs font-bold transition-all cursor-pointer shadow-2xs">
-                <UploadCloud size={16} />
+              <label className="group w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-slate-300 hover:border-[#5F8A03] bg-white hover:bg-[#F4F9E8] text-slate-700 hover:text-[#5F8A03] text-xs font-bold transition-all duration-200 cursor-pointer shadow-2xs hover:shadow-xs active:scale-[0.99]">
+                <UploadCloud size={16} className="text-slate-500 group-hover:text-[#5F8A03] transition-all duration-200 group-hover:-translate-y-0.5" />
                 <span>{image || file ? 'Thay ảnh sản phẩm khác' : 'Tải ảnh sản phẩm lên'}</span>
                 <input
                   type="file"
@@ -233,7 +233,7 @@ export default function HeroViForm({
                 </div>
               )}
               <p className="text-[11px] text-slate-400 font-normal text-center">
-                JPEG/PNG/WebP/AVIF, tối đa 10MB · Chiều rộng tối thiểu {HERO_IMAGE_MIN_WIDTH}px
+                JPEG/PNG/WebP/AVIF, tối đa 10MB
               </p>
             </div>
 
@@ -244,8 +244,8 @@ export default function HeroViForm({
             )}
           </div>
 
-          {/* MÔ TẢ ẢNH (ALT SEO) - THIẾT KẾ VỪA VẶN */}
-          <div className="pt-2 border-t border-slate-200 mt-0.5">
+          {/* MÔ TẢ ẢNH (ALT SEO) - BỎ BỚT MARGIN & PADDING */}
+          <div className="pt-1">
             <label className="block space-y-1">
               <span className="text-xs font-semibold text-slate-700">Mô tả ảnh</span>
               <input
