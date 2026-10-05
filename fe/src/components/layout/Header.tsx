@@ -17,16 +17,9 @@ import {
   Wind,
   Layers,
   DoorClosed,
+  LucideIcon,
   Music,
   Package,
-  Sliders,
-  Sparkles,
-  Table2,
-  Scale,
-  Calculator,
-  HelpCircle,
-  Hammer,
-  type LucideIcon,
 } from 'lucide-react';
 import SearchModal from './SearchModal';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -34,22 +27,8 @@ import { toLocalePath, toViPath } from '@/i18n/paths';
 import type messages from '../../../messages/vi.json';
 
 type HeaderMessages = (typeof messages)['Header'];
-type SectionKey = keyof HeaderMessages['sections'];
 
 const HOTLINE = '0902.441.981';
-
-// Chữ hiển thị nằm trong messages/<locale>.json (Header.sections.<key>), ở đây chỉ giữ cấu trúc menu
-const HOMEPAGE_SECTIONS: { id: string; key: SectionKey; icon: LucideIcon; badge?: boolean }[] = [
-  { id: 'banner-swiper', key: 'banner', icon: Sliders },
-  { id: 'hero-section', key: 'hero', icon: Sparkles },
-  { id: 'dac-tinh-vuot-troi', key: 'benefits', icon: Flame },
-  { id: 'so-sanh-vat-lieu', key: 'comparison', icon: Scale },
-  { id: 'bang-thong-so', key: 'specs', icon: Table2 },
-  { id: 'giai-phap-ung-dung', key: 'applications', icon: Layers },
-  { id: 'nhan-mau-thu', key: 'sample', icon: Package, badge: true },
-  { id: 'du-an-tin-tuc', key: 'projectsNews', icon: Building2 },
-  { id: 'faq-hoi-dap', key: 'faq', icon: HelpCircle },
-];
 
 type MenuItem<K extends string> = { key: K; href: string; icon: LucideIcon };
 
@@ -77,16 +56,18 @@ const PROJECT_ITEMS: MenuItem<Exclude<keyof HeaderMessages['projectsMenu'], 'hea
 type DropdownItem = { key: string; href: string; icon: LucideIcon; name: string; desc: string; tag: string };
 
 /** Dropdown desktop dạng danh sách (Sản phẩm / Giải pháp / Dự án); nhận nội dung đã dịch */
-function DropdownList({ heading, items, viewAllHref }: { heading: string; items: DropdownItem[]; viewAllHref: string }) {
+function DropdownList({ heading, items, viewAllHref }: { heading?: string; items: DropdownItem[]; viewAllHref?: string }) {
   const tc = useTranslations('Common');
   return (
     <div className="absolute top-[calc(100%-8px)] left-0 w-[360px] bg-white rounded-2xl shadow-xl border border-slate-200 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
-      <div className="flex items-center justify-between px-3 py-2 mb-1 border-b border-slate-100">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{heading}</span>
-        <Link href={viewAllHref} className="text-[11px] font-semibold text-[#5F8A03] hover:underline">
-          {tc('viewAll')}
-        </Link>
-      </div>
+      {heading && viewAllHref && (
+        <div className="flex items-center justify-between px-3 py-2 mb-1 border-b border-slate-100">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{heading}</span>
+          <Link href={viewAllHref} className="text-[11px] font-semibold text-[#5F8A03] hover:underline">
+            {tc('viewAll')}
+          </Link>
+        </div>
+      )}
       {items.map(({ key, href, icon: Icon, name, desc, tag }) => (
         <Link
           key={key}
@@ -175,17 +156,6 @@ export default function Header() {
     setActiveMobileSubmenu(activeMobileSubmenu === menu ? null : menu);
   };
 
-  const handleSectionClick = (id: string, e: React.MouseEvent) => {
-    if (pathname === '/') {
-      e.preventDefault();
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        window.history.pushState(null, '', toLocalePath(`/#${id}`, locale));
-      }
-    }
-  };
-
   return (
     <>
       {/* 1. TOP UTILITY BAR (THANH TIỆN ÍCH TRÊN CÙNG) */}
@@ -247,68 +217,21 @@ export default function Header() {
           {/* 7 HEADER ĐIỀU HƯỚNG CHA (DESKTOP) - THẲNG HÀNG TUYỆT ĐỐI KHÔNG XUỐNG DÒNG */}
           <nav className="hidden xl:flex items-center gap-1 h-full flex-nowrap flex-shrink-0">
 
-            {/* 1. Trang chủ (Dropdown Mega-Menu 10 Section Components page.tsx) */}
-            <div className="group relative h-full flex items-center flex-shrink-0">
+            {/* 1. Trang chủ (Liên kết trực tiếp không menu con) */}
+            <div className="relative h-full flex items-center flex-shrink-0">
               <Link
                 href="/"
-                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center transition-colors whitespace-nowrap flex-shrink-0 ${
                   isHomeActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
-                    : 'text-slate-800 group-hover:text-[#5F8A03] group-hover:bg-[#F4F9E8]'
+                    : 'text-slate-800 hover:text-[#5F8A03] hover:bg-[#F4F9E8]'
                 }`}
               >
                 <span>{t('nav.home')}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 flex-shrink-0 group-hover:rotate-180 ${
-                  isHomeActive ? 'text-[#5F8A03]' : 'text-slate-400'
-                }`} />
               </Link>
               {isHomeActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-
-              {/* Dropdown: 10 Section Components Trang Chủ - Chữ To Đẹp */}
-              <div className="absolute top-[calc(100%-8px)] left-0 w-[630px] bg-white rounded-2xl shadow-xl border border-slate-200 p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 flex flex-col z-50">
-                <div className="flex items-center justify-between px-3 py-2.5 mb-2 border-b border-slate-100">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#7CB305] animate-pulse"></span>
-                    <span className="text-xs font-black uppercase tracking-wider text-slate-600">{t('homeMenu.heading')}</span>
-                  </div>
-                  <Link href="/" className="text-xs font-bold text-[#5F8A03] hover:underline">{t('homeMenu.backToTop')}</Link>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {HOMEPAGE_SECTIONS.map((sec, idx) => {
-                    const SecIcon = sec.icon;
-                    return (
-                      <Link
-                        key={sec.id}
-                        href={`/#${sec.id}`}
-                        onClick={(e) => handleSectionClick(sec.id, e)}
-                        className="flex items-start gap-3 p-2.5 rounded-xl border border-transparent hover:border-[#7CB305]/40 hover:bg-[#F4F9E8]/80 transition-all group/item"
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-slate-100 group-hover/item:bg-white text-slate-600 group-hover/item:text-[#5F8A03] flex items-center justify-center shrink-0 transition-colors mt-0.5 shadow-2xs">
-                          <SecIcon size={16} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-bold text-slate-800 group-hover/item:text-[#5F8A03] truncate">
-                              {idx + 1}. {t(`sections.${sec.key}.name`)}
-                            </span>
-                            {sec.badge && (
-                              <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-[#F26522] text-white shrink-0">
-                                {tc('hot')}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs text-slate-500 line-clamp-1 mt-0.5 font-medium">
-                            {t(`sections.${sec.key}.desc`)}
-                          </p>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
             {/* 2. Sản phẩm (Dropdown Mega-Menu Đã Kiểm Chứng) */}
@@ -329,7 +252,7 @@ export default function Header() {
               {isProductsActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-              <DropdownList heading={t('productsMenu.heading')} items={products} viewAllHref="/san-pham" />
+              <DropdownList items={products} />
             </div>
 
             {/* 3. Ứng dụng (Dropdown) */}
@@ -486,58 +409,18 @@ export default function Header() {
 
             <div className="p-4 flex-grow">
               <nav aria-label={t('mobile.navLabel')} className="flex flex-col gap-1">
-                {/* Submenu Trang Chủ (10 Sections tương ứng page.tsx) */}
-                <div>
-                  <div className="flex items-center justify-between">
-                    <Link
-                      href="/"
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex-1 px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] ${
-                        isHomeActive
-                          ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]'
-                          : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
-                      }`}
-                    >
-                      {t('nav.home')}
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => toggleSubmenu('home')}
-                      className="p-2.5 text-slate-500 hover:text-[#5F8A03] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] rounded-lg"
-                      aria-label={t('homeMenu.toggle')}
-                      aria-expanded={activeMobileSubmenu === 'home'}
-                    >
-                      <ChevronDown size={16} className={`transition-transform duration-200 ${activeMobileSubmenu === 'home' ? 'rotate-180 text-[#5F8A03]' : ''}`} aria-hidden="true" />
-                    </button>
-                  </div>
-                  {activeMobileSubmenu === 'home' && (
-                    <div className="pl-3 py-1 flex flex-col gap-1 text-xs text-slate-600 border-l-2 border-[#7CB305]/40 ml-3.5 mt-0.5 animate-in slide-in-from-top-1 duration-150">
-                      {HOMEPAGE_SECTIONS.map((sec) => (
-                        <Link
-                          key={sec.id}
-                          href={`/#${sec.id}`}
-                          onClick={(e) => {
-                            setMobileOpen(false);
-                            handleSectionClick(sec.id, e);
-                          }}
-                          className="group py-2 px-3 rounded-lg hover:bg-[#F4F9E8] hover:text-[#5F8A03] flex items-center justify-between transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305]"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="w-1 h-3 rounded-full bg-slate-300 group-hover:bg-[#5F8A03] transition-colors shrink-0" aria-hidden="true" />
-                            <span className="text-[13.5px] font-semibold text-slate-800 group-hover:text-[#5F8A03] truncate">
-                              {t(`sections.${sec.key}.name`)}
-                            </span>
-                          </div>
-                          {sec.badge && (
-                            <span className="text-[10px] px-2 py-0.5 rounded font-black bg-[#F26522] text-white shrink-0 ml-1">
-                              {tc('hot')}
-                            </span>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {/* Trang Chủ (Liên kết trực tiếp không menu con) */}
+                <Link
+                  href="/"
+                  onClick={() => setMobileOpen(false)}
+                  className={`px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] ${
+                    isHomeActive
+                      ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]'
+                      : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
+                  }`}
+                >
+                  {t('nav.home')}
+                </Link>
 
                 {/* Submenu Sản phẩm */}
                 <div>

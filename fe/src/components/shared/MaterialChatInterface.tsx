@@ -72,13 +72,23 @@ export default function MaterialChatInterface({
   const [chatInput, setChatInput] = useState<string>('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = (smooth = true) => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+    }
   };
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     scrollToBottom();
   }, [step, isTyping, result, selectedThickness, chatMessages]);
 
@@ -192,7 +202,10 @@ export default function MaterialChatInterface({
       </div>
 
       {/* 2. CHAT CONTENT SCROLL AREA (LIÊN TỤC, KHÔNG CÓ TAB BỊ ĐÈ HAY PHỨC TẠP) */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-3.5 sm:p-4 space-y-3.5 text-xs sm:text-sm">
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 min-h-0 overflow-y-auto p-3.5 sm:p-4 space-y-3.5 text-xs sm:text-sm"
+      >
         {/* BOT MESSAGE 1: LỜI CHÀO & CHỌN HẠNG MỤC */}
         <div className="space-y-2.5 max-w-[95%]">
           <div className="bg-slate-900 text-slate-200 p-3.5 rounded-2xl rounded-tl-xs border border-slate-800 leading-relaxed shadow-sm">
@@ -419,7 +432,6 @@ export default function MaterialChatInterface({
           </div>
         ))}
 
-        <div ref={chatEndRef} />
       </div>
 
       {/* 3. Ô NHẬP CHAT TRỰC TIẾP (THUẦN TEXT - KHÔNG ICON) */}

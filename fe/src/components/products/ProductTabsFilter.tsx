@@ -205,11 +205,6 @@ export default function ProductTabsFilter({
               );
             })}
           </div>
-
-          <div className="text-xs text-slate-500 font-medium hidden sm:block">
-            Hiển thị <strong className="text-slate-900">{totalResults}</strong> dòng sản phẩm Tấm MGO
-          </div>
-
         </div>
 
         {/* ROW 4: ACTIVE FILTER TAGS & RESET (HIỂN THỊ KHI ĐANG LỌC) */}

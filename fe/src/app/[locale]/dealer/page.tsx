@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from '@/components/ui/LocaleLink';
 import {
   Star, TrendingUp, Headphones, Megaphone,
-  ClipboardCheck, Handshake, Award, ChevronRight,
+  ClipboardCheck, Handshake, Award,
   PhoneCall, CheckCircle2, ArrowRight,
 } from 'lucide-react';
 import DealerStats from '@/components/dealer/DealerStats';
@@ -87,11 +87,6 @@ export default async function DaiLyPage({ params }: { params: Promise<{ locale: 
       {/* Hero */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 pt-16 pb-14 px-4">
         <div className="max-w-[1440px] mx-auto lg:px-8">
-          <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Trang chủ</Link>
-            <ChevronRight size={12} />
-            <span className="text-white">Chính Sách Đại Lý</span>
-          </nav>
           <div className="mb-6">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
               Trở Thành Đại Lý

@@ -70,13 +70,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       
       {/* 1. BREADCRUMB */}
       <div className="bg-white border-b border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs text-slate-500 flex items-center gap-2 flex-wrap">
+        <nav aria-label="Breadcrumb" className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs font-semibold text-slate-500 flex items-center gap-2 flex-wrap">
           <Link href="/" className="hover:text-[#5F8A03] transition-colors">Trang chủ</Link>
-          <span>/</span>
+          <ChevronRight size={14} className="text-slate-400" />
           <Link href="/giai-phap-ung-dung" className="hover:text-[#5F8A03] transition-colors">Ứng dụng</Link>
-          <span>/</span>
-          <span className="font-semibold text-slate-800 truncate max-w-xs sm:max-w-md">{application.title}</span>
-        </div>
+          <ChevronRight size={14} className="text-slate-400" />
+          <span className="text-[#5F8A03] font-bold truncate max-w-xs sm:max-w-md">{application.title}</span>
+        </nav>
       </div>
 
       {/* 2. HERO SECTION */}

@@ -148,15 +148,6 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
       
-      {/* 1. BREADCRUMB NAVIGATION */}
-      <div className="bg-white border-b border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs text-slate-500 flex items-center gap-2">
-          <Link href="/" className="hover:text-[#5F8A03] transition-colors">Trang chủ</Link>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">Sản phẩm Tấm MGO Remak®</span>
-        </div>
-      </div>
-
       {/* 2. HERO BANNER - CHỨNG MINH SẢN PHẨM ĐÃ KIỂM CHỨNG */}
       <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white pt-14 pb-16 lg:pt-20 lg:pb-24 overflow-hidden">
         {/* Background glow effects */}
@@ -233,23 +224,7 @@ export default function ProductsPage() {
         />
 
         {/* 5. LƯỚI SẢN PHẨM CHÍNH (PRODUCT GRID CÂN ĐỐI 2 HÀNG X 3 CỘT) */}
-        <section className="py-12 max-w-[1440px] mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">
-              Danh Mục Sản Phẩm Tấm MGO ({filteredProducts.length})
-            </h2>
-
-          </div>
-          <Link
-            href="/bao-gia"
-            className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FEF3EC] text-[#F26522] hover:bg-[#F26522] hover:text-white font-bold text-xs transition-colors"
-          >
-            <PhoneCall size={14} />
-            <span>Tải Báo Giá Dự Án 2026</span>
-          </Link>
-        </div>
-
+        <section className="py-8 max-w-[1440px] mx-auto px-4 lg:px-8">
         {filteredProducts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
