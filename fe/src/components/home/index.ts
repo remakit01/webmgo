@@ -4,7 +4,6 @@ export { default as HomeHeroSection } from './HomeHeroSection';
 export { default as HomeStickyBenefits } from './HomeStickyBenefits';
 export { default as HomeSpecMatrix } from './HomeSpecMatrix';
 export { default as HomeApplicationGrid } from './HomeApplicationGrid';
-export { default as HomeFeaturedNews } from './HomeFeaturedNews';
 export { default as HomeProjectsAndNews } from './HomeProjectsAndNews';
 export { default as HomeConstructionProcess } from './HomeConstructionProcess';
 export { default as HomeLeadQuoteForm } from './HomeLeadQuoteForm';

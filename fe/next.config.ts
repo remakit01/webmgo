@@ -5,6 +5,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 // proxy (src/proxy.ts) định tuyến — không dùng rewrites nữa.
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  // Package dùng chung api/fe trong monorepo (packages/shared)
+  transpilePackages: ["@remak/shared"],
+};
 
 export default withNextIntl(nextConfig);

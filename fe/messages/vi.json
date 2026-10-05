@@ -40,40 +40,124 @@
       "toggle": "Xem các mục trong Trang chủ"
     },
     "sections": {
-      "banner": { "name": "Banner Trình Chiếu", "desc": "Slider ảnh & chứng nhận chất lượng PCCC" },
-      "hero": { "name": "Giới Thiệu & Chứng Nhận", "desc": "Thương hiệu Remak® FireOFF chuẩn A1" },
-      "benefits": { "name": "4 Đặc Tính Vượt Trội", "desc": "Chống cháy 1200°C, kháng nước, không rỉ" },
-      "specs": { "name": "Bảng Thông Số MGO", "desc": "Độ dày 5mm - 18mm & thông số kỹ thuật" },
-      "comparison": { "name": "Đối Chuẩn Vật Liệu", "desc": "MGO vs Cemboard vs Thạch Cao vs Ván Ép" },
-      "applications": { "name": "4 Ứng Dụng Hàng Đầu", "desc": "Ống gió, vách ngăn, lót sàn, cửa PCCC" },
-      "sample": { "name": "Hộp Mẫu Thử Miễn Phí", "desc": "Giao tận nơi 6 mẫu cắt thực tế + hồ sơ IBST" },
-      "guide": { "name": "Hướng Dẫn Thi Công", "desc": "Quy trình 4 bước chuẩn thợ & bản vẽ CAD" },
-      "projectsNews": { "name": "Dự Án & Tin Tức", "desc": "Công trình trọng điểm & kiến thức kỹ thuật" },
-      "calculator": { "name": "Dự Toán Vật Tư Online", "desc": "Tính nhanh số tấm & chi phí dự kiến" },
-      "quote": { "name": "Báo Giá Dự Án (2h)", "desc": "Gửi yêu cầu nhận chiết khấu nhà máy" },
-      "faq": { "name": "Hỏi Đáp FAQ PCCC", "desc": "Giải đáp quy chuẩn QCVN 06:2022/BXD" }
+      "banner": {
+        "name": "Banner Trình Chiếu",
+        "desc": "Slider ảnh & chứng nhận chất lượng PCCC"
+      },
+      "hero": {
+        "name": "Giới Thiệu & Chứng Nhận",
+        "desc": "Thương hiệu Remak® FireOFF chuẩn A1"
+      },
+      "benefits": {
+        "name": "4 Đặc Tính Vượt Trội",
+        "desc": "Chống cháy 1200°C, kháng nước, không rỉ"
+      },
+      "specs": {
+        "name": "Bảng Thông Số MGO",
+        "desc": "Độ dày 5mm - 18mm & thông số kỹ thuật"
+      },
+      "comparison": {
+        "name": "Đối Chuẩn Vật Liệu",
+        "desc": "MGO vs Cemboard vs Thạch Cao vs Ván Ép"
+      },
+      "applications": {
+        "name": "4 Ứng Dụng Hàng Đầu",
+        "desc": "Ống gió, vách ngăn, lót sàn, cửa PCCC"
+      },
+      "sample": {
+        "name": "Hộp Mẫu Thử Miễn Phí",
+        "desc": "Giao tận nơi 6 mẫu cắt thực tế + hồ sơ IBST"
+      },
+      "guide": {
+        "name": "Hướng Dẫn Thi Công",
+        "desc": "Quy trình 4 bước chuẩn thợ & bản vẽ CAD"
+      },
+      "projectsNews": {
+        "name": "Dự Án & Tin Tức",
+        "desc": "Công trình trọng điểm & kiến thức kỹ thuật"
+      },
+      "calculator": {
+        "name": "Dự Toán Vật Tư Online",
+        "desc": "Tính nhanh số tấm & chi phí dự kiến"
+      },
+      "quote": {
+        "name": "Báo Giá Dự Án (2h)",
+        "desc": "Gửi yêu cầu nhận chiết khấu nhà máy"
+      },
+      "faq": {
+        "name": "Hỏi Đáp FAQ PCCC",
+        "desc": "Giải đáp quy chuẩn QCVN 06:2022/BXD"
+      }
     },
     "productsMenu": {
       "heading": "Dòng sản phẩm Remak® FireOFF",
       "all": "• Tất cả sản phẩm (>)",
-      "duct": { "name": "MGO Bọc Ống Gió PCCC", "desc": "DuctBoard 5–12mm, kháng ẩm ngưng tụ", "tag": "EI 30–120" },
-      "standard": { "name": "MGO Tiêu Chuẩn Chống Cháy", "desc": "Vách, trần, chuẩn Euroclass A1", "tag": "Class A1" },
-      "floor": { "name": "MGO Lót Sàn Chịu Tải", "desc": "Chịu tải 850 kg/m², dày 15–18mm", "tag": "REI 180" },
-      "acoustic": { "name": "MGO Tiêu Âm & Trang Trí", "desc": "Cách âm STC 50–55 dB, bề mặt đẹp", "tag": "Tiêu âm" }
+      "duct": {
+        "name": "MGO Bọc Ống Gió PCCC",
+        "desc": "DuctBoard 5–12mm, kháng ẩm ngưng tụ",
+        "tag": "EI 30–120"
+      },
+      "standard": {
+        "name": "MGO Tiêu Chuẩn Chống Cháy",
+        "desc": "Vách, trần, chuẩn Euroclass A1",
+        "tag": "Class A1"
+      },
+      "floor": {
+        "name": "MGO Lót Sàn Chịu Tải",
+        "desc": "Chịu tải 850 kg/m², dày 15–18mm",
+        "tag": "REI 180"
+      },
+      "acoustic": {
+        "name": "MGO Tiêu Âm & Trang Trí",
+        "desc": "Cách âm STC 50–55 dB, bề mặt đẹp",
+        "tag": "Tiêu âm"
+      }
     },
     "applicationsMenu": {
       "heading": "Hệ thống thi công PCCC",
-      "duct": { "name": "Bọc Ống Gió PCCC", "desc": "Hút khói sự cố, cấp khí tươi, tăng áp", "tag": "EI 30–120" },
-      "karaoke": { "name": "Vách Ngăn Karaoke / Bar", "desc": "Cách âm 52 dB + chống cháy lan", "tag": "EI 60–120" },
-      "floor": { "name": "Sàn Chịu Lực Nhà Tiền Chế", "desc": "Nhà kho, xưởng thép, sàn gác lửng", "tag": "REI 180" },
-      "factory": { "name": "Vách Trần Nhà Xưởng KCN", "desc": "Tường bao kho lạnh, phân xưởng sản xuất", "tag": "EI 60" },
-      "door": { "name": "Lõi Cửa Thép Chống Cháy", "desc": "Điền lõi cửa thoát hiểm, cửa buồng thang", "tag": "EI 30–90" }
+      "duct": {
+        "name": "Bọc Ống Gió PCCC",
+        "desc": "Hút khói sự cố, cấp khí tươi, tăng áp",
+        "tag": "EI 30–120"
+      },
+      "karaoke": {
+        "name": "Vách Ngăn Karaoke / Bar",
+        "desc": "Cách âm 52 dB + chống cháy lan",
+        "tag": "EI 60–120"
+      },
+      "floor": {
+        "name": "Sàn Chịu Lực Nhà Tiền Chế",
+        "desc": "Nhà kho, xưởng thép, sàn gác lửng",
+        "tag": "REI 180"
+      },
+      "factory": {
+        "name": "Vách Trần Nhà Xưởng KCN",
+        "desc": "Tường bao kho lạnh, phân xưởng sản xuất",
+        "tag": "EI 60"
+      },
+      "door": {
+        "name": "Lõi Cửa Thép Chống Cháy",
+        "desc": "Điền lõi cửa thoát hiểm, cửa buồng thang",
+        "tag": "EI 30–90"
+      }
     },
     "projectsMenu": {
       "heading": "Dự án tiêu biểu",
-      "samsung": { "name": "Nhà Máy Samsung Yên Phong", "desc": "KCN Yên Phong, Bắc Ninh · 45.000 m²", "tag": "KCN" },
-      "lotte": { "name": "TTTM Lotte Mall Tây Hồ", "desc": "Võ Chí Công, Hà Nội · 28.500 m²", "tag": "TM" },
-      "viettel": { "name": "Data Center Viettel IDC", "desc": "Khu CNC Hòa Lạc, Hà Nội · 16.000 m²", "tag": "HT" }
+      "samsung": {
+        "name": "Nhà Máy Samsung Yên Phong",
+        "desc": "KCN Yên Phong, Bắc Ninh · 45.000 m²",
+        "tag": "KCN"
+      },
+      "lotte": {
+        "name": "TTTM Lotte Mall Tây Hồ",
+        "desc": "Võ Chí Công, Hà Nội · 28.500 m²",
+        "tag": "TM"
+      },
+      "viettel": {
+        "name": "Data Center Viettel IDC",
+        "desc": "Khu CNC Hòa Lạc, Hà Nội · 16.000 m²",
+        "tag": "HT"
+      }
     },
     "actions": {
       "search": "Tìm kiếm",
@@ -150,5 +234,44 @@
     "hint": "Tìm theo sản phẩm, giải pháp, tài liệu kỹ thuật",
     "close": "Đóng",
     "open": "Mở"
+  },
+  "News": {
+    "home": "Trang Chủ",
+    "title": "Tin tức",
+    "metaTitle": "Tin Tức & Kiến Thức Tấm Chống Cháy MGO | Remak®",
+    "metaDescription": "Tin tức, tiêu chuẩn PCCC QCVN 06, kết quả thử nghiệm và hướng dẫn thi công tấm chống cháy MGO Remak® cho kỹ sư, nhà thầu và chủ đầu tư.",
+    "allCategories": "Tất cả bài viết",
+    "categoriesLabel": "Chuyên mục tin tức",
+    "highlights": "Đáng chú ý",
+    "latest": "Tin mới cập nhật",
+    "readMore": "Xem chi tiết",
+    "loadMore": "Xem thêm bài viết",
+    "loading": "Đang tải…",
+    "loadError": "Không tải được thêm bài, vui lòng thử lại.",
+    "empty": "Chưa có bài viết trong chuyên mục này.",
+    "viewAllNews": "Xem tất cả bài viết",
+    "readingTime": "{minutes} phút đọc",
+    "by": "Theo {name}",
+    "source": "Nguồn: {name}",
+    "toc": "Nội dung bài viết",
+    "tags": "Chủ đề",
+    "related": "Bài viết liên quan",
+    "relatedInline": "Xem thêm",
+    "share": "Chia sẻ",
+    "copyLink": "Sao chép liên kết",
+    "copied": "Đã sao chép liên kết",
+    "backToList": "Quay lại danh sách",
+    "scrollLeft": "Cuộn sang trái",
+    "scrollRight": "Cuộn sang phải",
+    "callout": {
+      "info": "Thông tin kỹ thuật",
+      "warning": "Lưu ý quan trọng",
+      "tip": "Mẹo thi công"
+    },
+    "consultTitle": "Tư Vấn Kỹ Thuật PCCC",
+    "consultText": "Bạn cần biện pháp thi công bọc ống gió hoặc vách ngăn EI cho dự án cụ thể? Liên hệ kỹ sư Remak.",
+    "sampleCta": "Đăng Ký Nhận Hộp Mẫu Thử",
+    "homeSection": "Tin tức",
+    "homeSectionAria": "Tin tức kỹ thuật mới nhất"
   }
 }

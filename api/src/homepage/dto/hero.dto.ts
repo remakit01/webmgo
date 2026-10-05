@@ -13,13 +13,13 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
+import { SAFE_LINK_OR_ANCHOR_PATTERN } from '@remak/shared/link';
 
 // Màu nhấn chỉ được chọn trong bảng màu brand — FE map sang token Tailwind, không nhận mã màu tự do
 export const HERO_ACCENTS = ['orange', 'green-dark', 'green', 'slate'] as const;
 export type HeroAccent = (typeof HERO_ACCENTS)[number];
 
 // Link nội bộ "/...", anchor "#..." hoặc http(s) — chặn javascript:, data:, //evil.com
-const LINK_PATTERN = /^(\/(?!\/)|#|https?:\/\/)\S*$/;
 const LINK_MESSAGE = 'Đường dẫn phải bắt đầu bằng "/", "#" hoặc http(s)://';
 
 export class HeroCtaDto {
@@ -31,7 +31,7 @@ export class HeroCtaDto {
 
   @ApiProperty({ example: '/nhan-mau-thu' })
   @IsString()
-  @Matches(LINK_PATTERN, { message: LINK_MESSAGE })
+  @Matches(SAFE_LINK_OR_ANCHOR_PATTERN, { message: LINK_MESSAGE })
   @MaxLength(300)
   link!: string;
 }
@@ -140,7 +140,7 @@ export class HeroCtaTranslationDto {
   @IsOptional()
   @IsString()
   @ValidateIf((o: HeroCtaTranslationDto) => !!o.link)
-  @Matches(LINK_PATTERN, { message: LINK_MESSAGE })
+  @Matches(SAFE_LINK_OR_ANCHOR_PATTERN, { message: LINK_MESSAGE })
   @MaxLength(300)
   link?: string;
 }

@@ -136,6 +136,11 @@ Tài liệu này cung cấp sẵn: **Nội dung hiển thị (Copywriting), Th�
 ---
 
 ### 10. Route: `/tin-tuc` & `/tin-tuc/[slug]` (Tin Tức & Kiến Thức)
+* **URL theo ngôn ngữ (slug riêng từng ngôn ngữ, quản lý trong CMS > Tin Tức):**
+  * Danh sách: `/tin-tuc` ⇄ `/en/news`
+  * Chuyên mục: `/tin-tuc/chuyen-muc/[slug-vi]` ⇄ `/en/news/category/[slug-en]`
+  * Bài viết: `/tin-tuc/[slug-vi]` ⇄ `/en/news/[slug-en]` (bài chưa dịch: không có bản `/en`, 404; slug cũ 301 sang slug mới)
+* **Nguồn dữ liệu:** API `GET /news/public/*` (ISR 60s, revalidate tag `news` khi CMS lưu/xuất bản). Bài nổi bật trang chủ chọn ở CMS > Trang Chủ > Tin Tức Trang Chủ.
 * **Danh sách các bài viết trụ cột (Pillar Articles) sẵn sàng:**
   * **Bài 1:** *QCVN 06:2022/BXD quy định gì về bọc ống gió chống cháy và vật liệu nghiệm thu?*
   * **Bài 2:** *Giải mã hiện tượng tấm MGO bị chảy mồ hôi và cách nhận biết MGO Sulfate thế hệ mới.*

@@ -4,9 +4,9 @@ import React, { useRef, useState } from 'react';
 import { AlertCircle, Copy, Info, Loader2, RotateCcw, Sparkles, X } from 'lucide-react';
 import { HERO_ACCENT_STYLES } from '@/components/home/HomeHeroSection';
 import type { HeroContent, HomeHero } from '@/types/homepage';
-import TranslatableField from './TranslatableField';
-import TranslatePickerDialog from './TranslatePickerDialog';
-import { describeAiError, type AiErrorInfo } from './ai-error';
+import TranslatableField from '@/cms/components/shared/TranslatableField';
+import TranslatePickerDialog from '@/cms/components/shared/TranslatePickerDialog';
+import { describeAiError, type AiErrorInfo } from '@/cms/components/shared/ai-error';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import { apiFetch, ApiError } from '@/cms/lib/api-client';
 import {

@@ -12,6 +12,7 @@ import { MediaService } from '../src/storage/media.service.js';
 import { BannersService } from '../src/banners/banners.service.js';
 import { HeroService, HERO_CONTENT_KEY } from '../src/homepage/hero.service.js';
 import type { UpdateHeroDto } from '../src/homepage/dto/hero.dto.js';
+import { seedNews } from './seed-news.js';
 
 // Ảnh banner gốc dùng một lần để nạp dữ liệu ban đầu; sau đó quản lý qua CMS (ảnh nằm trong MinIO)
 const BANNER_IMAGE_DIR = fileURLToPath(new URL('../../fe/public/images/banners/', import.meta.url));
@@ -114,6 +115,7 @@ async function main() {
   const media = await createMediaService();
   await seedBanners(media);
   await seedHero(media);
+  await seedNews(prisma, media);
 }
 
 // Dùng lại đúng luồng của API: sharp -> biến thể WebP/AVIF -> MinIO -> DB

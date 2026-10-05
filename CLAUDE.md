@@ -6,6 +6,7 @@ Monorepo pnpm cho website giới thiệu tấm chống cháy MGO của Remak, k�
 | --- | --- | --- | --- |
 | `mgo_remak` | [fe/](fe/) | Next.js 16 (App Router) + React 19 + Tailwind v4. Gồm site public **và** CMS tại `/admin` | 3000 |
 | `api` | [api/](api/) | NestJS 12 (ESM) + Prisma 7 + PostgreSQL + Redis + MinIO | 4000 (Swagger: `/docs`) |
+| `@remak/shared` | [packages/shared/](packages/shared/) | TypeScript thuần, không dependency runtime — logic dùng chung api/fe | — |
 
 Quy tắc riêng từng package: [fe/CLAUDE.md](fe/CLAUDE.md), [api/CLAUDE.md](api/CLAUDE.md).
 
@@ -17,6 +18,7 @@ docker compose up -d               # Postgres, Redis, MinIO, Mailpit (có giá t
 
 pnpm dev:fe                        # Next.js  → http://localhost:3000
 pnpm dev:api                       # NestJS   → http://localhost:4000
+pnpm dev:shared                    # build lại @remak/shared khi sửa (tsc --watch), chạy song song khi cần
 
 pnpm --filter mgo_remak lint
 pnpm --filter mgo_remak build
@@ -26,9 +28,10 @@ pnpm --filter api test:e2e
 pnpm --filter api build
 pnpm --filter api db:generate      # sinh Prisma client sau khi sửa schema
 pnpm --filter api db:migrate       # tạo + áp migration
+pnpm --filter @remak/shared test   # vitest cho package dùng chung
 ```
 
-`dev:cms` / `build:cms` trong [package.json](package.json) là script cũ — CMS đã gộp vào `fe/src/app/admin`, không còn package `webmgo-cms`.
+`dev`/`build`/`lint`/`test` của `api` và `fe` có hook `pre*` tự build `@remak/shared` (ra `packages/shared/dist`) trước khi chạy.
 
 ## Quy tắc kiến trúc bắt buộc
 
@@ -40,6 +43,7 @@ Chi tiết: [fe/docs/ARCHITECTURE_3_TIER_PHASE_ROADMAP.md](fe/docs/ARCHITECTURE_
 4. **Một nguồn sự thật** cho thông số sản phẩm MGO (độ dày, EI, tỷ trọng, giá…): định nghĩa một lần trong DB, tái sử dụng cho trang chủ, trang sản phẩm, bảng so sánh, schema SEO.
 5. **Redis chết không được làm sập hệ thống:** mọi lệnh Redis bọc `try/catch`, fallback xuống DB và log cảnh báo.
 6. **Không commit `.env`.** Khi thêm biến môi trường, cập nhật `.env.example` tương ứng.
+7. **Logic dùng chung api/fe đặt trong `@remak/shared`, không sao chép.** Hằng số, kiểu dữ liệu, hàm thuần (locale, slug, kiểm tra link, ghép bản dịch, phân trang…) mà cả hai phía cần → viết một lần trong [packages/shared/src](packages/shared/src), thêm subpath vào `exports` của [packages/shared/package.json](packages/shared/package.json) và test `*.spec.ts` cạnh file. Package này không được import Node/React/Nest hay thư viện ngoài. Thành phần UI dùng lại giữa nhiều màn CMS đặt ở `fe/src/cms/components/shared/`.
 
 ## Quy ước chung
 
@@ -78,10 +82,12 @@ Mỗi khi Claude (hoặc người) làm sai một điều mà đọc code chưa 
 - [fe] Đừng nối thẳng `NEXT_PUBLIC_API_URL` + path → biến này có thể chứa hậu tố `/api` trong khi NestJS không có global prefix; luôn dùng `API_URL` đã strip hậu tố.
 - [fe] Đừng gọi `revalidateTag(tag)` một tham số → đã deprecated ở Next 16; dùng `revalidateTag(tag, { expire: 0 })` khi revalidate từ webhook/route handler.
 - [fe] Đừng nuốt lỗi fetch ISR lúc runtime rồi trả mảng rỗng → làm vậy sẽ cache đè trang tốt bằng trang trống. Chỉ fallback khi `NEXT_PHASE === 'phase-production-build'`.
-- [cms] Đừng tạo code trong thư mục `cms/` hay dùng `pnpm dev:cms` → CMS đã gộp vào `fe/src/app/admin` + `fe/src/cms`.
+- [cms] Đừng tạo code trong thư mục `cms/` → CMS đã gộp vào `fe/src/app/admin` + `fe/src/cms`.
 - [cms] Đừng lưu access token/session trong `localStorage` → auth dùng httpOnly cookie, client chỉ `credentials: 'include'`.
 - [git] Đừng mở PR vào `main` → base luôn là `dev`.
 - [infra] Đừng gửi JSON có tiếng Việt bằng `curl -d "$BIEN"` trong Git Bash/Windows → ghi ra file UTF-8 rồi `curl --data-binary @file.json`. Biến shell làm hỏng ký tự (thành `?`/`�`) và ghi đè dữ liệu thật.
+- [api] Đừng để job định kỳ có nghiệp vụ bắt buộc (đăng bài hẹn giờ...) phụ thuộc lock Redis → Redis chết thì `acquireLock` luôn false và job bỏ lượt mãi; viết job idempotent (điều kiện trong WHERE) thay vì khoá. Lock chỉ dùng cho job "bỏ một lượt cũng được" (dọn thùng rác).
+- [db] Đừng chạy `pnpm --filter api db:seed` trên DB đang dùng → seed upsert lại tài khoản admin/editor về mật khẩu mặc định. Nạp riêng tin tức: `pnpm --filter api db:seed:news` (chỉ chạy khi chưa có bài).
 - [api] Đừng thử nghiệm bằng cách ghi vào dữ liệu CMS thật khi người khác có thể đang sửa → chỉ ghi lại đúng nội dung vừa đọc (kèm `If-Match`) hoặc dùng bản ghi test riêng.
 - [fe] Đừng viết `'\.'` trong regex `matcher` của `src/proxy.ts` → phải là `'\\.'`. Chuỗi JS `'\.'` thành `.`, matcher khớp mọi URL dài hơn "/" và proxy bỏ qua toàn bộ route tiếng Việt (404).
 - [fe] Đừng dùng `next/link` hoặc `<a href="/...">` cho link nội bộ ở web khách hàng → dùng `Link` từ `@/components/ui/LocaleLink` (href viết URL tiếng Việt), nếu không trang `/en` sẽ dẫn về bản tiếng Việt.

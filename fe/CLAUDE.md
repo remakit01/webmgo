@@ -37,7 +37,12 @@ src/
 - **Nhãn giao diện** (menu, nút, footer…) nằm trong `messages/vi.json` + `messages/en.json`, dùng `useTranslations` / `getTranslations`. Thêm key ở **cả hai** file; key được kiểm tra kiểu theo `vi.json`.
 - **Nội dung** (tiêu đề, mô tả, thông số…) vẫn đến từ API/DB, không đưa vào messages.
 - Page/layout Server Component trong `[locale]` phải gọi `setRequestLocale(locale)` để giữ SSG/ISR.
-- Giai đoạn chuyển tiếp: trang `/en` đặt `noindex` (nội dung phần lớn còn tiếng Việt); chưa có `/en` trong sitemap/hreflang.
+- Giai đoạn chuyển tiếp: trang `/en` đặt `noindex` ở layout (nội dung phần lớn còn tiếng Việt). **Ngoại lệ:** trang có nội dung tiếng Anh thật (Tin tức đã dịch & xuất bản) tự ghi đè `robots: indexable(true)` và có hreflang/sitemap — xem [src/lib/seo.ts](src/lib/seo.ts).
+- **Slug theo ngôn ngữ (Localized slugs)** — vd bài viết `/tin-tuc/toi-la-abc` ⇄ `/en/news/i-am-abc`:
+  - Link: `LocaleLink` với href `/tin-tuc/<slug của ngôn ngữ đang xem>` (toLocalePath đổi tiền tố, giữ slug). URL tuyệt đối ở server: [src/lib/news-paths.ts](src/lib/news-paths.ts).
+  - Nút đổi ngôn ngữ: page render `<SetLocaleAlternates paths={{ vi, en }} />` ([LocaleAlternates](src/components/layout/LocaleAlternates.tsx)); trang không đặt thì dùng bảng `pathnames`.
+  - hreflang chỉ khai báo ngôn ngữ đã có bản: `localizedAlternates()` trong [src/lib/seo.ts](src/lib/seo.ts). Slug cũ / slug của ngôn ngữ khác: API trả `{ redirect }`, page gọi `permanentRedirect()`.
+- Nội dung rich text (bài viết) render bằng [components/news/RichContent.tsx](src/components/news/RichContent.tsx) theo whitelist `@remak/shared/rich-content` — không dùng `dangerouslySetInnerHTML` cho nội dung CMS.
 
 ## Lấy dữ liệu
 

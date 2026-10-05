@@ -14,9 +14,9 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { SAFE_LINK_PATTERN } from '@remak/shared/link';
 
 // Chỉ cho phép link nội bộ ("/...") hoặc http(s) — chặn javascript:, data:, //evil.com
-const LINK_PATTERN = /^(\/(?!\/)|https?:\/\/)\S*$/;
 const LINK_MESSAGE = 'linkUrl phải là đường dẫn nội bộ hoặc http(s) URL';
 
 // multipart gửi mọi field dạng chuỗi
@@ -51,7 +51,7 @@ export class CreateBannerDto {
   @ApiPropertyOptional({ description: 'Đường dẫn nội bộ hoặc http(s) URL; chuỗi rỗng = xoá link' })
   @IsOptional()
   @ValidateIf((o: CreateBannerDto) => !!o.linkUrl)
-  @Matches(LINK_PATTERN, { message: LINK_MESSAGE })
+  @Matches(SAFE_LINK_PATTERN, { message: LINK_MESSAGE })
   @MaxLength(500)
   linkUrl?: string;
 
@@ -92,7 +92,7 @@ export class UpdateBannerDto {
   @ApiPropertyOptional()
   @IsOptional()
   @ValidateIf((o: UpdateBannerDto) => !!o.linkUrl)
-  @Matches(LINK_PATTERN, { message: LINK_MESSAGE })
+  @Matches(SAFE_LINK_PATTERN, { message: LINK_MESSAGE })
   @MaxLength(500)
   linkUrl?: string;
 

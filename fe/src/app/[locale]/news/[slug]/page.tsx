@@ -1,243 +1,235 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { ArrowLeft, ChevronRight, Clock, FileCheck, PhoneCall } from 'lucide-react';
+import { formatDate } from '@remak/shared/locale';
+import { extractHeadings } from '@remak/shared/rich-content';
 import Link from '@/components/ui/LocaleLink';
-import { notFound } from 'next/navigation';
-import { 
-  Calendar, 
-  Clock, 
-  ArrowLeft, 
-  ShieldCheck, 
-  CheckCircle2, 
-  ChevronRight, 
-  PhoneCall, 
-  Share2,
-  FileCheck,
-  Building2
-} from 'lucide-react';
-import { NEWS_ARTICLES } from '@/data/news';
-import { setRequestLocale } from 'next-intl/server';
-import type { Locale } from '@/i18n/routing';
+import JsonLd from '@/components/shared/JsonLd';
+import { SetLocaleAlternates } from '@/components/layout/LocaleAlternates';
+import RichContent from '@/components/news/RichContent';
+import ShareButtons from '@/components/news/ShareButtons';
+import { CategoryChip, NewsCoverImage, NewsTile } from '@/components/news/NewsCards';
+import { routing, type Locale } from '@/i18n/routing';
+import { getNewsList, getNewsPost } from '@/lib/api';
+import { newsCategoryPath, newsIndexPath, newsPostPath } from '@/lib/news-paths';
+import { absoluteUrl, indexable, localizedAlternates } from '@/lib/seo';
 
-interface Props {
-  params: Promise<{ slug: string; locale: string }>;
+// ISR 60s. Chỉ dựng sẵn các bài mới nhất; bài khác dựng lần đầu có người xem (dynamicParams mặc định true)
+export const revalidate = 60;
+const PREBUILD_LIMIT = 20;
+
+type Props = PageProps<'/[locale]/news/[slug]'>;
+
+export async function generateStaticParams({ params }: { params: { locale: string } }) {
+  const list = await getNewsList(params.locale as Locale, { pageSize: PREBUILD_LIMIT });
+  return (list?.items ?? []).map((item) => ({ slug: item.slug }));
 }
 
-export async function generateStaticParams() {
-  return NEWS_ARTICLES.map((article) => ({
-    slug: article.slug,
-  }));
+/** Đường dẫn bài ở mọi ngôn ngữ ĐÃ xuất bản (hreflang + nút đổi ngôn ngữ) */
+function alternatePaths(alternates: Partial<Record<Locale, string>>) {
+  return Object.fromEntries(
+    routing.locales.flatMap((l) => (alternates[l] ? [[l, newsPostPath(l, alternates[l]!)]] : [])),
+  ) as Partial<Record<Locale, string>>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const article = NEWS_ARTICLES.find((a) => a.slug === slug);
-
-  if (!article) {
-    return {
-      title: 'Không Tìm Thấy Bài Viết | Remak® MGO FireOFF',
-    };
-  }
-
+  const { locale, slug } = (await params) as { locale: Locale; slug: string };
+  const data = await getNewsPost(locale, slug);
+  if (!data || 'redirect' in data) return {};
+  const { post } = data;
+  const t = await getTranslations({ locale, namespace: 'News' });
+  const ogImage = post.seo.ogImageUrl ?? undefined;
   return {
-    title: `${article.title} | Remak® MGO FireOFF`,
-    description: article.desc,
+    title: `${post.seo.title} | ${t('title')} Remak®`,
+    description: post.seo.description,
+    alternates: localizedAlternates(alternatePaths(post.alternates), locale),
+    openGraph: {
+      type: 'article',
+      title: post.seo.title,
+      description: post.seo.description,
+      url: newsPostPath(locale, post.slug),
+      publishedTime: post.publishedAt,
+      modifiedTime: post.updatedAt,
+      section: post.category.name,
+      tags: post.tags.map((tag) => tag.name),
+      ...(ogImage ? { images: [{ url: ogImage, alt: post.cover?.alt ?? post.title }] } : {}),
+    },
+    twitter: { card: 'summary_large_image', title: post.seo.title, description: post.seo.description, ...(ogImage ? { images: [ogImage] } : {}) },
+    // Bài đã xuất bản ở ngôn ngữ này là nội dung thật -> cho index (kể cả /en), trừ khi biên tập viên chọn noindex
+    robots: indexable(!post.seo.noindex),
   };
 }
 
 export default async function NewsDetailPage({ params }: Props) {
-  const { slug, locale } = await params;
-  setRequestLocale(locale as Locale);
-  const article = NEWS_ARTICLES.find((a) => a.slug === slug);
+  const { locale, slug } = (await params) as { locale: Locale; slug: string };
+  setRequestLocale(locale);
 
-  if (!article) {
-    notFound();
-  }
+  const data = await getNewsPost(locale, slug);
+  if (!data) notFound();
+  // Slug cũ (đổi sau khi đăng) -> 301 sang slug hiện tại, giữ SEO và link cũ
+  if ('redirect' in data) permanentRedirect(newsPostPath(locale, data.redirect));
 
-  const relatedArticles = NEWS_ARTICLES.filter((a) => a.slug !== slug).slice(0, 3);
+  const { post, related } = data;
+  const t = await getTranslations('News');
+  const tCommon = await getTranslations('Common');
+  const headings = extractHeadings(post.content).filter((h) => h.level <= 3);
+  const paths = alternatePaths(post.alternates);
+  const url = absoluteUrl(newsPostPath(locale, post.slug));
+  const readingLabel = t('readingTime', { minutes: post.readingMinutes });
 
   return (
-    <div className="min-h-screen bg-slate-50 py-10 lg:py-16">
-      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 space-y-10">
-        
-        {/* ========================================================================= */}
-        {/* 1. BREADCRUMB & BACK LINK                                                 */}
-        {/* ========================================================================= */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-slate-200 pb-4">
-          <nav className="flex items-center gap-2 text-xs font-semibold text-slate-500 overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-[#5F8A03] transition-colors">
-              Trang Chủ
-            </Link>
-            <ChevronRight size={13} className="text-slate-400 shrink-0" />
-            <Link href="/tin-tuc" className="hover:text-[#5F8A03] transition-colors">
-              Tin Tức &amp; Kỹ Thuật
-            </Link>
-            <ChevronRight size={13} className="text-slate-400 shrink-0" />
-            <span className="text-slate-800 font-bold truncate max-w-[200px] sm:max-w-[400px]">
-              {article.title}
-            </span>
-          </nav>
+    <div className="min-h-screen bg-slate-50 py-8 lg:py-12">
+      {/* Nút đổi ngôn ngữ: sang đúng bài ở ngôn ngữ kia; bài chưa dịch -> về trang Tin tức của ngôn ngữ đó */}
+      <SetLocaleAlternates paths={{ vi: paths.vi ?? newsIndexPath('vi'), en: paths.en ?? newsIndexPath('en') }} />
+      <JsonLd
+        data={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'NewsArticle',
+            headline: post.title,
+            description: post.seo.description,
+            inLanguage: locale,
+            datePublished: post.publishedAt,
+            dateModified: post.updatedAt,
+            mainEntityOfPage: url,
+            ...(post.cover ? { image: [post.cover.url] } : {}),
+            articleSection: post.category.name,
+            keywords: post.tags.map((tag) => tag.name).join(', ') || undefined,
+            author: post.author
+              ? { '@type': 'Person', name: post.author.name, ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}) }
+              : { '@type': 'Organization', name: 'Remak®' },
+            publisher: { '@type': 'Organization', name: 'Remak® Vietnam', logo: { '@type': 'ImageObject', url: absoluteUrl('/Logo_remak_800.png') } },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: t('home'), item: absoluteUrl(locale === 'vi' ? '/' : '/en') },
+              { '@type': 'ListItem', position: 2, name: t('title'), item: absoluteUrl(newsIndexPath(locale)) },
+              { '@type': 'ListItem', position: 3, name: post.category.name, item: absoluteUrl(newsCategoryPath(locale, post.category.slug)) },
+              { '@type': 'ListItem', position: 4, name: post.title, item: url },
+            ],
+          },
+        ]}
+      />
 
-          <Link
-            href="/tin-tuc"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5F8A03] hover:text-[#7CB305] transition-colors shrink-0"
-          >
-            <ArrowLeft size={14} />
-            <span>Quay lại danh sách</span>
+      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-200 pb-4">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-remak-green-dark">{t('home')}</Link>
+            <ChevronRight size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
+            <Link href="/tin-tuc" className="hover:text-remak-green-dark">{t('title')}</Link>
+            <ChevronRight size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
+            <Link href={`/tin-tuc/chuyen-muc/${post.category.slug}`} className="hover:text-remak-green-dark">{post.category.name}</Link>
+          </nav>
+          <Link href="/tin-tuc" className="inline-flex items-center gap-1.5 text-xs font-bold text-remak-green-dark hover:text-remak-green shrink-0">
+            <ArrowLeft size={14} aria-hidden="true" /> {t('backToList')}
           </Link>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 2. NỘI DUNG CHÍNH (LAYOUT 2 CỘT: 8 CỘT NỘI DUNG + 4 CỘT SIDEBAR)         */}
-        {/* ========================================================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          
-          {/* CỘT TRÁI (NỘI DUNG BÀI VIẾT) */}
-          <article className="lg:col-span-8 bg-white rounded-2xl p-6 sm:p-10 border-2 border-slate-200 shadow-xs space-y-8">
-            
-            {/* Header bài viết */}
-            <div className="space-y-4 border-b-2 border-slate-100 pb-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${article.categoryColor}`}>
-                  {article.category}
-                </span>
-                <span className="text-xs text-slate-400 font-semibold">•</span>
-                <span className="text-xs text-slate-600 font-semibold">{article.author}</span>
+          <article className="lg:col-span-8 bg-white rounded-2xl p-5 sm:p-10 border-2 border-slate-200 shadow-xs space-y-7">
+            <header className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 font-semibold">
+                <CategoryChip category={post.category} />
+                {post.author && (
+                  <>
+                    <span className="text-slate-300" aria-hidden="true">•</span>
+                    <span>{post.author.name}</span>
+                  </>
+                )}
               </div>
-
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-tight tracking-tight">
-                {article.title}
-              </h1>
-
-              <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
-                <span className="flex items-center gap-1.5">
-                  <Calendar size={13} className="text-[#F26522]" />
-                  <span>{article.date}</span>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-tight tracking-tight">{post.title}</h1>
+              <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
+                <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock size={13} className="text-remak-green" aria-hidden="true" /> {readingLabel}
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <Clock size={13} className="text-[#7CB305]" />
-                  <span>{article.readTime}</span>
-                </span>
-              </div>
-            </div>
+              </p>
+            </header>
 
-            {/* Ảnh đại diện lớn */}
-            <div className="relative rounded-xl overflow-hidden border-2 border-slate-200 aspect-video bg-slate-100">
-              <img
-                src={article.image}
-                alt={article.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            {/* Sapo */}
+            <p className="text-base sm:text-lg font-bold text-slate-800 leading-relaxed">{post.sapo}</p>
 
-            {/* Đoạn mở đầu tóm tắt */}
-            <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border-l-4 border-[#7CB305] text-slate-700 font-medium text-sm sm:text-base leading-relaxed">
-              {article.desc}
-            </div>
+            {post.cover && (
+              <figure className="space-y-2">
+                <div className="rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-100">
+                  <NewsCoverImage item={post} sizes="(min-width: 1024px) 60vw, 100vw" priority />
+                </div>
+                {post.cover.caption && <figcaption className="text-center text-xs italic text-slate-500">{post.cover.caption}</figcaption>}
+              </figure>
+            )}
 
-            {/* Nội dung chi tiết các đoạn */}
-            <div className="space-y-5 text-slate-700 text-sm sm:text-base leading-relaxed">
-              {article.content.map((paragraph, idx) => (
-                <p key={idx} className="font-normal">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            {headings.length >= 3 && (
+              <nav aria-label={t('toc')} className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                <p className="text-xs font-black uppercase tracking-wide text-slate-500 mb-2">{t('toc')}</p>
+                <ol className="space-y-1.5 text-sm">
+                  {headings.map((h) => (
+                    <li key={h.id} className={h.level === 3 ? 'pl-4' : ''}>
+                      <a href={`#${h.id}`} className="text-slate-700 hover:text-remak-green-dark font-medium">{h.text}</a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
 
-            {/* Hộp cam kết kỹ thuật Remak */}
-            <div className="bg-[#F4F9E8] rounded-xl p-5 sm:p-6 border-2 border-[#7CB305]/30 space-y-3">
-              <div className="flex items-center gap-2 text-[#5F8A03] font-bold text-sm sm:text-base">
-                <ShieldCheck size={20} />
-                <span>Cam Kết Kỹ Thuật Từ Remak® FireOFF</span>
-              </div>
-              <ul className="space-y-2 text-xs sm:text-sm text-slate-700">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 size={16} className="text-[#7CB305] shrink-0 mt-0.5" />
-                  <span>Đầy đủ kết quả thử nghiệm đốt mẫu thực tế tại Viện IBST đạt chỉ số EI30 đến EI180.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 size={16} className="text-[#7CB305] shrink-0 mt-0.5" />
-                  <span>Công nghệ Magie Sulfate cao cấp triệt tiêu hiện tượng ăn mòn rỉ sét kim loại (Zero Rust).</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 size={16} className="text-[#7CB305] shrink-0 mt-0.5" />
-                  <span>Cung cấp hồ sơ pháp lý xuất xưởng CO/CQ hỗ trợ nghiệm thu bàn giao PCCC nhanh chóng.</span>
-                </li>
-              </ul>
-            </div>
+            <RichContent doc={post.content} relatedRefs={post.relatedRefs} />
 
-            {/* Tags bài viết */}
-            <div className="pt-6 border-t-2 border-slate-100 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-slate-500 mr-1">Chủ đề:</span>
-              {article.tags.map((tag, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 border border-slate-200 transition-colors"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
+            {post.source && (
+              <p className="text-right text-sm font-semibold text-slate-600">
+                {post.source.url ? (
+                  <a href={post.source.url} target="_blank" rel="noopener noreferrer nofollow" className="hover:text-remak-green-dark underline underline-offset-2">
+                    {t('by', { name: post.source.name })}
+                  </a>
+                ) : (
+                  t('by', { name: post.source.name })
+                )}
+              </p>
+            )}
 
+            <footer className="pt-6 border-t-2 border-slate-100 space-y-4">
+              {post.tags.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold text-slate-500 mr-1">{t('tags')}:</span>
+                  {post.tags.map((tag) => (
+                    <span key={tag.id} className="px-3 py-1 rounded-lg bg-slate-100 text-xs font-semibold text-slate-700 border border-slate-200">
+                      #{tag.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <ShareButtons url={url} title={post.title} />
+            </footer>
           </article>
 
-          {/* CỘT PHẢI (SIDEBAR: TƯ VẤN + BÀI VIẾT LIÊN QUAN) */}
-          <aside className="lg:col-span-4 space-y-6">
-            
-            {/* Box liên hệ tư vấn nhanh */}
+          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
             <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-xs space-y-4">
-              <h3 className="font-black text-slate-900 text-lg border-b border-slate-100 pb-3">
-                Tư Vấn Kỹ Thuật PCCC
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Bạn cần bản vẽ biện pháp thi công bọc ống gió hoặc vách ngăn EI cho dự án cụ thể? Hãy liên hệ ngay với kỹ sư Remak.
-              </p>
-              <div className="space-y-2.5 pt-1">
-                <a
-                  href="tel:0902441981"
-                  className="w-full py-3 px-4 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition-colors"
-                >
-                  <PhoneCall size={16} />
-                  <span>Hotline: 0902.441.981</span>
+              <h2 className="font-black text-slate-900 text-lg border-b border-slate-100 pb-3">{t('consultTitle')}</h2>
+              <p className="text-sm text-slate-600 leading-relaxed">{t('consultText')}</p>
+              <div className="space-y-2.5">
+                <a href="tel:0902441981" className="w-full py-3 px-4 rounded-xl bg-remak-orange hover:bg-remak-orange-dark text-white text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition-colors">
+                  <PhoneCall size={16} aria-hidden="true" /> {tCommon('hotline', { phone: '0902.441.981' })}
                 </a>
-                <Link
-                  href="/nhan-mau-thu"
-                  className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-xs sm:text-sm font-bold border-2 border-slate-300 flex items-center justify-center gap-2 transition-colors"
-                >
-                  <FileCheck size={16} className="text-[#5F8A03]" />
-                  <span>Đăng Ký Nhận Hộp Mẫu Thử</span>
+                <Link href="/nhan-mau-thu" className="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-800 text-sm font-bold border-2 border-slate-300 flex items-center justify-center gap-2 transition-colors">
+                  <FileCheck size={16} className="text-remak-green-dark" aria-hidden="true" /> {t('sampleCta')}
                 </Link>
               </div>
             </div>
 
-            {/* Box bài viết liên quan */}
-            <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-xs space-y-4">
-              <h3 className="font-black text-slate-900 text-lg border-b border-slate-100 pb-3">
-                Bài Viết Liên Quan
-              </h3>
-              <div className="space-y-4">
-                {relatedArticles.map((rel) => (
-                  <Link
-                    key={rel.id}
-                    href={`/tin-tuc/${rel.slug}`}
-                    className="group block space-y-1.5"
-                  >
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                      <span>{rel.category}</span>
-                      <span>•</span>
-                      <span>{rel.date}</span>
-                    </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#5F8A03] transition-colors line-clamp-2 leading-snug">
-                      {rel.title}
-                    </h4>
-                  </Link>
-                ))}
+            {related.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 border-2 border-slate-200 shadow-xs space-y-4">
+                <h2 className="font-black text-slate-900 text-lg border-b border-slate-100 pb-3">{t('related')}</h2>
+                <div className="space-y-5">
+                  {related.map((item) => (
+                    <NewsTile key={item.id} item={item} sizes="(min-width: 1024px) 25vw, 100vw" titleClass="text-sm" />
+                  ))}
+                </div>
               </div>
-            </div>
-
+            )}
           </aside>
-
         </div>
-
       </div>
     </div>
   );

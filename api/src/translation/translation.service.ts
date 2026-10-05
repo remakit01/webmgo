@@ -19,8 +19,16 @@ const LINK_LIKE = /^(\/|#|https?:\/\/)\S*$/;
 const CONTEXT_STYLE: Record<TranslateContext, string> = {
   'homepage-hero':
     'Homepage hero of a B2B manufacturer website: punchy headline, concise persuasive copy, short button labels and stat captions.',
+  'news-article':
+    'Technical news article for construction and fire-protection professionals: accurate, natural journalistic US English; keep headings concise, keep the meaning of standards, test results and figures exact.',
   general: 'Website content for a B2B building-materials manufacturer.',
 };
+
+/** Mỗi lần gọi Gemini tối đa bấy nhiêu ô / ký tự — bài dài được chia nhiều lô */
+const BATCH_MAX_FIELDS = 40;
+const BATCH_MAX_CHARS = 6_000;
+/** Số lô gọi song song (vừa đủ nhanh, không dồn quota) */
+const BATCH_CONCURRENCY = 2;
 
 function systemPrompt(context: TranslateContext) {
   const glossary = GLOSSARY_VI_EN.map(([vi, en]) => `- "${vi}" => "${en}"`).join('\n');
@@ -31,6 +39,7 @@ function systemPrompt(context: TranslateContext) {
     'Rules:',
     '- Return JSON with exactly the same keys as the input; translate values only.',
     '- Keep markdown bold markers **like this** around the corresponding translated words.',
+    '- Keep inline tags such as <b>…</b>, <i>…</i>, <u>…</u>, <s>…</s>, <code>…</code>, <a1>…</a1>, <br/> exactly as given (same tag names, properly nested), placed around the corresponding translated words; never add new tags. Keep &lt; &gt; &amp; entities as-is.',
     '- Keep numbers and units; use English number formatting (e.g. "1.200°C" -> "1,200°C", "18.500 m²" -> "18,500 m²").',
     `- Never translate these terms: ${KEEP_AS_IS.join(', ')}.`,
     '- Keep each value about as short as the source (UI fields have length limits); keep button labels short.',
@@ -103,12 +112,24 @@ export class TranslationService implements OnModuleInit {
       else pending.push([key, text]);
     }
 
-    if (pending.length) {
-      const translated = await this.callGemini(pending.map(([, text]) => text), context);
+    // Chia lô theo số ô / tổng ký tự để mỗi lần gọi nằm trong giới hạn thời gian và độ dài phản hồi
+    const batches: [string, string][][] = [];
+    for (const item of pending) {
+      const last = batches[batches.length - 1];
+      const size = last?.reduce((n, [, t]) => n + t.length, 0) ?? 0;
+      if (!last || last.length >= BATCH_MAX_FIELDS || size + item[1].length > BATCH_MAX_CHARS) batches.push([item]);
+      else last.push(item);
+    }
+    for (let i = 0; i < batches.length; i += BATCH_CONCURRENCY) {
       await Promise.all(
-        pending.map(async ([key, text], i) => {
-          result[key] = translated[i];
-          await this.redis.setJson(this.cacheKey(context, text), translated[i], CACHE_TTL);
+        batches.slice(i, i + BATCH_CONCURRENCY).map(async (batch) => {
+          const translated = await this.callGemini(batch.map(([, text]) => text), context);
+          await Promise.all(
+            batch.map(async ([key, text], j) => {
+              result[key] = translated[j];
+              await this.redis.setJson(this.cacheKey(context, text), translated[j], CACHE_TTL);
+            }),
+          );
         }),
       );
     }

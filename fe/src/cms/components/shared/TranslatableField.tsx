@@ -2,7 +2,7 @@
 
 import React, { useId } from 'react';
 import { AlertCircle, Sparkles } from 'lucide-react';
-import { inputClass } from './hero-form';
+import { inputClass } from './form-styles';
 
 interface TranslatableFieldProps {
   label: string;

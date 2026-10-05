@@ -1,0 +1,64 @@
+{
+  "name": "@remak/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Logic thuần TypeScript dùng chung cho api và fe (locale, slug, link, bản dịch, phân trang)",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./locale": {
+      "types": "./dist/locale.d.ts",
+      "default": "./dist/locale.js"
+    },
+    "./slug": {
+      "types": "./dist/slug.d.ts",
+      "default": "./dist/slug.js"
+    },
+    "./link": {
+      "types": "./dist/link.d.ts",
+      "default": "./dist/link.js"
+    },
+    "./translation": {
+      "types": "./dist/translation.d.ts",
+      "default": "./dist/translation.js"
+    },
+    "./hero-i18n": {
+      "types": "./dist/hero-i18n.d.ts",
+      "default": "./dist/hero-i18n.js"
+    },
+    "./pagination": {
+      "types": "./dist/pagination.d.ts",
+      "default": "./dist/pagination.js"
+    },
+    "./rich-content": {
+      "types": "./dist/rich-content.d.ts",
+      "default": "./dist/rich-content.js"
+    },
+    "./publishing": {
+      "types": "./dist/publishing.d.ts",
+      "default": "./dist/publishing.js"
+    },
+    "./contracts/news": {
+      "types": "./dist/contracts/news.d.ts",
+      "default": "./dist/contracts/news.js"
+    },
+    "./rich-translate": {
+      "types": "./dist/rich-translate.d.ts",
+      "default": "./dist/rich-translate.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

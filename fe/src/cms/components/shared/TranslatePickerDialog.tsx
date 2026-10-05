@@ -3,7 +3,7 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Info, Sparkles, X } from 'lucide-react';
-import type { TranslationGroup } from './hero-form';
+import type { TranslationGroup } from './translation-types';
 
 interface TranslatePickerDialogProps {
   groups: TranslationGroup[];

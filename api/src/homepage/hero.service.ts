@@ -5,7 +5,7 @@ import { MediaService, type UploadedImage } from '../storage/media.service.js';
 import { RevalidateService } from '../revalidate/revalidate.service.js';
 import { saveSettingVersioned } from '../common/site-settings.js';
 import type { HeroLocale, HeroTranslationDto, UpdateHeroDto } from './dto/hero.dto.js';
-import { mergeHeroTranslation, type HeroTranslationShape } from './hero-i18n.js';
+import { mergeHeroTranslation, type HeroTranslationShape } from '@remak/shared/hero-i18n';
 
 // Nội dung chữ và ảnh lưu 2 key riêng: sửa chữ và thay ảnh không ghi đè lẫn nhau khi gửi đồng thời
 export const HERO_CONTENT_KEY = 'homepage.hero';

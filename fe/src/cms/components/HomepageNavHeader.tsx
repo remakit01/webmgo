@@ -12,9 +12,10 @@ const HOMEPAGE_TABS = [
   { id: 'comparison', name: '5. Đối Chuẩn Vật Liệu', href: '/admin/homepage/comparison', feAnchor: '#homepage-comparison' },
   { id: 'applications', name: '6. 4 Ứng Dụng Hàng Đầu', href: '/admin/homepage/applications', feAnchor: '#homepage-applications' },
   { id: 'sample-request', name: '7. Hộp Mẫu Thử Miễn Phí', href: '/admin/homepage/sample-request', feAnchor: '#homepage-sample-request' },
-  { id: 'projects-news', name: '8. Dự Án & Tin Tức', href: '/admin/homepage/projects-news', feAnchor: '#homepage-projects-news' },
-  { id: 'calculator', name: '9. Dự Toán Vật Tư', href: '/admin/homepage/calculator', feAnchor: '#homepage-calculator' },
-  { id: 'faq', name: '10. Hỏi Đáp FAQ SEO', href: '/admin/homepage/faq', feAnchor: '#homepage-faq' },
+  { id: 'projects', name: '8. Dự Án Tiêu Biểu', href: '/admin/homepage/projects', feAnchor: '#du-an-va-tin-tuc' },
+  { id: 'news', name: '9. Tin Tức Trang Chủ', href: '/admin/homepage/news', feAnchor: '#du-an-va-tin-tuc' },
+  { id: 'calculator', name: '10. Dự Toán Vật Tư', href: '/admin/homepage/calculator', feAnchor: '#homepage-calculator' },
+  { id: 'faq', name: '11. Hỏi Đáp FAQ SEO', href: '/admin/homepage/faq', feAnchor: '#homepage-faq' },
 ];
 
 interface HomepageNavHeaderProps {
@@ -45,7 +46,7 @@ export default function HomepageNavHeader({ currentId }: HomepageNavHeaderProps)
         </a>
       </div>
 
-      {/* Tabs navigation 10 menu con chuyển nhanh */}
+      {/* Tabs navigation 11 menu con chuyển nhanh */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
         {HOMEPAGE_TABS.map((tab) => {
           const isActive = tab.id === currentId;

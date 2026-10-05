@@ -12,6 +12,10 @@ import { RevalidateModule } from './revalidate/revalidate.module.js';
 import { BannersModule } from './banners/banners.module.js';
 import { HomepageModule } from './homepage/homepage.module.js';
 import { TranslationModule } from './translation/translation.module.js';
+import { ContentCacheModule } from './content-cache/content-cache.module.js';
+import { SlugRedirectModule } from './slug-redirect/slug-redirect.module.js';
+import { MediaModule } from './media/media.module.js';
+import { NewsModule } from './news/news.module.js';
 import configuration from './config/configuration.js';
 
 @Module({
@@ -31,6 +35,10 @@ import configuration from './config/configuration.js';
     BannersModule,
     HomepageModule,
     TranslationModule,
+    ContentCacheModule,
+    SlugRedirectModule,
+    MediaModule,
+    NewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

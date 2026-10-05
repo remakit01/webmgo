@@ -6,6 +6,7 @@ import Header from './Header';
 import Footer from './Footer';
 import StickyConversionBar from './StickyConversionBar';
 import { QuickQuoteModal, MaterialChatPopup } from '@/components/shared';
+import { LocaleAlternatesProvider } from './LocaleAlternates';
 
 // Khung web khách hàng (Header + main + Footer + Sticky Conversion Bar + Quick Quote Modal). CMS có root layout riêng ở app/admin nên không đi qua đây.
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [quoteModalOpen, setQuoteModalOpen] = useState(false);
 
   return (
+    <LocaleAlternatesProvider>
     <div className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-800">
       {/* Skip to Main Content Link chuẩn Web Interface Guidelines */}
       <a 
@@ -37,5 +39,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Widget Chat Popup Dự Toán MGO Nổi Toàn Cục */}
       <MaterialChatPopup />
     </div>
+    </LocaleAlternatesProvider>
   );
 }

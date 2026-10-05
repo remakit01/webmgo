@@ -1,9 +1,10 @@
 import { revalidateTag } from 'next/cache';
 import { timingSafeEqual } from 'node:crypto';
 import { NextResponse } from 'next/server';
+import { NEWS_REVALIDATE_TAG } from '@remak/shared/contracts/news';
 
 // Chỉ cho phép revalidate các tag đã biết
-const ALLOWED_TAGS = new Set(['banners', 'homepage-hero']);
+const ALLOWED_TAGS = new Set(['banners', 'homepage-hero', NEWS_REVALIDATE_TAG]);
 
 function secretMatches(provided: string | null, expected: string) {
   if (!provided) return false;

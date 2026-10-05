@@ -1,7 +1,9 @@
 import React from 'react';
 import Link from '@/components/ui/LocaleLink';
 import { PROJECTS } from '@/data/projects';
-import { NEWS_ARTICLES } from '@/data/news';
+import { useTranslations } from 'next-intl';
+import type { NewsListItem } from '@remak/shared/contracts/news';
+import { NewsCoverImage } from '@/components/news/NewsCards';
 
 // Dữ liệu dự án tiêu biểu (1 tiêu điểm + 4 tin vệ tinh)
 const HERO_PROJECT = {
@@ -19,22 +21,10 @@ const SIDE_PROJECTS = PROJECTS.slice(1, 5).map((p) => ({
   link: `/du-an/${p.slug}`,
 }));
 
-// Dữ liệu tin tức (1 tiêu điểm + 4 tin vệ tinh)
-const HERO_NEWS = {
-  id: NEWS_ARTICLES[0].id,
-  title: NEWS_ARTICLES[0].title,
-  desc: NEWS_ARTICLES[0].desc,
-  image: NEWS_ARTICLES[0].image,
-  link: `/tin-tuc/${NEWS_ARTICLES[0].slug}`,
-};
-
-const SIDE_NEWS = NEWS_ARTICLES.slice(1, 5).map((n) => ({
-  id: n.id,
-  title: n.title,
-  link: `/tin-tuc/${n.slug}`,
-}));
-
-export default function HomeProjectsAndNews() {
+/** Khối Dự án + Tin tức trên trang chủ. `news`: bài nổi bật theo ngôn ngữ đang xem (1 tin chính + tối đa 4 tin phụ), lấy từ API. */
+export default function HomeProjectsAndNews({ news }: { news: NewsListItem[] }) {
+  const t = useTranslations('News');
+  const [heroNews, ...sideNews] = news;
   return (
     <section 
       id="du-an-va-tin-tuc" 
@@ -114,55 +104,51 @@ export default function HomeProjectsAndNews() {
         </div>
 
         {/* ========================================================================= */}
-        {/* CHUYÊN MỤC 2: TIN TỨC                                                     */}
+        {/* CHUYÊN MỤC 2: TIN TỨC (bài nổi bật chọn ở CMS: Trang Chủ > Tin Tức Trang Chủ)  */}
         {/* ========================================================================= */}
-        <div className="space-y-4 flex flex-col justify-between">
+        {heroNews && (
+        <div className="space-y-4 flex flex-col justify-between" aria-label={t('homeSectionAria')}>
           {/* Header Chuyên Mục Chuẩn Báo Chí: Tên In Hoa + Gạch Chân Màu Thương Hiệu */}
           <div className="flex items-center justify-between border-b border-slate-300">
-            <Link 
-              href="/tin-tuc" 
+            <Link
+              href="/tin-tuc"
               className="border-b-[2.5px] border-[#5F8A03] pb-2 -mb-[1px] group block"
             >
               <h2 className="text-lg sm:text-xl font-black text-[#5F8A03] group-hover:text-[#4A6B02] tracking-wide uppercase transition-colors">
-                TIN TỨC
+                {t('homeSection')}
               </h2>
             </Link>
-            <Link 
-              href="/tin-tuc" 
+            <Link
+              href="/tin-tuc"
               className="text-xs font-bold text-slate-500 hover:text-[#5F8A03] transition-colors pb-2"
             >
-              Xem tất cả
+              {t('viewAllNews')}
             </Link>
           </div>
 
           {/* Bố Cục 2 Cột Con: 1 Tiêu Điểm Bên Trái + 4 Tin Bullet Bên Phải */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-5 items-stretch flex-1">
-            {/* Cột Con Trái: Tin Tiêu Điểm (Hero Spotlight - có ảnh, tiêu đề, subtitle) */}
-            <Link href={HERO_NEWS.link} className="group flex flex-col justify-start">
+            {/* Cột Con Trái: Tin Tiêu Điểm */}
+            <Link href={`/tin-tuc/${heroNews.slug}`} className="group flex flex-col justify-start">
               <div className="aspect-[16/10] overflow-hidden bg-slate-100 rounded-sm">
-                <img
-                  src={HERO_NEWS.image}
-                  alt={HERO_NEWS.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
+                <NewsCoverImage item={heroNews} sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 100vw" className="group-hover:scale-105 transition-transform duration-500" />
               </div>
               <h3 className="mt-2.5 font-extrabold text-slate-900 text-sm sm:text-[15px] leading-snug group-hover:text-[#5F8A03] transition-colors line-clamp-2">
-                {HERO_NEWS.title}
+                {heroNews.title}
               </h3>
               <p className="mt-1.5 text-xs text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-3 font-normal">
-                {HERO_NEWS.desc}
+                {heroNews.sapo}
               </p>
             </Link>
 
-            {/* Cột Con Phải: 4 Bài Viết (có divider gạch ngang border-slate-300 đậm nét rõ ràng) */}
+            {/* Cột Con Phải: tối đa 4 bài viết */}
             <div className="flex flex-col justify-between h-full pt-1 sm:pt-0">
-              {SIDE_NEWS.map((article, idx) => (
+              {sideNews.slice(0, 4).map((article, idx, arr) => (
                 <Link
                   key={article.id}
-                  href={article.link}
+                  href={`/tin-tuc/${article.slug}`}
                   className={`group flex-1 flex flex-col justify-center py-2.5 sm:py-2 ${
-                    idx !== SIDE_NEWS.length - 1 ? 'border-b border-slate-300' : ''
+                    idx !== arr.length - 1 ? 'border-b border-slate-300' : ''
                   }`}
                 >
                   <div className="flex items-start gap-2.5">
@@ -176,6 +162,7 @@ export default function HomeProjectsAndNews() {
             </div>
           </div>
         </div>
+        )}
 
       </div>
     </section>
