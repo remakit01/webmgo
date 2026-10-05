@@ -1,5 +1,4 @@
-import { CheckCircle2, XCircle, Minus, ArrowRight } from 'lucide-react';
-import Link from '@/components/ui/LocaleLink';
+import { CheckCircle2, XCircle, Minus } from 'lucide-react';
 import { MATERIAL_COMPARISONS } from '@/data/products';
 import SectionHeading from '@/components/ui/SectionHeading';
 
@@ -129,28 +128,6 @@ export default function ComparisonTable({
               </tr>
             </tbody>
           </table>
-        </div>
-
-        {/* ── CONVERSION BRIDGE DƯỚI BẢNG SO SÁNH ── */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-700">
-          <div className="space-y-1.5 text-center md:text-left">
-            <h4 className="text-lg sm:text-xl font-black text-white">
-              Đang Sử Dụng Thạch Cao Hoặc Cemboard Cho Dự Án?
-            </h4>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
-              Chuyển sang MGO Remak giúp giảm 30% tải trọng, chống nước tuyệt đối, không rỉ sét ốc vít và đạt nghiệm thu PCCC nhanh chóng.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-            <Link
-              href="/bao-gia"
-              className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D95314] text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-orange-600/30 flex items-center gap-2 hover:-translate-y-0.5 transition-all cursor-pointer whitespace-nowrap"
-            >
-              <span>Nhận Báo Giá Tấm MGO Remak®</span>
-              <ArrowRight size={16} />
-            </Link>
-          </div>
         </div>
       </div>
     </section>

@@ -6,7 +6,6 @@ import {
   Send, FileCheck, Users,
   ArrowRight, ClipboardList, MessageSquare, PackageCheck,
   Shield, Award,
-  Link,
 } from 'lucide-react';
 
 const APPLICATIONS = [
