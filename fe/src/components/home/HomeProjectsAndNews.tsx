@@ -50,11 +50,14 @@ export default function HomeProjectsAndNews() {
         <div className="space-y-4 flex flex-col justify-between">
           {/* Header Chuyên Mục Chuẩn Báo Chí: Tên In Hoa + Gạch Chân Màu Thương Hiệu */}
           <div className="flex items-center justify-between border-b border-slate-300">
-            <div className="border-b-[2.5px] border-[#5F8A03] pb-2 -mb-[1px]">
-              <h2 className="text-lg sm:text-xl font-black text-[#5F8A03] tracking-wide uppercase">
+            <Link 
+              href="/du-an" 
+              className="border-b-[2.5px] border-[#5F8A03] pb-2 -mb-[1px] group block"
+            >
+              <h2 className="text-lg sm:text-xl font-black text-[#5F8A03] group-hover:text-[#4A6B02] tracking-wide uppercase transition-colors">
                 DỰ ÁN TIÊU BIỂU
               </h2>
-            </div>
+            </Link>
             <Link 
               href="/du-an" 
               className="text-xs font-bold text-slate-500 hover:text-[#5F8A03] transition-colors pb-2"
@@ -116,11 +119,14 @@ export default function HomeProjectsAndNews() {
         <div className="space-y-4 flex flex-col justify-between">
           {/* Header Chuyên Mục Chuẩn Báo Chí: Tên In Hoa + Gạch Chân Màu Thương Hiệu */}
           <div className="flex items-center justify-between border-b border-slate-300">
-            <div className="border-b-[2.5px] border-[#5F8A03] pb-2 -mb-[1px]">
-              <h2 className="text-lg sm:text-xl font-black text-[#5F8A03] tracking-wide uppercase">
+            <Link 
+              href="/tin-tuc" 
+              className="border-b-[2.5px] border-[#5F8A03] pb-2 -mb-[1px] group block"
+            >
+              <h2 className="text-lg sm:text-xl font-black text-[#5F8A03] group-hover:text-[#4A6B02] tracking-wide uppercase transition-colors">
                 TIN TỨC
               </h2>
-            </div>
+            </Link>
             <Link 
               href="/tin-tuc" 
               className="text-xs font-bold text-slate-500 hover:text-[#5F8A03] transition-colors pb-2"

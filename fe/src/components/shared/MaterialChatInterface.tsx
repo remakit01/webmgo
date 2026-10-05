@@ -8,6 +8,7 @@ import { formatNumber } from '@/lib/utils';
 export interface MaterialChatInterfaceProps {
   onClose?: () => void;
   isPopupMode?: boolean;
+  onExpandPopup?: () => void;
 }
 
 interface ApplicationOption {
@@ -56,6 +57,7 @@ interface ChatMessage {
 export default function MaterialChatInterface({
   onClose,
   isPopupMode = false,
+  onExpandPopup,
 }: MaterialChatInterfaceProps) {
   // State bóc tách theo luồng hội thoại liên tục
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -164,11 +166,10 @@ export default function MaterialChatInterface({
 
   return (
     <div
-      className={`flex flex-col bg-slate-950 text-white w-full overflow-hidden ${
-        isPopupMode
+      className={`flex flex-col bg-slate-950 text-white w-full overflow-hidden ${isPopupMode
           ? 'h-full'
           : 'h-[620px] max-h-[85vh] rounded-2xl border border-slate-700/80 shadow-2xl'
-      }`}
+        }`}
     >
       {/* 1. CHAT HEADER (KHÔNG DÙNG ICON, CHỈ DÙNG TYPOGRAPHY VÀ BADGE) */}
       <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between shrink-0 select-none">
@@ -325,11 +326,10 @@ export default function MaterialChatInterface({
                       key={th}
                       type="button"
                       onClick={() => handleChangeThickness(th)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
-                        selectedThickness === th
+                      className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${selectedThickness === th
                           ? 'bg-[#F26522] text-white border-[#F26522]'
                           : 'border-slate-800 bg-slate-950 text-slate-300 hover:border-slate-700'
-                      }`}
+                        }`}
                     >
                       {th}mm
                     </button>
