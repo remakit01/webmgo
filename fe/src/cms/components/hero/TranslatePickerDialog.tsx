@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Info, Sparkles, X } from 'lucide-react';
 import type { TranslationGroup } from './hero-form';
 
@@ -85,11 +86,33 @@ export default function TranslatePickerDialog({ groups, onConfirm, onClose }: Tr
       return next;
     });
 
-  const quickBtn =
-    'px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-[11px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors cursor-pointer';
+  // Lựa chọn hiện tại khớp với nút chọn nhanh nào -> nút đó ở trạng thái active
+  const sameAs = (keys: string[]) => keys.length === selected.size && keys.every((k) => selected.has(k));
+  const activeQuick =
+    selected.size === 0
+      ? 'none'
+      : sameAs(allEntries.map((e) => e.key))
+        ? 'all'
+        : untranslatedKeys.length > 0 && sameAs(untranslatedKeys)
+          ? 'untranslated'
+          : null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 p-0 sm:p-4" onMouseDown={onClose}>
+  const quickBtn = (active: boolean) =>
+    `inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[11px] font-semibold transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+      active
+        ? 'border-[#5F8A03] bg-[#F4F9E8] text-[#5F8A03] ring-1 ring-[#5F8A03]/30'
+        : 'border-slate-300 bg-white text-slate-700 hover:border-[#7CB305] hover:text-[#5F8A03]'
+    }`;
+  // Số đếm trong nút chọn nhanh: màu thương hiệu
+  const countBadge = 'px-1.5 py-px rounded-md bg-[#5F8A03] text-white text-[10px] font-bold tabular-nums';
+
+  // Portal ra <body>: nếu khối cha có transform/filter/animation, `fixed` sẽ bị neo theo khối cha
+  // (dialog tràn theo bề rộng form, không nằm giữa màn hình)
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 backdrop-blur-[1px] p-4"
+      onMouseDown={onClose}
+    >
       <div
         ref={dialogRef}
         role="dialog"
@@ -97,12 +120,13 @@ export default function TranslatePickerDialog({ groups, onConfirm, onClose }: Tr
         aria-labelledby={titleId}
         tabIndex={-1}
         onMouseDown={(e) => e.stopPropagation()}
-        className="w-full sm:max-w-2xl max-h-[92vh] sm:max-h-[85vh] flex flex-col bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-200 font-sans focus:outline-none"
+        // Gọn: tối đa 560px, cao tối đa 80% màn hình (danh sách bên trong tự cuộn)
+        className="w-full max-w-[560px] max-h-[80vh] flex flex-col bg-white rounded-2xl shadow-2xl border border-slate-200 font-sans focus:outline-none"
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-slate-100">
+        <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-slate-100">
           <div>
-            <h2 id={titleId} className="text-base font-black text-slate-900 flex items-center gap-2">
+            <h2 id={titleId} className="text-sm font-black text-slate-900 flex items-center gap-2">
               <Sparkles size={16} className="text-[#5F8A03]" aria-hidden="true" /> Chọn nội dung cần dịch bằng AI
             </h2>
             <p className="text-xs text-slate-500 mt-1">
@@ -120,34 +144,45 @@ export default function TranslatePickerDialog({ groups, onConfirm, onClose }: Tr
         </div>
 
         {/* Chọn nhanh */}
-        <div className="flex items-center gap-2 flex-wrap px-5 py-2.5 border-b border-slate-100 bg-slate-50/60">
+        <div className="flex items-center gap-2 flex-wrap px-4 py-2 border-b border-slate-100 bg-slate-50/60">
           <span className="text-[11px] font-semibold text-slate-500 mr-1">Chọn nhanh:</span>
           <button
             type="button"
-            className={quickBtn}
+            className={quickBtn(activeQuick === 'untranslated')}
+            aria-pressed={activeQuick === 'untranslated'}
             disabled={untranslatedKeys.length === 0}
             onClick={() => setSelected(new Set(untranslatedKeys))}
           >
-            Ô chưa dịch ({untranslatedKeys.length})
+            Ô chưa dịch <span className={countBadge}>{untranslatedKeys.length}</span>
           </button>
-          <button type="button" className={quickBtn} onClick={() => setSelected(new Set(allEntries.map((e) => e.key)))}>
-            Tất cả ({allEntries.length})
+          <button
+            type="button"
+            className={quickBtn(activeQuick === 'all')}
+            aria-pressed={activeQuick === 'all'}
+            onClick={() => setSelected(new Set(allEntries.map((e) => e.key)))}
+          >
+            Tất cả <span className={countBadge}>{allEntries.length}</span>
           </button>
-          <button type="button" className={quickBtn} onClick={() => setSelected(new Set())}>
+          <button
+            type="button"
+            className={quickBtn(activeQuick === 'none')}
+            aria-pressed={activeQuick === 'none'}
+            onClick={() => setSelected(new Set())}
+          >
             Bỏ chọn
           </button>
         </div>
 
         {/* Danh sách nhóm */}
-        <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2.5">
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
           {groups.map((group) => {
             const keys = group.entries.map((e) => e.key);
             const count = keys.filter((k) => selected.has(k)).length;
             const isOpen = expanded.has(group.id);
             return (
-              <fieldset key={group.id} className="rounded-xl border border-slate-200">
+              <fieldset key={group.id} className="rounded-xl border border-slate-300">
                 <legend className="sr-only">{group.title}</legend>
-                <div className="flex items-center gap-3 px-3.5 py-2.5">
+                <div className="flex items-center gap-3 px-3 py-2">
                   <TriCheckbox
                     label={`Chọn cả nhóm ${group.title}`}
                     checked={count === keys.length}
@@ -175,7 +210,7 @@ export default function TranslatePickerDialog({ groups, onConfirm, onClose }: Tr
                       const hasTranslation = entry.value.trim() !== '';
                       return (
                         <li key={entry.key}>
-                          <label className="flex items-start gap-3 px-3.5 py-2.5 pl-10 cursor-pointer hover:bg-slate-50">
+                          <label className="flex items-start gap-3 px-3 py-2 pl-9 cursor-pointer hover:bg-slate-50">
                             <input
                               type="checkbox"
                               checked={checked}
@@ -222,7 +257,7 @@ export default function TranslatePickerDialog({ groups, onConfirm, onClose }: Tr
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between gap-3 flex-wrap px-5 py-3.5 border-t border-slate-100">
+        <div className="flex items-center justify-between gap-3 flex-wrap px-4 py-3 border-t border-slate-100">
           <span className="text-xs text-slate-600" aria-live="polite">
             {selected.size === 0
               ? 'Chưa chọn ô nào'
@@ -247,6 +282,7 @@ export default function TranslatePickerDialog({ groups, onConfirm, onClose }: Tr
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
