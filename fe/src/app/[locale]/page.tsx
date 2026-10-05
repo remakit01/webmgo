@@ -15,7 +15,7 @@ import {
 } from '@/components/shared';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { FAQ_LIST, THICKNESS_DATA } from '@/data/products';
-import { getHomeBanners, getHomeHero } from '@/lib/api';
+import { getHomeBanners, getHomeHero, getNewsList } from '@/lib/api';
 import { setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
 
@@ -35,7 +35,16 @@ export const revalidate = 60;
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
-  const [home, hero] = await Promise.all([getHomeBanners(), getHomeHero(locale)]);
+  const [home, hero, featuredNews, latestNews] = await Promise.all([
+    getHomeBanners(),
+    getHomeHero(locale),
+    getNewsList(locale, { featured: true, pageSize: 5 }),
+    getNewsList(locale, { pageSize: 5 }),
+  ]);
+  // Khối Tin tức: bài nổi bật (thứ tự chọn ở CMS), thiếu thì bù bằng bài mới nhất
+  const homeNews = [...(featuredNews?.items ?? []), ...(latestNews?.items ?? [])]
+    .filter((item, i, all) => all.findIndex((x) => x.id === item.id) === i)
+    .slice(0, 5);
 
   // Cấu trúc dữ liệu JSON-LD Schema (Google Rich Results)
   const faqSchema = {
@@ -170,7 +179,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {/* 10. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
         <section id="du-an-tin-tuc" className="scroll-mt-24">
           <ScrollReveal direction="up" delay={50}>
-            <HomeProjectsAndNews />
+            <HomeProjectsAndNews news={homeNews} />
           </ScrollReveal>
         </section>
 

@@ -1,3 +1,6 @@
+// Dữ liệu Tin tức ban đầu (chép từ fe/src/data/news.ts trước khi chuyển sang CMS) — chỉ dùng cho prisma/seed.ts.
+// Sau khi seed, nội dung được quản lý trong CMS; không thêm bài mới vào file này.
+
 export interface NewsArticle {
   id: string;
   slug: string;

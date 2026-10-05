@@ -25,6 +25,14 @@ src/
 ```
 
 - Module mới: tạo trong `src/<feature>/`, đăng ký vào [src/app.module.ts](src/app.module.ts).
+- **Dùng lại hạ tầng có sẵn, không viết lại** (mẫu đầy đủ: module [src/news/](src/news/)):
+  - Phân trang: `PaginationQueryDto` ([common/pagination.dto.ts](src/common/pagination.dto.ts)) + `normalizePage`/`toPaginated` từ `@remak/shared/pagination`.
+  - Khoá lạc quan bản ghi: `assertVersion` / `assertUpdated` / `versionOf` ([common/versioning.ts](src/common/versioning.ts)); site_settings dùng [common/site-settings.ts](src/common/site-settings.ts).
+  - Validator: `@IsSlug`, `@IsSafeLink`, `@IsRichDoc` ([common/validators.ts](src/common/validators.ts)); slug không trùng: `resolveUniqueSlug` ([common/unique-slug.ts](src/common/unique-slug.ts)).
+  - Cache public: `redis.cacheOrLoad(key, ttl, loader)`; sau khi ghi: `ContentCacheService.invalidate({ prefixes, keys, tags })`; job định kỳ: `redis.withLock(...)`.
+  - Đổi slug nội dung đã đăng: `SlugRedirectService` (bảng chung `slug_redirects`, fe trả 301).
+  - Ảnh trong nội dung rich text: `POST /media/images?scope=...` ([media/media.controller.ts](src/media/media.controller.ts)); thêm scope + prefix vào `PUBLIC_PREFIXES`.
+  - Nội dung đa ngôn ngữ: bảng `<Entity>Translation` khoá `(entity_id, locale)`, slug unique `(locale, slug)`, enum `ContentLocale`/`PublishStatus` (xem [prisma/schema.prisma](prisma/schema.prisma)).
 - Biến môi trường mới: thêm vào `configuration.ts` **và** [.env.example](.env.example). Đọc qua `ConfigService`, không đọc `process.env` rải rác trong service.
 
 ## Quy tắc khi viết API

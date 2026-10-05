@@ -1,5 +1,7 @@
-// Ghép bản dịch lên bản tiếng Việt theo TỪNG TRƯỜNG: trường dịch rỗng/thiếu -> dùng tiếng Việt.
-// BẢN SAO của api/src/homepage/hero-i18n.ts — sửa logic thì sửa cả hai (CMS dùng để xem trước đúng như trang /en).
+// Ghép bản dịch Hero trang chủ lên bản tiếng Việt theo TỪNG TRƯỜNG: trường dịch rỗng/thiếu -> dùng tiếng Việt.
+// Dùng chung cho api (trả /homepage/hero/public?locale=en) và CMS (xem trước đúng như trang /en).
+
+import { pickTranslated as pick } from './translation.js';
 
 export interface HeroCtaShape {
   text: string;
@@ -26,9 +28,6 @@ export interface HeroTranslationShape {
   stats?: { value?: string; label?: string; sublabel?: string }[];
   media?: { frameTitle?: string; badge?: string; alt?: string };
 }
-
-const pick = (translated: string | undefined, source: string) =>
-  translated !== undefined && translated.trim() !== '' ? translated.trim() : source;
 
 const mergeCta = (source: HeroCtaShape, t?: Partial<HeroCtaShape>): HeroCtaShape => ({
   text: pick(t?.text, source.text),

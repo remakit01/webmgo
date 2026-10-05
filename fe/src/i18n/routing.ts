@@ -1,4 +1,5 @@
 import { defineRouting } from 'next-intl/routing';
+import { DEFAULT_LOCALE, LOCALES } from '@remak/shared/locale';
 
 /**
  * Cấu hình ngôn ngữ web khách hàng.
@@ -8,8 +9,8 @@ import { defineRouting } from 'next-intl/routing';
  * Thêm route public mới -> thêm vào đây (thay cho rewrites cũ trong next.config.ts).
  */
 export const routing = defineRouting({
-  locales: ['vi', 'en'],
-  defaultLocale: 'vi',
+  locales: LOCALES,
+  defaultLocale: DEFAULT_LOCALE,
   localePrefix: 'as-needed',
   // Không tự đổi ngôn ngữ theo trình duyệt/cookie: "/" luôn là tiếng Việt, người dùng chủ động bấm EN
   localeDetection: false,
@@ -32,6 +33,8 @@ export const routing = defineRouting({
     '/about': { vi: '/gioi-thieu', en: '/about' },
     '/news': { vi: '/tin-tuc', en: '/news' },
     '/news/[slug]': { vi: '/tin-tuc/[slug]', en: '/news/[slug]' },
+    // Chuyên mục: slug chuyên mục cũng theo ngôn ngữ (vd /tin-tuc/chuyen-muc/ky-thuat ⇄ /en/news/category/engineering)
+    '/news/category/[slug]': { vi: '/tin-tuc/chuyen-muc/[slug]', en: '/news/category/[slug]' },
     '/faq': '/faq',
   },
 });

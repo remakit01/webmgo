@@ -127,3 +127,19 @@ describe('TranslationService khi Gemini lỗi tạm thời', () => {
     expect(generateContent).toHaveBeenCalledTimes(4);
   }, 20_000);
 });
+
+describe('TranslationService chia lô (bài dài)', () => {
+  it('nhiều ô / nhiều ký tự -> chia nhiều lần gọi, kết quả đủ khoá', async () => {
+    const { service, generateContent } = setup({ apiKey: 'k' });
+    const fields = Object.fromEntries(Array.from({ length: 95 }, (_, i) => [`c.t${i}`, `Đoạn văn số ${i}`]));
+    fields.long = 'x'.repeat(5_900);
+    const res = await service.translate(fields, 'news-article');
+    expect(Object.keys(res)).toHaveLength(96);
+    expect(res['c.t94']).toBe('EN:Đoạn văn số 94');
+    // 95 ô ngắn -> 3 lô (40/40/15) + ô dài tách lô riêng vì vượt 6.000 ký tự
+    expect(generateContent.mock.calls.length).toBeGreaterThanOrEqual(3);
+    for (const [arg] of generateContent.mock.calls as unknown as [{ contents: string }][]) {
+      expect(Object.keys(JSON.parse(arg.contents)).length).toBeLessThanOrEqual(40);
+    }
+  });
+});

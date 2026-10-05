@@ -4,7 +4,8 @@ import React from 'react';
 import { AlertCircle, Check, ImageIcon, Plus, Trash2, UploadCloud } from 'lucide-react';
 import { HERO_ACCENT_STYLES } from '@/components/home/HomeHeroSection';
 import { HERO_ACCENTS, type HeroContent, type HeroCta, type HomeHero } from '@/types/homepage';
-import { MAX_PARAGRAPHS, inputClass } from './hero-form';
+import { inputClass } from '@/cms/components/shared/form-styles';
+import { MAX_PARAGRAPHS } from './hero-form';
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (

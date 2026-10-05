@@ -1,6 +1,7 @@
 packages:
   - fe
   - api
+  - packages/*
 
 allowBuilds:
   '@google/genai': set this to true or false

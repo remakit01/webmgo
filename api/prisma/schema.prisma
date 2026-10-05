@@ -29,7 +29,10 @@ model User {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  deletedBanners Banner[] @relation("BannerDeletedBy")
+  deletedBanners   Banner[]   @relation("BannerDeletedBy")
+  createdNewsPosts NewsPost[] @relation("NewsPostCreatedBy")
+  updatedNewsPosts NewsPost[] @relation("NewsPostUpdatedBy")
+  deletedNewsPosts NewsPost[] @relation("NewsPostDeletedBy")
 
   @@map("users")
 }
@@ -111,4 +114,215 @@ model SiteSetting {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@map("site_settings")
+}
+
+// ─── Đa ngôn ngữ & xuất bản (dùng chung mọi loại nội dung) ──────────────────
+// Mẫu dịch: mỗi thực thể có bảng <Entity>Translation (khoá (entity_id, locale)); slug unique theo (locale, slug).
+// Thêm ngôn ngữ mới chỉ cần thêm giá trị enum, không đổi cấu trúc bảng.
+
+enum ContentLocale {
+  vi
+  en
+
+  @@map("content_locale")
+}
+
+enum PublishStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+
+  @@map("publish_status")
+}
+
+enum TranslationOrigin {
+  HUMAN
+  AI // bản nháp AI chưa ai sửa
+  AI_REVIEWED // bản AI đã được biên tập viên chỉnh/duyệt
+
+  @@map("translation_origin")
+}
+
+/// Slug cũ của nội dung đã đăng -> 301 sang slug hiện tại. Dùng chung (entity_type: 'news_post', ...),
+/// không có FK vì đa hình — xoá nội dung thì service tự xoá redirect.
+model SlugRedirect {
+  entityType String        @map("entity_type")
+  locale     ContentLocale
+  oldSlug    String        @map("old_slug")
+  entityId   String        @map("entity_id")
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@id([entityType, locale, oldSlug])
+  @@index([entityType, entityId])
+  @@map("slug_redirects")
+}
+
+// ─── Tin tức ─────────────────────────────────────────────────────────────────
+
+model NewsCategory {
+  id        String   @id @default(cuid())
+  color     String   @default("green") // token thương hiệu (NEWS_CATEGORY_COLORS) — CHECK trong migration
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  translations NewsCategoryTranslation[]
+  posts        NewsPost[]
+
+  @@map("news_categories")
+}
+
+model NewsCategoryTranslation {
+  categoryId     String        @map("category_id")
+  locale         ContentLocale
+  name           String
+  slug           String
+  description    String?
+  seoTitle       String?       @map("seo_title")
+  seoDescription String?       @map("seo_description")
+
+  category NewsCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // PK bắt đầu bằng category_id nên đã phủ index cho FK
+  @@id([categoryId, locale])
+  @@unique([locale, slug])
+  @@map("news_category_translations")
+}
+
+model NewsTag {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  translations NewsTagTranslation[]
+  posts        NewsPostTag[]
+
+  @@map("news_tags")
+}
+
+model NewsTagTranslation {
+  tagId  String        @map("tag_id")
+  locale ContentLocale
+  name   String
+  slug   String
+
+  tag NewsTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([tagId, locale])
+  @@unique([locale, slug])
+  @@map("news_tag_translations")
+}
+
+model NewsAuthor {
+  id        String   @id @default(cuid())
+  name      String // tên riêng, không dịch
+  avatarUrl String?  @map("avatar_url")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  translations NewsAuthorTranslation[]
+  posts        NewsPost[]
+
+  @@map("news_authors")
+}
+
+model NewsAuthorTranslation {
+  authorId String        @map("author_id")
+  locale   ContentLocale
+  jobTitle String?       @map("job_title")
+  bio      String?
+
+  author NewsAuthor @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([authorId, locale])
+  @@map("news_author_translations")
+}
+
+/// Thông tin chung của bài (không phụ thuộc ngôn ngữ). Nội dung từng ngôn ngữ ở NewsPostTranslation.
+model NewsPost {
+  id            String    @id @default(cuid())
+  categoryId    String    @map("category_id")
+  authorId      String?   @map("author_id")
+  coverImageKey String?   @map("cover_image_key") // prefix MinIO để dọn khi thay/xoá ảnh
+  coverImageUrl String?   @map("cover_image_url")
+  coverImages   Json?     @map("cover_images") // [{ width, format, url }] — CHECK là mảng JSON
+  isFeatured    Boolean   @default(false) @map("is_featured")
+  featuredOrder Int?      @map("featured_order")
+  createdById   String?   @map("created_by_id")
+  updatedById   String?   @map("updated_by_id")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+  deletedById   String?   @map("deleted_by_id")
+
+  // Chuyên mục còn bài thì không xoá được (Restrict) — CMS báo chuyển bài sang chuyên mục khác trước
+  category     NewsCategory          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  author       NewsAuthor?           @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdBy    User?                 @relation("NewsPostCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy    User?                 @relation("NewsPostUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  deletedBy    User?                 @relation("NewsPostDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
+  translations NewsPostTranslation[]
+  tags         NewsPostTag[]
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([createdById])
+  @@index([updatedById])
+  @@index([deletedById])
+  // Danh sách CMS: bài chưa xoá, mới sửa trước
+  @@index([updatedAt(sort: Desc)], map: "news_posts_live_updated_at_idx", where: raw("deleted_at IS NULL"))
+  @@map("news_posts")
+}
+
+model NewsPostTranslation {
+  postId           String            @map("post_id")
+  locale           ContentLocale
+  status           PublishStatus     @default(DRAFT)
+  publishedAt      DateTime?         @map("published_at") @db.Timestamptz(3)
+  firstPublishedAt DateTime?         @map("first_published_at") @db.Timestamptz(3)
+  title            String
+  slug             String
+  sapo             String
+  content          Json // RichDoc (@remak/shared/rich-content) — kiểm tra ở API trước khi lưu
+  contentText      String            @default("") @map("content_text") // plain text: tìm kiếm, thời gian đọc
+  readingMinutes   Int               @default(1) @map("reading_minutes")
+  coverAlt         String            @default("") @map("cover_alt")
+  coverCaption     String?           @map("cover_caption")
+  seoTitle         String?           @map("seo_title")
+  seoDescription   String?           @map("seo_description")
+  ogImageUrl       String?           @map("og_image_url")
+  noindex          Boolean           @default(false)
+  sourceName       String?           @map("source_name") // "Theo ..."
+  sourceUrl        String?           @map("source_url")
+  origin           TranslationOrigin @default(HUMAN)
+  // Lần cuối nội dung (chữ) thay đổi — khác updatedAt (đổi trạng thái xuất bản cũng tăng updatedAt)
+  contentUpdatedAt DateTime          @default(now()) @map("content_updated_at") @db.Timestamptz(3)
+  sourceUpdatedAt  DateTime?         @map("source_updated_at") @db.Timestamptz(3) // contentUpdatedAt bản vi lúc dịch
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  post NewsPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, locale])
+  @@unique([locale, slug])
+  // Trang danh sách public: WHERE locale = ? AND status = 'PUBLISHED' AND published_at <= now() ORDER BY published_at DESC
+  @@index([locale, publishedAt(sort: Desc)], map: "news_post_translations_public_idx", where: raw("status = 'PUBLISHED'"))
+  // Cron đăng bài hẹn giờ: WHERE status = 'SCHEDULED' AND published_at <= now()
+  @@index([publishedAt], map: "news_post_translations_scheduled_idx", where: raw("status = 'SCHEDULED'"))
+  @@map("news_post_translations")
+}
+
+model NewsPostTag {
+  postId String @map("post_id")
+  tagId  String @map("tag_id")
+
+  post NewsPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  NewsTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@index([tagId])
+  @@map("news_post_tags")
 }

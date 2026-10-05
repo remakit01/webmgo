@@ -98,19 +98,41 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.del(CACHE_PREFIX + key);
   }
 
+  /**
+   * Đọc cache, miss thì gọi loader (DB) rồi lưu cache. Redis lỗi -> vẫn trả dữ liệu từ loader (quy tắc #5).
+   * Kết quả null/undefined không được cache (vd bài chưa tồn tại) để bài mới đăng hiện ngay.
+   */
+  async cacheOrLoad<T>(key: string, ttlSeconds: number, loader: () => Promise<T>): Promise<T> {
+    const cached = await this.getJson<T>(key);
+    if (cached !== null) return cached;
+    const value = await loader();
+    if (value !== null && value !== undefined) await this.setJson(key, value, ttlSeconds);
+    return value;
+  }
+
+  /** Xoá mọi cache JSON có key bắt đầu bằng prefix (vd 'news:') — dùng khi một thay đổi ảnh hưởng nhiều trang. */
+  delCacheByPrefix(prefix: string): Promise<number> {
+    return this.deleteByPattern(`${CACHE_PREFIX}${prefix}*`, 'DEL_PREFIX');
+  }
+
   /** Xoá mọi key `cache:*` bằng SCAN (không chặn Redis như KEYS). */
   async flushCache(): Promise<number> {
+    const removed = await this.deleteByPattern(`${CACHE_PREFIX}*`, 'FLUSH');
+    this.logger.warn(`Redis kết nối lại: đã xoá ${removed} key cache để tránh dữ liệu cũ`);
+    return removed;
+  }
+
+  private async deleteByPattern(pattern: string, op: string): Promise<number> {
     let removed = 0;
     try {
       let cursor = '0';
       do {
-        const [next, keys] = await this.client.scan(cursor, 'MATCH', `${CACHE_PREFIX}*`, 'COUNT', 200);
+        const [next, keys] = await this.client.scan(cursor, 'MATCH', pattern, 'COUNT', 200);
         cursor = next;
         if (keys.length) removed += await this.client.del(...keys);
       } while (cursor !== '0');
-      this.logger.warn(`Redis kết nối lại: đã xoá ${removed} key cache để tránh dữ liệu cũ`);
     } catch (err) {
-      this.warn('FLUSH', `${CACHE_PREFIX}*`, err);
+      this.warn(op, pattern, err);
     }
     return removed;
   }
@@ -125,6 +147,19 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     } catch (err) {
       this.warn('LOCK', key, err);
       return false;
+    }
+  }
+
+  /**
+   * Chạy fn khi giành được lock (job định kỳ nhiều instance); không giành được -> bỏ lượt, trả undefined.
+   * Luôn nhả lock sau khi chạy xong, kể cả khi fn lỗi.
+   */
+  async withLock<T>(key: string, ttlSeconds: number, fn: () => Promise<T>): Promise<T | undefined> {
+    if (!(await this.acquireLock(key, ttlSeconds))) return undefined;
+    try {
+      return await fn();
+    } finally {
+      await this.del(key);
     }
   }
 

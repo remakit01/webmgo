@@ -40,40 +40,124 @@
       "toggle": "Show home page sections"
     },
     "sections": {
-      "banner": { "name": "Featured Banners", "desc": "Image slider & fire-safety certifications" },
-      "hero": { "name": "Introduction & Certifications", "desc": "Remak® FireOFF brand, Class A1" },
-      "benefits": { "name": "4 Key Advantages", "desc": "1,200°C fire resistance, waterproof, rust-free" },
-      "specs": { "name": "MgO Specifications", "desc": "5mm - 18mm thickness & technical data" },
-      "comparison": { "name": "Material Comparison", "desc": "MgO vs cement board vs gypsum vs plywood" },
-      "applications": { "name": "Top 4 Applications", "desc": "Ducts, partitions, floors, fire doors" },
-      "sample": { "name": "Free Sample Kit", "desc": "6 real cut samples + IBST test reports, delivered" },
-      "guide": { "name": "Installation Guide", "desc": "4-step process & CAD details" },
-      "projectsNews": { "name": "Projects & News", "desc": "Landmark projects & technical insights" },
-      "calculator": { "name": "Online Material Estimator", "desc": "Quickly estimate boards & cost" },
-      "quote": { "name": "Project Quote (2h)", "desc": "Factory direct discount request" },
-      "faq": { "name": "Fire Safety FAQ", "desc": "QCVN 06:2022/BXD explained" }
+      "banner": {
+        "name": "Featured Banners",
+        "desc": "Image slider & fire-safety certifications"
+      },
+      "hero": {
+        "name": "Introduction & Certifications",
+        "desc": "Remak® FireOFF brand, Class A1"
+      },
+      "benefits": {
+        "name": "4 Key Advantages",
+        "desc": "1,200°C fire resistance, waterproof, rust-free"
+      },
+      "specs": {
+        "name": "MgO Specifications",
+        "desc": "5mm - 18mm thickness & technical data"
+      },
+      "comparison": {
+        "name": "Material Comparison",
+        "desc": "MgO vs cement board vs gypsum vs plywood"
+      },
+      "applications": {
+        "name": "Top 4 Applications",
+        "desc": "Ducts, partitions, floors, fire doors"
+      },
+      "sample": {
+        "name": "Free Sample Kit",
+        "desc": "6 real cut samples + IBST test reports, delivered"
+      },
+      "guide": {
+        "name": "Installation Guide",
+        "desc": "4-step process & CAD details"
+      },
+      "projectsNews": {
+        "name": "Projects & News",
+        "desc": "Landmark projects & technical insights"
+      },
+      "calculator": {
+        "name": "Online Material Estimator",
+        "desc": "Quickly estimate boards & cost"
+      },
+      "quote": {
+        "name": "Project Quote (2h)",
+        "desc": "Factory direct discount request"
+      },
+      "faq": {
+        "name": "Fire Safety FAQ",
+        "desc": "QCVN 06:2022/BXD explained"
+      }
     },
     "productsMenu": {
       "heading": "Remak® FireOFF product range",
       "all": "• All products (>)",
-      "duct": { "name": "MgO Fire-Rated Duct Board", "desc": "DuctBoard 5–12mm, condensation resistant", "tag": "EI 30–120" },
-      "standard": { "name": "Standard Fire-Rated MgO Board", "desc": "Walls & ceilings, Euroclass A1", "tag": "Class A1" },
-      "floor": { "name": "MgO Structural Floor Board", "desc": "850 kg/m² load capacity, 15–18mm", "tag": "REI 180" },
-      "acoustic": { "name": "Acoustic & Decorative MgO Board", "desc": "STC 50–55 dB sound insulation, fine finish", "tag": "Acoustic" }
+      "duct": {
+        "name": "MgO Fire-Rated Duct Board",
+        "desc": "DuctBoard 5–12mm, condensation resistant",
+        "tag": "EI 30–120"
+      },
+      "standard": {
+        "name": "Standard Fire-Rated MgO Board",
+        "desc": "Walls & ceilings, Euroclass A1",
+        "tag": "Class A1"
+      },
+      "floor": {
+        "name": "MgO Structural Floor Board",
+        "desc": "850 kg/m² load capacity, 15–18mm",
+        "tag": "REI 180"
+      },
+      "acoustic": {
+        "name": "Acoustic & Decorative MgO Board",
+        "desc": "STC 50–55 dB sound insulation, fine finish",
+        "tag": "Acoustic"
+      }
     },
     "applicationsMenu": {
       "heading": "Fire protection systems",
-      "duct": { "name": "Fire-Rated Duct Encasement", "desc": "Smoke extraction, fresh air, pressurisation", "tag": "EI 30–120" },
-      "karaoke": { "name": "Karaoke / Bar Partitions", "desc": "52 dB sound insulation + fire spread protection", "tag": "EI 60–120" },
-      "floor": { "name": "Floors for Pre-Engineered Buildings", "desc": "Warehouses, steel factories, mezzanines", "tag": "REI 180" },
-      "factory": { "name": "Industrial Walls & Ceilings", "desc": "Cold storage enclosures, production halls", "tag": "EI 60" },
-      "door": { "name": "Fire-Rated Steel Door Cores", "desc": "Cores for emergency exit & stairwell doors", "tag": "EI 30–90" }
+      "duct": {
+        "name": "Fire-Rated Duct Encasement",
+        "desc": "Smoke extraction, fresh air, pressurisation",
+        "tag": "EI 30–120"
+      },
+      "karaoke": {
+        "name": "Karaoke / Bar Partitions",
+        "desc": "52 dB sound insulation + fire spread protection",
+        "tag": "EI 60–120"
+      },
+      "floor": {
+        "name": "Floors for Pre-Engineered Buildings",
+        "desc": "Warehouses, steel factories, mezzanines",
+        "tag": "REI 180"
+      },
+      "factory": {
+        "name": "Industrial Walls & Ceilings",
+        "desc": "Cold storage enclosures, production halls",
+        "tag": "EI 60"
+      },
+      "door": {
+        "name": "Fire-Rated Steel Door Cores",
+        "desc": "Cores for emergency exit & stairwell doors",
+        "tag": "EI 30–90"
+      }
     },
     "projectsMenu": {
       "heading": "Featured projects",
-      "samsung": { "name": "Samsung Yen Phong Factory", "desc": "Yen Phong IP, Bac Ninh · 45,000 m²", "tag": "IP" },
-      "lotte": { "name": "Lotte Mall West Lake", "desc": "Vo Chi Cong, Hanoi · 28,500 m²", "tag": "Retail" },
-      "viettel": { "name": "Viettel IDC Data Center", "desc": "Hoa Lac Hi-Tech Park, Hanoi · 16,000 m²", "tag": "Infra" }
+      "samsung": {
+        "name": "Samsung Yen Phong Factory",
+        "desc": "Yen Phong IP, Bac Ninh · 45,000 m²",
+        "tag": "IP"
+      },
+      "lotte": {
+        "name": "Lotte Mall West Lake",
+        "desc": "Vo Chi Cong, Hanoi · 28,500 m²",
+        "tag": "Retail"
+      },
+      "viettel": {
+        "name": "Viettel IDC Data Center",
+        "desc": "Hoa Lac Hi-Tech Park, Hanoi · 16,000 m²",
+        "tag": "Infra"
+      }
     },
     "actions": {
       "search": "Search",
@@ -150,5 +234,44 @@
     "hint": "Search products, solutions and technical documents",
     "close": "Close",
     "open": "Open"
+  },
+  "News": {
+    "home": "Home",
+    "title": "News",
+    "metaTitle": "News & Insights on Fire-Rated MgO Board | Remak®",
+    "metaDescription": "News, fire-safety standards (QCVN 06), test results and installation guides for Remak® fire-rated MgO board, for engineers, contractors and developers.",
+    "allCategories": "All articles",
+    "categoriesLabel": "News categories",
+    "highlights": "Highlights",
+    "latest": "Latest news",
+    "readMore": "Read more",
+    "loadMore": "Load more articles",
+    "loading": "Loading…",
+    "loadError": "Could not load more articles, please try again.",
+    "empty": "No articles in this category yet.",
+    "viewAllNews": "View all articles",
+    "readingTime": "{minutes} min read",
+    "by": "By {name}",
+    "source": "Source: {name}",
+    "toc": "In this article",
+    "tags": "Topics",
+    "related": "Related articles",
+    "relatedInline": "Read more",
+    "share": "Share",
+    "copyLink": "Copy link",
+    "copied": "Link copied",
+    "backToList": "Back to news",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "callout": {
+      "info": "Technical note",
+      "warning": "Important",
+      "tip": "Installation tip"
+    },
+    "consultTitle": "Fire-Protection Technical Advice",
+    "consultText": "Need an installation method for duct encasement or EI-rated partitions on your project? Talk to a Remak engineer.",
+    "sampleCta": "Request Free Samples",
+    "homeSection": "News",
+    "homeSectionAria": "Latest technical news"
   }
 }

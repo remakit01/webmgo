@@ -15,7 +15,8 @@ const HOMEPAGE_SUBMENU = [
   { id: 'comparison', name: 'So Sánh Vật Liệu', href: '/admin/homepage/comparison' },
   { id: 'applications', name: 'Giải Pháp Ứng Dụng', href: '/admin/homepage/applications' },
   { id: 'sample-request', name: 'Đăng Ký Mẫu Thử', href: '/admin/homepage/sample-request' },
-  { id: 'projects-news', name: 'Dự Án & Tin Tức', href: '/admin/homepage/projects-news' },
+  { id: 'projects', name: 'Dự Án Tiêu Biểu', href: '/admin/homepage/projects' },
+  { id: 'news', name: 'Tin Tức Trang Chủ', href: '/admin/homepage/news' },
   { id: 'calculator', name: 'Dự Toán Chi Phí', href: '/admin/homepage/calculator' },
   { id: 'faq', name: 'Câu Hỏi Thường Gặp', href: '/admin/homepage/faq' },
 ];
@@ -39,6 +40,14 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
+    title: 'Tin Tức',
+    items: [
+      { id: 'news-posts', name: 'Bài Viết', href: '/admin/news' },
+      { id: 'news-categories', name: 'Chuyên Mục', href: '/admin/news/categories' },
+      { id: 'news-taxonomy', name: 'Tag & Tác Giả', href: '/admin/news/taxonomy' },
+    ],
+  },
+  {
     title: 'Sản Phẩm & Ứng Dụng',
     items: [
       { id: 'products', name: 'Sản Phẩm MGO', href: '/admin/products' },
@@ -55,6 +64,16 @@ const NAV_SECTIONS: NavSection[] = [
     ],
   },
 ];
+
+const ALL_HREFS = NAV_SECTIONS.flatMap((s) => s.items.map((i) => i.href));
+
+/** Mục đang mở: khớp đường dẫn dài nhất (vd /admin/news/categories không làm sáng cả "Bài Viết" /admin/news) */
+function isNavItemActive(pathname: string, href: string) {
+  if (href === '/admin') return pathname === '/admin';
+  const matches = (h: string) => pathname === h || pathname.startsWith(`${h}/`);
+  if (!matches(href)) return false;
+  return !ALL_HREFS.some((other) => other.length > href.length && other.startsWith(href) && matches(other));
+}
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -117,9 +136,9 @@ export default function AdminSidebar() {
 
             <div className="space-y-1">
               {section.items.map((item) => {
-                const isActive = item.href === '/admin' ? pathname === '/admin' : pathname.startsWith(item.href);
+                const isActive = isNavItemActive(pathname, item.href);
 
-                // Render mục Trang Chủ kèm Submenu 10 mục con
+                // Render mục Trang Chủ kèm Submenu 11 mục con
                 if (item.hasSubmenu) {
                   return (
                     <div key={item.href} className="space-y-1">
@@ -159,7 +178,7 @@ export default function AdminSidebar() {
                         </button>
                       </div>
 
-                      {/* Submenu 10 mục con của Trang Chủ: Text-only thanh lịch, vạch brand mượt mà */}
+                      {/* Submenu 11 mục con của Trang Chủ: Text-only thanh lịch, vạch brand mượt mà */}
                       <div 
                         className={`grid transition-[grid-template-rows,opacity] duration-250 ease-out ${
                           isHomeSubmenuOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0 pointer-events-none'

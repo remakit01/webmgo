@@ -1,14 +1,12 @@
+import { isSafeLink } from '@remak/shared/link';
 import { HERO_ACCENTS, type HeroContent, type HeroTranslation } from '@/types/homepage';
+import type { TranslatableEntry, TranslationGroup } from '@/cms/components/shared/translation-types';
 
 export const MAX_PARAGRAPHS = 3;
 
-// Khớp LINK_PATTERN ở API (homepage/dto/hero.dto.ts): "/...", "#..." hoặc http(s)
-const LINK_PATTERN = /^(\/(?!\/)|#|https?:\/\/)\S*$/;
+// Cùng quy tắc với API (homepage/dto/hero.dto.ts): "/...", "#..." hoặc http(s)
 export const LINK_ERROR = 'Đường dẫn phải bắt đầu bằng "/", "#" hoặc https://';
-export const isValidLink = (link: string) => LINK_PATTERN.test(link);
-
-export const inputClass =
-  'w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-xs font-medium text-slate-900 bg-white placeholder:text-slate-400 focus:outline-none focus:border-[#5F8A03] focus:ring-1 focus:ring-[#5F8A03] transition-colors aria-[invalid=true]:border-rose-400';
+export const isValidLink = (link: string) => isSafeLink(link, { allowAnchor: true });
 
 // Form trống (chỉ khung cấu trúc, không có nội dung) — dùng khi hero chưa từng được cấu hình
 export const EMPTY_CONTENT: HeroContent = {
@@ -59,13 +57,6 @@ export function toTranslationDraft(vi: HeroContent, en: HeroTranslation): HeroTr
     })),
     media: { frameTitle: en.media?.frameTitle ?? '', badge: en.media?.badge ?? '', alt: en.media?.alt ?? '' },
   };
-}
-
-/** Một ô dịch được: khoá (vd "stats.1.label"), nội dung gốc tiếng Việt, nội dung đã dịch */
-export interface TranslatableEntry {
-  key: string;
-  source: string;
-  value: string;
 }
 
 /**
@@ -144,17 +135,6 @@ export function setDraftField(draft: HeroTranslationDraft, key: string, value: s
 }
 
 // ─── Chọn ô để AI dịch ───────────────────────────────────────────────────────
-
-export interface TranslationGroupEntry extends TranslatableEntry {
-  /** Nhãn hiển thị trong dialog chọn, vd "Đoạn mô tả 1", "Tiêu đề" */
-  label: string;
-}
-
-export interface TranslationGroup {
-  id: string;
-  title: string;
-  entries: TranslationGroupEntry[];
-}
 
 const FIELD_LABELS: Record<string, string> = {
   title: 'Tiêu đề chính',

@@ -7,11 +7,11 @@ import AdminHeader from '@/cms/components/AdminHeader';
 import { useToast } from '@/cms/components/ConfirmDialog';
 import { apiFetch, ApiError } from '@/cms/lib/api-client';
 import HomeHeroSection from '@/components/home/HomeHeroSection';
-import { mergeHeroTranslation } from '@/lib/hero-i18n';
+import { mergeHeroTranslation } from '@remak/shared/hero-i18n';
 import type { HeroContent, HomeHeroForCms } from '@/types/homepage';
 import HeroViForm from '@/cms/components/hero/HeroViForm';
 import HeroEnForm from '@/cms/components/hero/HeroEnForm';
-import LocaleTabs, { type CmsLocale } from '@/cms/components/hero/LocaleTabs';
+import LocaleTabs, { type CmsLocale } from '@/cms/components/shared/LocaleTabs';
 import Skeleton from '@/cms/components/ui/Skeleton';
 import {
   EMPTY_CONTENT,
