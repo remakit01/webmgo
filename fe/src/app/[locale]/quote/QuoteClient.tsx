@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from '@/components/ui/LocaleLink';
 import {
   Clock, PhoneCall, MapPin, Mail, CheckCircle2,
   Send, FileCheck, Users,
