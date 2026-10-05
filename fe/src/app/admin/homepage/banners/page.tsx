@@ -698,8 +698,11 @@ export default function AdminBannersManagerPage() {
           <div className="xl:col-span-8 space-y-4">
             <div className="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-slate-300">
               <div>
-                <h4 className="text-base font-bold text-slate-900">
-                  Danh Sách Banner ({banners.length})
+                <h4 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <span>Danh Sách Banner</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-[#F4F9E8] text-[#5F8A03] border border-[#7CB305]/30 shadow-2xs">
+                    {banners.length}
+                  </span>
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Có {activeBannersList.length} banner đang được bật hiển thị · <span className="text-[#5F8A03] font-medium">Kéo thả ⋮⋮ hoặc dùng mũi tên ↑↓ để đổi vị trí</span>
@@ -830,21 +833,21 @@ export default function AdminBannersManagerPage() {
                           type="button"
                           disabled={index === 0}
                           onClick={() => handleMove(index, 'up')}
-                          className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 disabled:opacity-25 cursor-pointer border-r border-slate-200 transition-colors"
+                          className="p-1.5 hover:bg-slate-100 text-slate-800 hover:text-[#5F8A03] disabled:text-slate-400 disabled:opacity-80 disabled:cursor-not-allowed disabled:hover:bg-transparent cursor-pointer border-r border-slate-200 transition-colors"
                           title="Di chuyển lên trên"
                           aria-label="Di chuyển lên trên"
                         >
-                          <ArrowUp size={14} />
+                          <ArrowUp size={14} className="stroke-[2.5]" />
                         </button>
                         <button
                           type="button"
                           disabled={index === banners.length - 1}
                           onClick={() => handleMove(index, 'down')}
-                          className="p-1.5 hover:bg-slate-100 text-slate-600 hover:text-slate-900 disabled:opacity-25 cursor-pointer transition-colors"
+                          className="p-1.5 hover:bg-slate-100 text-slate-800 hover:text-[#5F8A03] disabled:text-slate-400 disabled:opacity-80 disabled:cursor-not-allowed disabled:hover:bg-transparent cursor-pointer transition-colors"
                           title="Di chuyển xuống dưới"
                           aria-label="Di chuyển xuống dưới"
                         >
-                          <ArrowDown size={14} />
+                          <ArrowDown size={14} className="stroke-[2.5]" />
                         </button>
                       </div>
 
@@ -901,9 +904,24 @@ export default function AdminBannersManagerPage() {
                 className="w-full px-4 py-3 flex items-center justify-between gap-3 text-left cursor-pointer hover:bg-slate-50 rounded-xl transition-colors"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Trash2 size={15} className="text-slate-500 shrink-0" />
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                    trash.length > 0 
+                      ? 'bg-amber-50 text-amber-600 border border-amber-200/60' 
+                      : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    <Trash2 size={15} />
+                  </div>
                   <div className="min-w-0">
-                    <div className="text-sm font-bold text-slate-900">Thùng rác ({trash.length})</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-slate-900">Thùng rác</span>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${
+                        trash.length > 0
+                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                          : 'bg-slate-100 text-slate-500 border border-slate-200'
+                      }`}>
+                        {trash.length}
+                      </span>
+                    </div>
                     <div className="text-[11px] text-slate-500">
                       {!trashSettings
                         ? 'Đang tải cài đặt…'

@@ -142,3 +142,62 @@ export function setDraftField(draft: HeroTranslationDraft, key: string, value: s
   node[parts[parts.length - 1]] = value;
   return next;
 }
+
+// ─── Chọn ô để AI dịch ───────────────────────────────────────────────────────
+
+export interface TranslationGroupEntry extends TranslatableEntry {
+  /** Nhãn hiển thị trong dialog chọn, vd "Đoạn mô tả 1", "Tiêu đề" */
+  label: string;
+}
+
+export interface TranslationGroup {
+  id: string;
+  title: string;
+  entries: TranslationGroupEntry[];
+}
+
+const FIELD_LABELS: Record<string, string> = {
+  title: 'Tiêu đề chính',
+  subtitle: 'Tiêu đề phụ',
+  'primaryCta.text': 'Chữ nút chính',
+  'secondaryCta.text': 'Chữ nút phụ',
+  value: 'Số liệu',
+  label: 'Tiêu đề',
+  sublabel: 'Mô tả phụ',
+  'media.alt': 'Mô tả ảnh (alt)',
+  'media.frameTitle': 'Tiêu đề khung',
+  'media.badge': 'Nhãn công nghệ',
+};
+
+const isLinkKey = (key: string) => key.endsWith('.link');
+
+function labelOf(key: string): string {
+  const paragraph = /^paragraphs\.(\d+)$/.exec(key);
+  if (paragraph) return `Đoạn mô tả ${Number(paragraph[1]) + 1}`;
+  const stat = /^stats\.\d+\.(\w+)$/.exec(key);
+  if (stat) return FIELD_LABELS[stat[1]] ?? stat[1];
+  return FIELD_LABELS[key] ?? key;
+}
+
+/**
+ * Các ô có thể nhờ AI dịch, nhóm theo đúng khối trên form.
+ * Bỏ ô đường dẫn (không cần dịch — trang /en tự đổi link) và ô tiếng Việt trống. Nhóm rỗng bị bỏ.
+ */
+export function translationGroups(vi: HeroContent, en: HeroTranslationDraft): TranslationGroup[] {
+  const entries = translatableEntries(vi, en)
+    .filter((e) => !isLinkKey(e.key))
+    .map((e) => ({ ...e, label: labelOf(e.key) }));
+  const pick = (test: (key: string) => boolean) => entries.filter((e) => test(e.key));
+
+  const groups: TranslationGroup[] = [
+    { id: 'text', title: 'Tiêu đề & mô tả', entries: pick((k) => k === 'title' || k === 'subtitle' || k.startsWith('paragraphs.')) },
+    { id: 'cta', title: 'Nút hành động', entries: pick((k) => k.endsWith('Cta.text')) },
+    ...vi.stats.map((_, i) => ({
+      id: `stat-${i}`,
+      title: `Thẻ số liệu #${i + 1}`,
+      entries: pick((k) => k.startsWith(`stats.${i}.`)),
+    })),
+    { id: 'media', title: 'Ảnh sản phẩm', entries: pick((k) => k.startsWith('media.')) },
+  ];
+  return groups.filter((g) => g.entries.length > 0);
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bug, Flame, Droplets, Leaf, ArrowRight, CheckCircle2, FileCheck, Sparkles, ChevronRight } from 'lucide-react';
+import { Bug, Flame, Droplets, Leaf, ArrowRight, CheckCircle2, FileCheck, ChevronRight } from 'lucide-react';
 import Link from '@/components/ui/LocaleLink';
 
 interface BenefitItem {
@@ -21,26 +21,8 @@ interface BenefitItem {
 
 const BENEFITS: BenefitItem[] = [
   {
-    id: 'insect',
-    index: 1,
-    icon: Bug,
-    title: 'Kháng Mối Mọt & Côn Trùng',
-    enTitle: 'Natural Termite Proof',
-    tagline: '100% khoáng vô cơ không chứa xenlulozo',
-    desc: 'Cấu tạo từ Magie Oxit (MgO) và mạng sợi thủy tinh đa tầng, loại bỏ hoàn toàn mùn cưa hữu cơ. Mối mọt và côn trùng tuyệt đối không thể tiêu hóa hay đục khoét làm tổ.',
-    statNumber: '100%',
-    statLabel: 'Kháng tự nhiên không hóa chất',
-    image: '/images/mgo-mesh.jpg',
-    accentColor: 'green',
-    bullets: [
-      'Không cần ngâm tẩm hóa chất bảo quản độc hại',
-      'Độ bền cấu trúc vĩnh cửu theo thời gian',
-      'Đạt chứng nhận an toàn sinh học công trình',
-    ],
-  },
-  {
     id: 'fire',
-    index: 2,
+    index: 1,
     icon: Flame,
     title: 'Chống Cháy A1 (EI 30 – 180)',
     enTitle: 'Euroclass A1 Non-Combustible',
@@ -58,20 +40,38 @@ const BENEFITS: BenefitItem[] = [
   },
   {
     id: 'water',
-    index: 3,
+    index: 2,
     icon: Droplets,
-    title: 'Kháng Nước & Chống Nồm Ẩm',
-    enTitle: 'Zero Moisture Absorption',
-    tagline: 'Tỷ lệ giãn nở 0% – Không mủn rã khi ngâm nước',
-    desc: 'Giải quyết triệt để nhược điểm sợ nước của thạch cao và tình trạng ngậm ẩm nặng của Cemboard. Kích thước và cường độ chịu lực giữ nguyên vẹn trong mùa nồm ẩm.',
-    statNumber: '0.0%',
-    statLabel: 'Hệ số giãn nở thủy phân',
+    title: 'Kháng Nước & Không Rỉ Sét',
+    enTitle: 'Zero Moisture Absorption & Non-Corrosive',
+    tagline: 'Công thức Magie Sunfat độc quyền – Tuyệt đối không rỉ ốc vít',
+    desc: 'Giải quyết triệt để nhược điểm sợ nước của thạch cao và tình trạng ngậm ẩm nặng của Cemboard. Công thức Sunfat không chứa ion Clorua (Zero Chloride) bảo vệ khung xương kim loại vĩnh cửu.',
+    statNumber: '0% Clo',
+    statLabel: 'Không gây ăn mòn kim loại & ốc vít',
     image: '/images/mgo-floor.jpg',
     accentColor: 'green',
     bullets: [
-      'Thích nghi tối đa khí hậu nồm ẩm Việt Nam',
+      'Công thức Sunfat cao cấp – Không chảy nước muối',
       'Không sinh rêu mốc, vi khuẩn trong phòng kín',
       'Bề mặt dễ dàng lau chùi vệ sinh trực tiếp bằng nước',
+    ],
+  },
+  {
+    id: 'insect',
+    index: 3,
+    icon: Bug,
+    title: 'Kháng Mối Mọt & Côn Trùng',
+    enTitle: 'Natural Termite Proof',
+    tagline: '100% khoáng vô cơ không chứa xenlulozo',
+    desc: 'Cấu tạo từ Magie Oxit (MgO) và mạng sợi thủy tinh đa tầng, loại bỏ hoàn toàn mùn cưa hữu cơ. Mối mọt và côn trùng tuyệt đối không thể tiêu hóa hay đục khoét làm tổ.',
+    statNumber: '100%',
+    statLabel: 'Kháng tự nhiên không hóa chất',
+    image: '/images/mgo-mesh.jpg',
+    accentColor: 'orange',
+    bullets: [
+      'Không cần ngâm tẩm hóa chất bảo quản độc hại',
+      'Độ bền cấu trúc vĩnh cửu theo thời gian',
+      'Đạt chứng nhận an toàn sinh học công trình',
     ],
   },
   {
@@ -85,7 +85,7 @@ const BENEFITS: BenefitItem[] = [
     statNumber: '0% VOCs',
     statLabel: 'Không hóa chất bay hơi độc hại',
     image: '/images/mgo-wall.jpg',
-    accentColor: 'orange',
+    accentColor: 'green',
     bullets: [
       'Đạt chuẩn chất lượng không khí trong nhà (IAQ)',
       'An toàn cho công nhân thi công và người sử dụng',
@@ -100,7 +100,7 @@ const BENEFITS: BenefitItem[] = [
  * - Cột phải: Hiển thị duy nhất 1 card chi tiết của đặc tính được chọn, đổi nội dung + ảnh thực tế mượt mà
  */
 export default function HomeStickyBenefits() {
-  const [activeId, setActiveId] = useState<string>('insect');
+  const [activeId, setActiveId] = useState<string>('fire');
 
   return (
     <section 
@@ -141,46 +141,44 @@ export default function HomeStickyBenefits() {
                       aria-selected={isCurrent}
                       aria-controls={`benefit-panel-${item.id}`}
                       onClick={() => setActiveId(item.id)}
-                      className={`relative w-full p-4 rounded-2xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer border overflow-hidden ${
+                      className={`group relative w-full p-4 rounded-2xl text-left transition-all duration-300 flex items-center justify-between cursor-pointer border overflow-hidden ${
                         isCurrent
                           ? (itemOrange 
                               ? 'bg-white border-2 border-[#F26522] shadow-xl shadow-orange-500/15 ring-2 ring-[#F26522]/20 translate-x-1' 
-                              : 'bg-white border-2 border-[#7CB305] shadow-xl shadow-green-500/15 ring-2 ring-[#7CB305]/20 translate-x-1')
-                          : 'bg-slate-50/90 border-slate-200/90 hover:bg-white hover:border-slate-300 hover:shadow-md text-slate-600'
+                              : 'bg-white border-2 border-[#5F8A03] shadow-xl shadow-green-600/15 ring-2 ring-[#5F8A03]/20 translate-x-1')
+                          : (itemOrange
+                              ? 'bg-slate-50/90 border-slate-200/90 hover:bg-[#FEF3EC]/50 hover:border-[#F26522]/50 hover:shadow-md hover:shadow-orange-500/10 hover:translate-x-0.5 text-slate-700'
+                              : 'bg-slate-50/90 border-slate-200/90 hover:bg-[#F4F9E8]/50 hover:border-[#5F8A03]/50 hover:shadow-md hover:shadow-green-600/10 hover:translate-x-0.5 text-slate-700')
                       }`}
                     >
-                      {/* Vạch màu chỉ báo active bên trái */}
-                      {isCurrent && (
-                        <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${
-                          itemOrange ? 'bg-[#F26522]' : 'bg-[#7CB305]'
-                        }`} />
-                      )}
-
-                      <div className="flex items-center gap-3.5 pl-1">
+                      <div className="flex items-center gap-3.5">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
                           isCurrent
                             ? (itemOrange ? 'bg-[#FEF3EC] text-[#F26522] scale-110 shadow-sm' : 'bg-[#F4F9E8] text-[#5F8A03] scale-110 shadow-sm')
-                            : 'bg-slate-200/70 text-slate-500'
+                            : (itemOrange 
+                                ? 'bg-slate-200/70 text-slate-500 group-hover:bg-[#FEF3EC] group-hover:text-[#F26522] group-hover:scale-105' 
+                                : 'bg-slate-200/70 text-slate-500 group-hover:bg-[#F4F9E8] group-hover:text-[#5F8A03] group-hover:scale-105')
                         }`}>
                           <Icon size={20} />
                         </div>
-                        <div>
-                          <div className={`text-xs sm:text-sm font-extrabold transition-colors ${
-                            isCurrent ? 'text-slate-900' : 'text-slate-700'
-                          }`}>
-                            0{item.index}. {item.title}
-                          </div>
-                          <div className="text-[11px] text-slate-400 font-medium truncate max-w-[220px] sm:max-w-[270px] mt-0.5">
-                            {item.tagline}
-                          </div>
+                        <div className={`text-xs sm:text-sm font-extrabold transition-colors ${
+                          isCurrent 
+                            ? (itemOrange ? 'text-[#F26522]' : 'text-[#5F8A03]')
+                            : (itemOrange ? 'text-slate-800 group-hover:text-[#F26522]' : 'text-slate-800 group-hover:text-[#5F8A03]')
+                        }`}>
+                          0{item.index}. {item.title}
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <div className={`text-xs font-black px-2.5 py-1 rounded-full transition-colors ${
+                        <div className={`text-xs font-black px-3 py-1 rounded-full transition-all duration-200 border ${
                           isCurrent 
-                            ? (itemOrange ? 'bg-[#FEF3EC] text-[#F26522]' : 'bg-[#F4F9E8] text-[#5F8A03]') 
-                            : 'text-slate-400 bg-slate-100'
+                            ? (itemOrange 
+                                ? 'bg-[#FEF3EC] text-[#C2410C] border-[#F26522]/50 shadow-xs' 
+                                : 'bg-[#F4F9E8] text-[#3B5702] border-[#5F8A03]/50 shadow-xs') 
+                            : (itemOrange 
+                                ? 'text-[#C2410C] bg-orange-100/90 border-orange-200/90 group-hover:bg-[#FEF3EC] group-hover:text-[#9A3412] group-hover:border-[#F26522]/50' 
+                                : 'text-[#3B5702] bg-[#EAF5D6] border-[#7CB305]/40 group-hover:bg-[#F4F9E8] group-hover:text-[#2E4501] group-hover:border-[#5F8A03]/50')
                         }`}>
                           {item.statNumber}
                         </div>
@@ -207,11 +205,6 @@ export default function HomeStickyBenefits() {
                 <span>Xem Hồ Sơ Kiểm Định PCCC</span>
                 <ArrowRight size={16} />
               </Link>
-              
-              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-                <FileCheck size={16} className="text-[#7CB305]" />
-                <span>Viện IBST chứng nhận</span>
-              </div>
             </div>
 
           </div>
@@ -224,7 +217,6 @@ export default function HomeStickyBenefits() {
               {BENEFITS.map((item) => {
                 const isActive = activeId === item.id;
                 const isOrange = item.accentColor === 'orange';
-                const IconComponent = item.icon;
 
                 return (
                   <div
@@ -240,11 +232,11 @@ export default function HomeStickyBenefits() {
                     } ${
                       isOrange 
                         ? 'border-[#F26522]/30 shadow-orange-500/10' 
-                        : 'border-[#7CB305]/30 shadow-green-500/10'
+                        : 'border-[#5F8A03]/30 shadow-green-600/10'
                     }`}
                   >
                     {/* Top Accent Bar */}
-                    <div className={`h-1.5 w-full ${isOrange ? 'bg-[#F26522]' : 'bg-[#7CB305]'}`} />
+                    <div className={`h-1.5 w-full ${isOrange ? 'bg-[#F26522]' : 'bg-[#5F8A03]'}`} />
 
                     {/* Ảnh thực tế của đặc tính được chọn */}
                     <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-100">
@@ -259,25 +251,15 @@ export default function HomeStickyBenefits() {
                       {/* Overlay gradient tinh tế */}
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/30 to-transparent" />
 
-                      {/* Badge góc trên */}
-                      <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-3.5 py-1.5 rounded-xl shadow-md border border-slate-200/80 flex items-center gap-2">
-                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                          isOrange ? 'bg-[#FEF3EC] text-[#F26522]' : 'bg-[#F4F9E8] text-[#5F8A03]'
-                        }`}>
-                          <IconComponent size={16} />
-                        </div>
-                        <span className="text-xs font-bold text-slate-800">
-                          Đặc Tính 0{item.index} / 04
-                        </span>
-                      </div>
-
                       {/* Chỉ số lớn góc dưới ảnh */}
                       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between text-white">
                         <div>
                           <div className="text-[11px] uppercase tracking-wider text-slate-300 font-semibold">
                             Chỉ số kỹ thuật đột phá:
                           </div>
-                          <div className="text-3xl sm:text-4xl font-black tracking-tight text-white drop-shadow-md">
+                          <div className={`text-3xl sm:text-4xl font-black tracking-tight drop-shadow-md ${
+                            isOrange ? 'text-[#FF8447]' : 'text-[#A3E635]'
+                          }`}>
                             {item.statNumber}
                           </div>
                         </div>
@@ -294,7 +276,7 @@ export default function HomeStickyBenefits() {
                         <h3 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
                           {item.title}
                         </h3>
-                        <p className="text-xs font-semibold mt-1 text-[#F26522]">
+                        <p className={`text-xs font-semibold mt-1 ${isOrange ? 'text-[#F26522]' : 'text-[#5F8A03]'}`}>
                           {item.tagline}
                         </p>
                       </div>
@@ -308,13 +290,26 @@ export default function HomeStickyBenefits() {
                         {item.bullets.map((bullet, bIdx) => (
                           <div key={bIdx} className="flex items-start gap-2.5 text-xs text-slate-700">
                             <CheckCircle2 size={16} className={`flex-shrink-0 mt-0.5 ${
-                              isOrange ? 'text-[#F26522]' : 'text-[#7CB305]'
+                              isOrange ? 'text-[#F26522]' : 'text-[#5F8A03]'
                             }`} />
                             <span className="font-medium">{bullet}</span>
                           </div>
                         ))}
                       </div>
 
+                      {/* Nút CTA nhận báo giá giải pháp (Màu động theo card: Cam hoặc Xanh) */}
+                      <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <Link
+                          href="/bao-gia"
+                          className={`inline-flex items-center justify-center px-6 py-3 rounded-xl text-white text-xs sm:text-sm font-extrabold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer ${
+                            isOrange
+                              ? 'bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D95314] shadow-orange-600/30'
+                              : 'bg-gradient-to-r from-[#5F8A03] to-[#4D7002] hover:from-[#4D7002] hover:to-[#3E5A01] shadow-green-700/30'
+                          }`}
+                        >
+                          <span>Nhận Báo Giá Giải Pháp {item.title}</span>
+                        </Link>
+                      </div>
                     </div>
 
                   </div>

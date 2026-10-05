@@ -47,8 +47,10 @@
       "comparison": { "name": "Material Comparison", "desc": "MgO vs cement board vs gypsum vs plywood" },
       "applications": { "name": "Top 4 Applications", "desc": "Ducts, partitions, floors, fire doors" },
       "sample": { "name": "Free Sample Kit", "desc": "6 real cut samples + IBST test reports, delivered" },
+      "guide": { "name": "Installation Guide", "desc": "4-step process & CAD details" },
       "projectsNews": { "name": "Projects & News", "desc": "Landmark projects & technical insights" },
       "calculator": { "name": "Online Material Estimator", "desc": "Quickly estimate boards & cost" },
+      "quote": { "name": "Project Quote (2h)", "desc": "Factory direct discount request" },
       "faq": { "name": "Fire Safety FAQ", "desc": "QCVN 06:2022/BXD explained" }
     },
     "productsMenu": {

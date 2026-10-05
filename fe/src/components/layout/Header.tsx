@@ -25,6 +25,7 @@ import {
   Scale,
   Calculator,
   HelpCircle,
+  Hammer,
   type LucideIcon,
 } from 'lucide-react';
 import SearchModal from './SearchModal';
@@ -42,12 +43,11 @@ const HOMEPAGE_SECTIONS: { id: string; key: SectionKey; icon: LucideIcon; badge?
   { id: 'banner-swiper', key: 'banner', icon: Sliders },
   { id: 'hero-section', key: 'hero', icon: Sparkles },
   { id: 'dac-tinh-vuot-troi', key: 'benefits', icon: Flame },
-  { id: 'bang-thong-so', key: 'specs', icon: Table2 },
   { id: 'so-sanh-vat-lieu', key: 'comparison', icon: Scale },
+  { id: 'bang-thong-so', key: 'specs', icon: Table2 },
   { id: 'giai-phap-ung-dung', key: 'applications', icon: Layers },
   { id: 'nhan-mau-thu', key: 'sample', icon: Package, badge: true },
   { id: 'du-an-tin-tuc', key: 'projectsNews', icon: Building2 },
-  { id: 'du-toan-vat-tu', key: 'calculator', icon: Calculator },
   { id: 'faq-hoi-dap', key: 'faq', icon: HelpCircle },
 ];
 

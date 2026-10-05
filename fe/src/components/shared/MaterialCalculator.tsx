@@ -1,10 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Calculator, Phone } from 'lucide-react';
-import { calculateMgoMaterials } from '@/lib/calculator';
-import { formatNumber } from '@/lib/utils';
+import React from 'react';
 import SectionHeading from '@/components/ui/SectionHeading';
+import MaterialChatInterface from './MaterialChatInterface';
+import {
+  Sparkles,
+  ShieldCheck,
+  Percent,
+  Factory,
+  Phone,
+  Maximize2,
+  Clock,
+  CheckCircle2,
+} from 'lucide-react';
 
 interface MaterialCalculatorProps {
   id?: string;
@@ -12,198 +20,108 @@ interface MaterialCalculatorProps {
 }
 
 export default function MaterialCalculator({
-  id = 'du-toan',
+  id = 'du-toan-vat-tu',
   showHeading = true,
 }: MaterialCalculatorProps) {
-  const [area, setArea] = useState<number>(50);
-  const [areaInput, setAreaInput] = useState<string>('50');
-  const [selectedThickness, setSelectedThickness] = useState<number>(10);
-  const [applicationType, setApplicationType] = useState<string>('duct');
-
-  const result = calculateMgoMaterials(area, selectedThickness);
-
-  const commitAreaInput = () => {
-    const parsed = Number(areaInput);
-    const clamped = Number.isFinite(parsed) ? Math.min(500, Math.max(5, Math.round(parsed))) : area;
-    setArea(clamped);
-    setAreaInput(String(clamped));
+  const handleOpenFloatingPopup = () => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('open-material-chat'));
+    }
   };
 
   return (
-    <section id={id} className="max-w-[1440px] mx-auto px-4 lg:px-8">
-      <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl">
-        {showHeading && (
-          <SectionHeading 
-            title="Dự Toán Vật Tư Online"
-          />
-        )}
+    <section id={id} aria-label="Dự Toán Vật Tư Online" className="max-w-[1440px] mx-auto px-4 lg:px-8">
+      {showHeading && <SectionHeading title="Dự Toán Vật Tư Online" />}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 sm:p-10 border border-slate-700 shadow-2xl text-white">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
-          {/* Cột nhập thông số (Trái) */}
-          <div className="lg:col-span-6 space-y-6 bg-white p-6 rounded-2xl border border-slate-200">
-            <div>
-              <label className="block text-sm font-bold text-slate-800 mb-2">
-                1. Ứng dụng thi công:
-              </label>
-              <div className="grid grid-cols-2 gap-3" role="group" aria-label="Ứng dụng thi công">
-                {[
-                  { id: 'duct', label: 'Bọc ống gió PCCC' },
-                  { id: 'wall', label: 'Vách ngăn chống cháy' },
-                  { id: 'floor', label: 'Lót sàn chịu lực' },
-                  { id: 'door', label: 'Lõi cửa chống cháy' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    aria-pressed={applicationType === item.id}
-                    onClick={() => {
-                      setApplicationType(item.id);
-                      if (item.id === 'floor') setSelectedThickness(18);
-                      else if (item.id === 'door') setSelectedThickness(5);
-                      else setSelectedThickness(10);
-                    }}
-                    className={`p-3 text-xs font-bold rounded-xl border text-center transition-all cursor-pointer ${
-                      applicationType === item.id 
-                        ? 'border-[#7CB305] bg-[#F4F9E8] text-[#5F8A03]' 
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+          {/* CỘT TRÁI: GIỚI THIỆU TRỢ LÝ KỸ THUẬT REMAK & 3 LỢI ÍCH */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#5F8A03]/20 text-[#7CB305] text-xs font-bold border border-[#7CB305]/30">
+                <Sparkles size={13} className="text-[#F26522]" />
+                <span>Trợ Lý Bóc Tách Kỹ Sư Remak®</span>
               </div>
+
+              <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight tracking-tight">
+                Bóc Tách Khối Lượng & Chi Phí Tấm MGO Trong 30 Giây
+              </h3>
+
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Không cần tra cứu bảng thông số phức tạp. Trực tiếp trò chuyện với trợ lý kỹ thuật Remak® để nhận kết quả bóc tách số lượng tấm, độ dày PCCC và dự toán kinh phí chuẩn xác ngay tức thì.
+              </p>
             </div>
 
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <label htmlFor="area-input" className="text-sm font-bold text-slate-800">
-                  2. Diện tích cần thi công:
-                </label>
-                <div className="flex items-center gap-1 bg-[#F4F9E8] rounded-lg pl-2 pr-3 py-1 focus-within:ring-2 focus-within:ring-[#7CB305]">
-                  <input
-                    id="area-input"
-                    type="number"
-                    inputMode="numeric"
-                    min={5}
-                    max={500}
-                    value={areaInput}
-                    onChange={(e) => setAreaInput(e.target.value)}
-                    onBlur={commitAreaInput}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.currentTarget.blur();
-                      }
-                    }}
-                    className="w-14 bg-transparent text-lg font-black text-[#5F8A03] text-right focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <span className="text-lg font-black text-[#5F8A03]">m²</span>
+            {/* 3 ĐIỂM CỐT LÕI */}
+            <div className="space-y-3.5">
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#7CB305]/40 transition-colors">
+                <div className="w-8 h-8 rounded-xl bg-[#5F8A03]/20 text-[#7CB305] flex items-center justify-center shrink-0 mt-0.5">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-bold text-white">
+                    Tư Vấn Chuẩn PCCC QCVN 06:2022
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug">
+                    Tự động đề xuất độ dày tấm tối ưu từ EI 30 đến EI 120 cho từng hạng mục công trình.
+                  </div>
                 </div>
               </div>
-              <input
-                type="range"
-                min="5"
-                max="500"
-                step="5"
-                value={area}
-                onChange={(e) => {
-                  setArea(Number(e.target.value));
-                  setAreaInput(e.target.value);
-                }}
-                aria-label="Diện tích cần thi công (m²)"
-                aria-valuetext={`${area} mét vuông`}
-                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#7CB305] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#7CB305] [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#7CB305] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
-              />
-              <div className="flex justify-between text-[11px] text-slate-400 mt-1 font-medium">
-                <span>5 m²</span>
-                <span>250 m²</span>
-                <span>500 m²</span>
+
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#7CB305]/40 transition-colors">
+                <div className="w-8 h-8 rounded-xl bg-[#F26522]/20 text-[#F26522] flex items-center justify-center shrink-0 mt-0.5">
+                  <Percent size={18} />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-bold text-white">
+                    Tối Ưu 5% Hao Hụt Thi Công
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug">
+                    Đã gồm số lượng đinh vít chuyên dụng, khung xương và keo nở ngăn khói chống cháy.
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:border-[#7CB305]/40 transition-colors">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <Factory size={18} />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-bold text-white">
+                    Báo Giá Xuất Xưởng Từ Nhà Máy
+                  </div>
+                  <div className="text-[11px] sm:text-xs text-slate-300 mt-0.5 leading-snug">
+                    Chiết khấu cao nhất theo số lượng đơn hàng, sẵn hàng tại tổng kho Hà Nội & TP.HCM.
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-slate-800 mb-2">
-                3. Độ dày tấm MGO đề xuất:
-              </label>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Độ dày tấm MGO đề xuất">
-                {[5, 8, 10, 12, 15, 18].map((th) => (
-                  <button
-                    key={th}
-                    type="button"
-                    aria-pressed={selectedThickness === th}
-                    onClick={() => setSelectedThickness(th)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      selectedThickness === th
-                        ? 'bg-[#F26522] text-white border-[#F26522] shadow-sm'
-                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    {th}mm
-                  </button>
-                ))}
-              </div>
+            {/* HÀNH ĐỘNG HỖ TRỢ */}
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button
+                type="button"
+                onClick={handleOpenFloatingPopup}
+                className="flex-1 py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Maximize2 size={15} className="text-[#7CB305]" />
+                <span>Mở Dạng Chat Popup Nổi</span>
+              </button>
+
+              <a
+                href="tel:0902441981"
+                className="py-3 px-4 rounded-xl bg-[#F26522]/20 hover:bg-[#F26522]/30 border border-[#F26522]/40 text-[#F26522] font-bold text-xs flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap"
+              >
+                <Phone size={14} />
+                <span>Kỹ Sư: 0902.441.981</span>
+              </a>
             </div>
           </div>
 
-          {/* Cột kết quả bóc tách (Phải) */}
-          <div
-            className="lg:col-span-6 bg-slate-900 text-white p-6 sm:p-8 rounded-2xl space-y-6"
-            aria-live="polite"
-          >
-            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-              <div className="w-10 h-10 rounded-xl bg-[#7CB305]/20 text-[#7CB305] flex items-center justify-center">
-                <Calculator size={22} />
-              </div>
-              <div>
-                <h3 className="font-bold text-base">Bảng Dự Toán Vật Tư Tạm Tính</h3>
-                <p className="text-xs text-slate-400">Đã cộng 5% hao hụt thi công tiêu chuẩn</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-xs sm:text-sm">
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-                <span className="text-slate-300">Tấm MGO ({selectedThickness}mm, 1.22x2.44m):</span>
-                <span className="font-bold text-white text-base">{result.sheets} tấm</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-                <span className="text-slate-300">Khung xương thép mạ kẽm:</span>
-                <span className="font-bold text-white text-base">{result.frames} cây</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-                <span className="text-slate-300">Vít tự khoan mạ chống rỉ:</span>
-                <span className="font-bold text-white text-base">{result.screws} con</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-                <span className="text-slate-300">Keo chống cháy nở phồng:</span>
-                <span className="font-bold text-white text-base">{result.sealantTubes} tuýp</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-800/80">
-                <span className="text-slate-300">Lưới thủy tinh chống nứt mối nối:</span>
-                <span className="font-bold text-white text-base">{result.meshRolls} cuộn</span>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <div className="flex justify-between items-end mb-4 bg-slate-800/50 p-4 rounded-xl">
-                <div>
-                  <div className="text-xs text-slate-400 font-medium">Tổng kinh phí vật tư ước tính:</div>
-                  <div className="text-2xl sm:text-3xl font-black text-[#7CB305]">
-                    ~ {formatNumber(result.estimatedCost)} đ
-                  </div>
-                </div>
-                <span className="text-[10px] text-slate-400 italic">(Chưa gồm VAT & cước xe)</span>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <a 
-                  href="tel:0902441981" 
-                  className="flex-1 py-3 px-4 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors shadow-md"
-                >
-                  <Phone size={15} />
-                  <span>Nhận Báo Giá Đóng Dấu Đỏ</span>
-                </a>
-              </div>
-            </div>
+          {/* CỘT PHẢI: KHUNG CHAT LIVE TƯƠNG TÁC THÔNG MINH */}
+          <div className="lg:col-span-7">
+            <MaterialChatInterface onExpandPopup={handleOpenFloatingPopup} />
           </div>
 
         </div>

@@ -10,7 +10,6 @@ import {
 } from '@/components/home';
 import {
   ComparisonTable,
-  MaterialCalculator,
   SampleRequestForm,
   FaqAccordion,
 } from '@/components/shared';
@@ -133,54 +132,50 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           {hero && <HomeHeroSection hero={hero} />}
         </section>
 
-        {/* 3. MGO BENEFITS - 4 ĐẶC TÍNH VƯỢT TRỘI (INTERACTIVE TAB SWITCHER) */}
+        {/* 3. MGO BENEFITS - 4 ĐẶC TÍNH VƯỢT TRỘI (NÓ LÀ GÌ: A1 1200°C, KHÁNG NƯỚC, KHÔNG RỈ VÍT) */}
         <section id="dac-tinh-vuot-troi" className="scroll-mt-24">
           <HomeStickyBenefits />
         </section>
 
-        {/* 4. BẢNG THÔNG SỐ KỸ THUẬT TẤM MGO REMAK (ĐẨY LÊN CAO THEO YÊU CẦU LEADER) */}
-        <section id="bang-thong-so" className="scroll-mt-24">
-          <ScrollReveal direction="up" delay={50}>
-            <HomeSpecMatrix />
-          </ScrollReveal>
-        </section>
-
-        {/* 5. BẢNG ĐỐI CHUẨN KỸ THUẬT VẬT LIỆU (MGO VS CEMBOARD VS THẠCH CAO VS VÁN ÉP) */}
+        {/* 4. BẢNG ĐỐI CHUẨN KỸ THUẬT VẬT LIỆU (VÌ SAO TỐT HƠN: MGO VS CEMBOARD VS THẠCH CAO VS VÁN ÉP) */}
         <section id="so-sanh-vat-lieu" className="scroll-mt-24">
           <ScrollReveal direction="up" delay={50}>
             <ComparisonTable />
           </ScrollReveal>
         </section>
 
-        {/* 6. 4 ỨNG DỤNG THỰC TẾ HÀNG ĐẦU (ỐNG GIÓ, VÁCH NGĂN, LÓT SÀN, CỬA CHỐNG CHÁY) */}
+        {/* 5. BẢNG THÔNG SỐ KỸ THUẬT & ĐỘ DÀY TẤM MGO REMAK (5MM - 18MM) */}
+        <section id="bang-thong-so" className="scroll-mt-24">
+          <ScrollReveal direction="up" delay={50}>
+            <HomeSpecMatrix />
+          </ScrollReveal>
+        </section>
+
+        {/* 6. 4 ỨNG DỤNG THỰC TẾ HÀNG ĐẦU (DÙNG Ở ĐÂU: ỐNG GIÓ, VÁCH NGĂN, LÓT SÀN, CỬA CHỐNG CHÁY) */}
         <section id="giai-phap-ung-dung" className="scroll-mt-24">
           <ScrollReveal direction="up" delay={50}>
             <HomeApplicationGrid />
           </ScrollReveal>
         </section>
 
-        {/* 7. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
+
+
+        {/* 9. FORM ĐĂNG KÝ HỘP MẪU THỬ MIỄN PHÍ TẬN CHÂN CÔNG TRÌNH */}
         <section id="nhan-mau-thu" className="scroll-mt-24 w-full">
           <ScrollReveal direction="up" delay={50} className="w-full">
             <SampleRequestForm />
           </ScrollReveal>
         </section>
 
-        {/* 8. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
+        {/* 10. DỰ ÁN TIÊU BIỂU & TIN TỨC KIẾN THỨC KỸ THUẬT (CÙNG MỘT HÀNG - 2 CỘT SONG SONG) */}
         <section id="du-an-tin-tuc" className="scroll-mt-24">
           <ScrollReveal direction="up" delay={50}>
             <HomeProjectsAndNews />
           </ScrollReveal>
         </section>
 
-        {/* 9. DỰ TOÁN VẬT TƯ ONLINE (TÍNH NHANH SỐ TẤM & CHI PHÍ) */}
-        <section id="du-toan-vat-tu" className="scroll-mt-24">
-          <ScrollReveal direction="up" delay={50}>
-            <MaterialCalculator />
-          </ScrollReveal>
-        </section>
 
-        {/* 10. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
+        {/* 12. HỎI ĐÁP FAQ SCHEMA CHUẨN SEO GOOGLE */}
         <section id="faq-hoi-dap" className="scroll-mt-24">
           <ScrollReveal direction="up" delay={50}>
             <FaqAccordion />

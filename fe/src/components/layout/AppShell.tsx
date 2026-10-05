@@ -1,13 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Header from './Header';
 import Footer from './Footer';
+import StickyConversionBar from './StickyConversionBar';
+import { QuickQuoteModal, MaterialChatPopup } from '@/components/shared';
 
-// Khung web khách hàng (Header + main + Footer). CMS có root layout riêng ở app/admin nên không đi qua đây.
+// Khung web khách hàng (Header + main + Footer + Sticky Conversion Bar + Quick Quote Modal). CMS có root layout riêng ở app/admin nên không đi qua đây.
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const t = useTranslations('Common');
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
 
   return (
     <div className="min-h-full flex flex-col bg-[#F8FAFC] text-slate-800">
@@ -21,6 +24,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Header />
       <main id="main-content" className="flex-grow">{children}</main>
       <Footer />
+
+      {/* Thanh chuyển đổi cố định chân trang (Mobile & Desktop) */}
+      <StickyConversionBar onOpenQuoteModal={() => setQuoteModalOpen(true)} />
+
+      {/* Modal Báo Giá Nhanh Toàn Cục */}
+      <QuickQuoteModal
+        isOpen={quoteModalOpen}
+        onClose={() => setQuoteModalOpen(false)}
+      />
+
+      {/* Widget Chat Popup Dự Toán MGO Nổi Toàn Cục */}
+      <MaterialChatPopup />
     </div>
   );
 }
