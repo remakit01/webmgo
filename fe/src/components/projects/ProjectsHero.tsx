@@ -1,17 +1,9 @@
-import Link from '@/components/ui/LocaleLink';
 import StatsCounter from './StatsCounter';
 
 export default function ProjectsHero() {
   return (
     <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 pt-8 pb-12 lg:pt-12 lg:pb-16">
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-          <Link href="/" className="hover:text-[#7CB305] transition-colors">Trang chủ</Link>
-          <span>/</span>
-          <span className="font-semibold text-slate-200">Dự Án Tiêu Biểu</span>
-        </div>
 
         {/* Main copy */}
         <div className="max-w-3xl mb-10">

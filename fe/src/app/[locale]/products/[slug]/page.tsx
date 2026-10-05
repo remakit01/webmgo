@@ -61,13 +61,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
       
       {/* 1. BREADCRUMB */}
       <div className="bg-white border-b border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs text-slate-500 flex items-center gap-2">
+        <nav aria-label="Breadcrumb" className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs font-semibold text-slate-500 flex items-center gap-2">
           <Link href="/" className="hover:text-[#5F8A03] transition-colors">Trang chủ</Link>
-          <span>/</span>
+          <ChevronRight size={14} className="text-slate-400" />
           <Link href="/san-pham" className="hover:text-[#5F8A03] transition-colors">Sản phẩm</Link>
-          <span>/</span>
-          <span className="font-semibold text-slate-800 truncate max-w-xs sm:max-w-md">{product.shortName}</span>
-        </div>
+          <ChevronRight size={14} className="text-slate-400" />
+          <span className="text-[#5F8A03] font-bold truncate max-w-xs sm:max-w-md">{product.shortName}</span>
+        </nav>
       </div>
 
       {/* 2. PRODUCT HERO SECTION (MODULAR COMPONENTS) */}

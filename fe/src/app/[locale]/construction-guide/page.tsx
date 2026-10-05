@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from '@/components/ui/LocaleLink';
 import {
   Hammer, Play, CheckCircle2, AlertTriangle,
-  ChevronRight, PhoneCall, ArrowRight,
+  PhoneCall, ArrowRight,
 } from 'lucide-react';
 import { setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/i18n/routing';
@@ -86,11 +86,6 @@ export default async function ConstructionGuidePage({ params }: { params: Promis
       {/* Hero */}
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 pt-16 pb-14 px-4">
         <div className="max-w-[1440px] mx-auto lg:px-8">
-          <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Trang chủ</Link>
-            <ChevronRight size={12} />
-            <span className="text-white">Hướng Dẫn Thi Công</span>
-          </nav>
           <div className="mb-6">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
               Hướng Dẫn Thi Công

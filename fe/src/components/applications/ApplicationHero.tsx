@@ -2,10 +2,7 @@
 
 import React from 'react';
 import Link from '@/components/ui/LocaleLink';
-import { 
-  Download, 
-  ChevronDown 
-} from 'lucide-react';
+import { ChevronDown, Download } from 'lucide-react';
 
 export default function ApplicationHero() {
   const scrollToSolutions = () => {
@@ -24,13 +21,6 @@ export default function ApplicationHero() {
 
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
         
-        {/* Breadcrumb Mini */}
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-6">
-          <Link href="/" className="hover:text-[#5F8A03] transition-colors">Trang chủ</Link>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">Giải pháp ứng dụng</span>
-        </div>
-
         {/* Hero Main Content */}
         <div className="max-w-4xl mx-auto text-center space-y-5">
           {/* Main Title */}

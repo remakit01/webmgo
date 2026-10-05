@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from '@/components/ui/LocaleLink';
 import {
   Clock, PhoneCall, MapPin, Mail, CheckCircle2,
-  ChevronRight, Send, FileCheck, Users,
+  Send, FileCheck, Users,
   ArrowRight, ClipboardList, MessageSquare, PackageCheck,
   Shield, Award,
+  Link,
 } from 'lucide-react';
 
 const APPLICATIONS = [
@@ -71,12 +71,6 @@ export default function QuoteClient() {
       <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 pt-16 pb-14 px-4">
         <div className="max-w-[1440px] mx-auto lg:px-8">
 
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Trang chủ</Link>
-            <ChevronRight size={12} />
-            <span className="text-white font-semibold">Báo Giá</span>
-          </nav>
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
             <div className="flex-1">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-4">
