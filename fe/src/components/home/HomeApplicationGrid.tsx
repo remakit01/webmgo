@@ -208,7 +208,7 @@ export default function HomeApplicationGrid() {
               key={idx}
               className={`group bg-white rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs hover:shadow-xl ${theme.borderHover} hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]`}
             >
-              <div className="relative h-48 overflow-hidden bg-slate-100">
+              <Link href={item.link} className="relative h-48 overflow-hidden bg-slate-100 block">
                 <img
                   src={item.img}
                   alt={item.title}
@@ -234,25 +234,32 @@ export default function HomeApplicationGrid() {
                     MỚI
                   </div>
                 )}
-              </div>
+              </Link>
 
               <div className="p-5 flex-grow flex flex-col justify-between space-y-4">
                 <div>
-                  <h3 className={`font-bold text-slate-900 text-base ${theme.textHover} transition-colors leading-snug`}>
-                    {item.title}
-                  </h3>
+                  <Link href={item.link} className="block">
+                    <h3 className={`font-bold text-slate-900 text-base ${theme.textHover} transition-colors leading-snug`}>
+                      {item.title}
+                    </h3>
+                  </Link>
                   <p className="text-xs text-slate-500 mt-2 leading-relaxed">
                     {item.desc}
                   </p>
                 </div>
 
-                <Link
-                  href={item.link}
-                  className={`text-xs font-bold ${theme.btnText} flex items-center gap-1.5 group-hover:translate-x-1 transition-transform pt-2`}
-                >
-                  <span>Xem Giải Pháp</span>
-                  <ArrowRight size={14} />
-                </Link>
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <Link
+                    href={item.link}
+                    className={`text-xs font-bold ${theme.btnText} hover:underline flex items-center gap-1.5 group-hover:translate-x-0.5 transition-transform`}
+                  >
+                    <span>Xem chi tiết giải pháp</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase">
+                    {item.thickness}
+                  </span>
+                </div>
               </div>
             </div>
           );

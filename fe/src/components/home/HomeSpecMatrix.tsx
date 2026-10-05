@@ -220,24 +220,30 @@ export default function HomeSpecMatrix() {
                   })}
                 </tr>
 
-                {/* ROW 6: CTA — verdict style */}
-                <tr className="border-t-2 border-slate-300 bg-slate-800">
-                  <td className="sticky left-0 z-10 bg-slate-800 px-5 py-4 border-r border-slate-700" />
-                  {specs.map((spec, i) => (
-                    <td key={spec.thickness}
-                      onMouseEnter={() => setHoveredCol(i)} onMouseLeave={() => setHoveredCol(null)}
-                      className={`px-3 py-4 border-l border-slate-700 transition-colors duration-100 ${hoveredCol === i ? 'bg-slate-700' : ''}`}>
-                      <Link
-                        href="/bao-gia"
-                        className="flex items-center justify-center gap-1 py-2.5 rounded-xl bg-[#5F8A03] hover:bg-[#4A7002] text-white text-[11px] font-bold w-full transition-all"
-                      >
-                        Báo Giá <ArrowRight size={11} />
-                      </Link>
-                    </td>
-                  ))}
-                </tr>
               </tbody>
             </table>
+          </div>
+
+          {/* ── CONVERSION BRIDGE DƯỚI BẢNG THÔNG SỐ (1 CTA DUY NHẤT) ── */}
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-700">
+            <div className="space-y-1.5 text-center md:text-left">
+              <h4 className="text-lg sm:text-xl font-black text-white">
+                Cần Tư Vấn Quy Cách & Báo Giá Tấm MGO Cho Dự Án?
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+                Kỹ sư Remak hỗ trợ tính toán độ dày theo tiêu chuẩn PCCC QCVN 06:2022, nhận gia công cắt phay cạnh theo bản vẽ và gửi báo giá chiết khấu trực tiếp từ nhà máy.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <Link
+                href="/bao-gia"
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D95314] text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-orange-600/30 flex items-center gap-2 hover:-translate-y-0.5 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <span>Nhận Báo Giá Tấm MGO Remak®</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -246,27 +252,6 @@ export default function HomeSpecMatrix() {
       <p className="sm:hidden text-[11px] text-center text-slate-400 mt-2">
         ← Vuốt ngang để xem đủ {MGO_SPECS.length} quy cách →
       </p>
-
-      {/* Bottom note */}
-      <div className="mt-5 p-4 sm:p-5 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center flex-shrink-0">
-            <ShieldCheck size={19} />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-slate-900">Gia công theo yêu cầu thiết kế</div>
-            <div className="text-xs text-slate-600 mt-0.5 leading-snug">
-              Cắt kích thước đặc thù, phay cạnh âm dương, soi rãnh theo bản vẽ công trình.
-            </div>
-          </div>
-        </div>
-        <Link
-          href="/bao-gia"
-          className="flex-shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white border border-slate-300 hover:border-[#7CB305] text-slate-800 hover:text-[#5F8A03] text-xs font-bold transition-all shadow-sm whitespace-nowrap"
-        >
-          Tư Vấn Kỹ Thuật <ArrowRight size={13} />
-        </Link>
-      </div>
     </section>
   );
 }

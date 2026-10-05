@@ -5,15 +5,16 @@ import { AlertCircle, Copy, Info, Loader2, RotateCcw, Sparkles, X } from 'lucide
 import { HERO_ACCENT_STYLES } from '@/components/home/HomeHeroSection';
 import type { HeroContent, HomeHero } from '@/types/homepage';
 import TranslatableField from './TranslatableField';
+import TranslatePickerDialog from './TranslatePickerDialog';
 import { describeAiError, type AiErrorInfo } from './ai-error';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import { apiFetch, ApiError } from '@/cms/lib/api-client';
 import {
   copyViToEnDraft,
   getDraftField,
-  isTranslated,
   setDraftField,
   translatableEntries,
+  translationGroups,
   type HeroTranslationDraft,
 } from './hero-form';
 
@@ -68,26 +69,19 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
     setAiError(null);
   };
 
-  /**
-   * "Sao chép tất cả từ tiếng Việt": gửi các ô tiếng Việt lên API -> Gemini dịch sang tiếng Anh bản xứ
-   * -> điền vào các ô tiếng Anh. Không tự lưu: người dùng kiểm tra rồi bấm Lưu.
-   */
-  const handleCopyAllFromVi = async (retry = false) => {
-    const entries = translatableEntries(vi, draft);
-    if (!entries.length) return;
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-    // Bấm "Thử lại" từ dialog lỗi thì người dùng đã xác nhận ghi đè trước đó
-    const existing = entries.filter(isTranslated).length;
-    if (existing > 0 && !retry) {
-      const ok = await confirm({
-        title: 'Dịch lại toàn bộ bằng AI?',
-        description: `${existing} ô đang có bản dịch sẽ bị thay bằng bản AI dịch mới. Bạn vẫn có thể bấm "Huỷ thay đổi" ở thanh lưu để quay lại bản đã lưu.`,
-        confirmText: 'Dịch & ghi đè',
-        cancelText: 'Giữ nguyên',
-        variant: 'warning',
-      });
-      if (!ok) return;
-    }
+  /** Bấm "Sao chép tất cả từ tiếng Việt" -> mở dialog chọn ô (mặc định không tích ô nào) */
+  const handleCopyAllFromVi = () => setPickerOpen(true);
+
+  /**
+   * Dịch đúng các ô đã tích: gửi tiếng Việt của các ô đó lên API -> Gemini -> ghi đè CHỈ các ô đó.
+   * Ô không tích giữ nguyên. Không tự lưu: người dùng kiểm tra rồi bấm Lưu.
+   */
+  const runTranslate = async (keys: string[]) => {
+    const sources = new Map(translatableEntries(vi, draft).map((e) => [e.key, e.source]));
+    const fields = Object.fromEntries(keys.filter((k) => sources.has(k)).map((k) => [k, sources.get(k)!]));
+    if (!Object.keys(fields).length) return;
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -95,19 +89,15 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
     setAiError(null);
     let failure: AiErrorInfo | null = null;
     try {
-      const { fields } = await apiFetch<{ fields: Record<string, string> }>('/translate', {
+      const res = await apiFetch<{ fields: Record<string, string> }>('/translate', {
         method: 'POST',
         signal: controller.signal,
-        body: JSON.stringify({
-          source: 'vi',
-          target: 'en',
-          context: 'homepage-hero',
-          fields: Object.fromEntries(entries.map((e) => [e.key, e.source])),
-        }),
+        body: JSON.stringify({ source: 'vi', target: 'en', context: 'homepage-hero', fields }),
       });
-      setDraft((prev) => Object.entries(fields).reduce((d, [key, value]) => setDraftField(d, key, value), prev));
-      setAiValues(fields);
-      showToast(`Đã dịch ${Object.keys(fields).length} ô — kiểm tra lại trước khi lưu`, 'success');
+      setDraft((prev) => Object.entries(res.fields).reduce((d, [key, value]) => setDraftField(d, key, value), prev));
+      // Gộp với nhãn "AI dịch" của các lần trước (ô không dịch lần này giữ nguyên nhãn cũ)
+      setAiValues((prev) => ({ ...prev, ...res.fields }));
+      showToast(`Đã dịch ${Object.keys(res.fields).length} ô — kiểm tra lại trước khi lưu`, 'success');
     } catch (err) {
       if (controller.signal.aborted) {
         showToast('Đã huỷ dịch tự động', 'info');
@@ -121,7 +111,7 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
       setTranslating(false);
     }
 
-    // Hiện dialog sau khi đã thoát trạng thái "đang dịch" (nút không còn quay)
+    // Hiện dialog lỗi sau khi đã thoát trạng thái "đang dịch"
     if (failure) {
       const accepted = await confirm({
         title: failure.title,
@@ -131,7 +121,8 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
         variant: 'warning',
       });
       if (!accepted) return;
-      if (failure.action === 'retry') await handleCopyAllFromVi(true);
+      // "Thử lại" dịch lại đúng tập ô đã chọn, không mở lại dialog chọn
+      if (failure.action === 'retry') await runTranslate(keys);
       else copyVerbatim();
     }
   };
@@ -188,6 +179,17 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
   return (
     <div className="space-y-4 font-sans">
       
+      {pickerOpen && (
+        <TranslatePickerDialog
+          groups={translationGroups(vi, draft)}
+          onClose={() => setPickerOpen(false)}
+          onConfirm={(keys) => {
+            setPickerOpen(false);
+            void runTranslate(keys);
+          }}
+        />
+      )}
+
       {/* THANH CÔNG CỤ NHANH BẢN DỊCH */}
       <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-white border border-slate-300 shadow-2xs flex-wrap">
         <div className="text-xs font-bold text-slate-900">
@@ -200,7 +202,7 @@ export default function HeroEnForm({ vi, draft, setDraft, image, previewUrl, err
             disabled={translating}
             aria-busy={translating}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#7CB305]/50 bg-[#F4F9E8] text-xs font-bold text-[#5F8A03] hover:bg-[#5F8A03] hover:text-white transition-all cursor-pointer shadow-2xs disabled:cursor-wait disabled:hover:bg-[#F4F9E8] disabled:hover:text-[#5F8A03]"
-            title="Dịch toàn bộ nội dung tiếng Việt sang tiếng Anh bằng AI (Gemini), sau đó bạn kiểm tra và lưu"
+            title="Chọn các ô cần dịch từ tiếng Việt sang tiếng Anh bằng AI (Gemini); ô không chọn giữ nguyên"
           >
             {translating ? (
               <>

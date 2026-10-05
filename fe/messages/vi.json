@@ -47,8 +47,10 @@
       "comparison": { "name": "Đối Chuẩn Vật Liệu", "desc": "MGO vs Cemboard vs Thạch Cao vs Ván Ép" },
       "applications": { "name": "4 Ứng Dụng Hàng Đầu", "desc": "Ống gió, vách ngăn, lót sàn, cửa PCCC" },
       "sample": { "name": "Hộp Mẫu Thử Miễn Phí", "desc": "Giao tận nơi 6 mẫu cắt thực tế + hồ sơ IBST" },
+      "guide": { "name": "Hướng Dẫn Thi Công", "desc": "Quy trình 4 bước chuẩn thợ & bản vẽ CAD" },
       "projectsNews": { "name": "Dự Án & Tin Tức", "desc": "Công trình trọng điểm & kiến thức kỹ thuật" },
       "calculator": { "name": "Dự Toán Vật Tư Online", "desc": "Tính nhanh số tấm & chi phí dự kiến" },
+      "quote": { "name": "Báo Giá Dự Án (2h)", "desc": "Gửi yêu cầu nhận chiết khấu nhà máy" },
       "faq": { "name": "Hỏi Đáp FAQ PCCC", "desc": "Giải đáp quy chuẩn QCVN 06:2022/BXD" }
     },
     "productsMenu": {
