@@ -13,6 +13,7 @@ export interface TranslationDraft {
   content: RichDoc;
   coverAlt: string;
   coverCaption: string;
+  focusKeyword: string;
   seoTitle: string;
   seoDescription: string;
   noindex: boolean;
@@ -37,6 +38,7 @@ export const EMPTY_TRANSLATION: TranslationDraft = {
   content: EMPTY_RICH_DOC,
   coverAlt: '',
   coverCaption: '',
+  focusKeyword: '',
   seoTitle: '',
   seoDescription: '',
   noindex: false,
@@ -55,6 +57,7 @@ export function toTranslationDraft(t: NewsTranslationCms | undefined): Translati
     content: t.content,
     coverAlt: t.coverAlt,
     coverCaption: t.coverCaption ?? '',
+    focusKeyword: t.focusKeyword ?? '',
     seoTitle: t.seoTitle ?? '',
     seoDescription: t.seoDescription ?? '',
     noindex: t.noindex,
@@ -83,6 +86,7 @@ export function toTranslationInput(d: TranslationDraft, savedSlug?: string): New
     content: d.content,
     coverAlt: d.coverAlt.trim(),
     coverCaption: d.coverCaption.trim() || null,
+    focusKeyword: d.focusKeyword.trim() || null,
     seoTitle: d.seoTitle.trim() || null,
     seoDescription: d.seoDescription.trim() || null,
     noindex: d.noindex,

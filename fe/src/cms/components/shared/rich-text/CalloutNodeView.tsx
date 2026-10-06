@@ -8,6 +8,8 @@ export const CALLOUT_STYLES: Record<CalloutVariant, { label: string; box: string
   info: { label: 'Thông tin kỹ thuật', box: 'border-sky-300 bg-sky-50' },
   warning: { label: 'Lưu ý quan trọng', box: 'border-amber-300 bg-amber-50' },
   tip: { label: 'Mẹo thi công', box: 'border-[#7CB305]/50 bg-[#F4F9E8]' },
+  // AEO: 3–5 ý trả lời thẳng câu hỏi chính, đặt đầu bài
+  summary: { label: 'Tóm tắt nhanh', box: 'border-remak-orange bg-remak-orange-light' },
 };
 
 /** Hộp lưu ý: chọn kiểu ngay trên khối, nội dung bên trong soạn như đoạn văn thường */

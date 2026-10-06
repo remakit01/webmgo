@@ -68,6 +68,13 @@ export class NewsTranslationDto {
   @MaxLength(500)
   coverCaption?: string | null;
 
+  @ApiPropertyOptional({ description: 'Keyword chính của bài (chấm điểm SEO/AEO/GEO trong CMS)' })
+  @IsOptional()
+  @Transform(trim)
+  @IsString()
+  @MaxLength(100)
+  focusKeyword?: string | null;
+
   @ApiPropertyOptional({ description: 'Bỏ trống = dùng tiêu đề' })
   @IsOptional()
   @Transform(trim)

@@ -266,12 +266,16 @@
     "callout": {
       "info": "Thông tin kỹ thuật",
       "warning": "Lưu ý quan trọng",
-      "tip": "Mẹo thi công"
+      "tip": "Mẹo thi công",
+      "summary": "Tóm tắt nhanh"
     },
     "consultTitle": "Tư Vấn Kỹ Thuật PCCC",
     "consultText": "Bạn cần biện pháp thi công bọc ống gió hoặc vách ngăn EI cho dự án cụ thể? Liên hệ kỹ sư Remak.",
     "sampleCta": "Đăng Ký Nhận Hộp Mẫu Thử",
     "homeSection": "Tin tức",
-    "homeSectionAria": "Tin tức kỹ thuật mới nhất"
+    "homeSectionAria": "Tin tức kỹ thuật mới nhất",
+    "faqTitle": "Câu hỏi thường gặp",
+    "updatedAt": "Cập nhật lần cuối: {date}",
+    "aboutAuthor": "Về tác giả"
   }
 }

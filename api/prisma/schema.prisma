@@ -291,6 +291,7 @@ model NewsPostTranslation {
   readingMinutes   Int               @default(1) @map("reading_minutes")
   coverAlt         String            @default("") @map("cover_alt")
   coverCaption     String?           @map("cover_caption")
+  focusKeyword     String?           @map("focus_keyword") // keyword chính theo ngôn ngữ — chấm điểm SEO/AEO/GEO
   seoTitle         String?           @map("seo_title")
   seoDescription   String?           @map("seo_description")
   ogImageUrl       String?           @map("og_image_url")

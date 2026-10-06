@@ -4,7 +4,7 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ArrowLeft, ChevronRight, Clock, FileCheck, PhoneCall } from 'lucide-react';
 import { formatDate } from '@remak/shared/locale';
-import { extractHeadings } from '@remak/shared/rich-content';
+import { collectFaqItems, extractHeadings } from '@remak/shared/rich-content';
 import Link from '@/components/ui/LocaleLink';
 import JsonLd from '@/components/shared/JsonLd';
 import { SetLocaleAlternates } from '@/components/layout/LocaleAlternates';
@@ -78,6 +78,9 @@ export default async function NewsDetailPage({ params }: Props) {
   const paths = alternatePaths(post.alternates);
   const url = absoluteUrl(newsPostPath(locale, post.slug));
   const readingLabel = t('readingTime', { minutes: post.readingMinutes });
+  const faqItems = collectFaqItems(post.content);
+  // Hiện "Cập nhật lần cuối" khi nội dung được sửa sau ngày đăng hơn 1 ngày (tín hiệu độ mới cho Google / AI)
+  const updatedLater = new Date(post.updatedAt).getTime() - new Date(post.publishedAt).getTime() > 24 * 60 * 60 * 1000;
 
   return (
     <div className="min-h-screen bg-slate-50 py-8 lg:py-12">
@@ -98,9 +101,16 @@ export default async function NewsDetailPage({ params }: Props) {
             articleSection: post.category.name,
             keywords: post.tags.map((tag) => tag.name).join(', ') || undefined,
             author: post.author
-              ? { '@type': 'Person', name: post.author.name, ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}) }
+              ? {
+                  '@type': 'Person',
+                  name: post.author.name,
+                  ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}),
+                  ...(post.author.bio ? { description: post.author.bio } : {}),
+                  ...(post.author.avatarUrl ? { image: post.author.avatarUrl } : {}),
+                  worksFor: { '@type': 'Organization', name: 'Remak® Vietnam' },
+                }
               : { '@type': 'Organization', name: 'Remak®' },
-            publisher: { '@type': 'Organization', name: 'Remak® Vietnam', logo: { '@type': 'ImageObject', url: absoluteUrl('/Logo_remak_800.png') } },
+            publisher: { '@type': 'Organization', '@id': absoluteUrl('/#organization'), name: 'Remak® Vietnam', logo: { '@type': 'ImageObject', url: absoluteUrl('/Logo_remak_800.png') } },
           },
           {
             '@context': 'https://schema.org',
@@ -112,6 +122,21 @@ export default async function NewsDetailPage({ params }: Props) {
               { '@type': 'ListItem', position: 4, name: post.title, item: url },
             ],
           },
+          // Khối FAQ trong bài -> FAQPage (giúp Google & trợ lý AI trích câu trả lời)
+          ...(faqItems.length
+            ? [
+                {
+                  '@context': 'https://schema.org',
+                  '@type': 'FAQPage',
+                  inLanguage: locale,
+                  mainEntity: faqItems.map((f) => ({
+                    '@type': 'Question',
+                    name: f.question,
+                    acceptedAnswer: { '@type': 'Answer', text: f.answer },
+                  })),
+                },
+              ]
+            : []),
         ]}
       />
 
@@ -150,6 +175,11 @@ export default async function NewsDetailPage({ params }: Props) {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 leading-tight tracking-tight">{post.title}</h1>
               <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 font-medium">
                 <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
+                {updatedLater && (
+                  <time dateTime={post.updatedAt} className="text-remak-green-dark font-semibold">
+                    {t('updatedAt', { date: formatDate(post.updatedAt, locale) })}
+                  </time>
+                )}
                 <span className="inline-flex items-center gap-1.5">
                   <Clock size={13} className="text-remak-green" aria-hidden="true" /> {readingLabel}
                 </span>
@@ -193,6 +223,28 @@ export default async function NewsDetailPage({ params }: Props) {
                   t('by', { name: post.source.name })
                 )}
               </p>
+            )}
+
+            {/* Hộp tác giả (E-E-A-T): chuyên gia đứng tên bài */}
+            {post.author && (post.author.jobTitle || post.author.bio) && (
+              <section aria-label={t('aboutAuthor')} className="flex gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                {post.author.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- ảnh MinIO đã tối ưu
+                  <img src={post.author.avatarUrl} alt={post.author.name} width={56} height={56} loading="lazy" className="w-14 h-14 rounded-full object-cover border border-slate-200 shrink-0" />
+                ) : (
+                  <span aria-hidden="true" className="w-14 h-14 rounded-full bg-remak-green-light text-remak-green-dark font-black text-xl flex items-center justify-center shrink-0">
+                    {post.author.name.charAt(0)}
+                  </span>
+                )}
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-wide text-slate-500">{t('aboutAuthor')}</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {post.author.name}
+                    {post.author.jobTitle && <span className="font-medium text-slate-600"> · {post.author.jobTitle}</span>}
+                  </p>
+                  {post.author.bio && <p className="mt-1 text-sm text-slate-600 leading-relaxed">{post.author.bio}</p>}
+                </div>
+              </section>
             )}
 
             <footer className="pt-6 border-t-2 border-slate-100 space-y-4">

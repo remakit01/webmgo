@@ -3,6 +3,7 @@ import { ApiError } from '@google/genai';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { TranslationService } from './translation.service.js';
+import { GeminiService } from '../ai/gemini.service.js';
 import { TranslateDto } from './dto/translate.dto.js';
 
 function setup(opts: { apiKey?: string; reply?: (input: Record<string, string>) => unknown } = {}) {
@@ -19,8 +20,9 @@ function setup(opts: { apiKey?: string; reply?: (input: Record<string, string>) 
           ? 'fallback-model'
           : fallback,
   };
-  const service = new TranslationService(config as never, redis as never);
-  service.onModuleInit();
+  const gemini = new GeminiService(config as never);
+  gemini.onModuleInit();
+  const service = new TranslationService(gemini, redis as never);
 
   // Thay client Gemini bằng bản giả: dịch = thêm tiền tố "EN:" (hoặc theo opts.reply)
   const generateContent = vi.fn(async ({ contents }: { contents: string }) => {
@@ -28,7 +30,7 @@ function setup(opts: { apiKey?: string; reply?: (input: Record<string, string>) 
     const out = opts.reply ? opts.reply(input) : Object.fromEntries(Object.entries(input).map(([k, v]) => [k, `EN:${v}`]));
     return { text: typeof out === 'string' ? out : JSON.stringify(out) };
   });
-  if (opts.apiKey) (service as unknown as { client: unknown }).client = { models: { generateContent } };
+  if (opts.apiKey) (gemini as unknown as { client: unknown }).client = { models: { generateContent } };
   return { service, generateContent, redis };
 }
 

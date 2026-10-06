@@ -135,6 +135,7 @@ export function toTranslationCms(t: TranslationRow): NewsTranslationCms {
     readingMinutes: t.readingMinutes,
     coverAlt: t.coverAlt,
     coverCaption: t.coverCaption,
+    focusKeyword: t.focusKeyword,
     seoTitle: t.seoTitle,
     seoDescription: t.seoDescription,
     ogImageUrl: t.ogImageUrl,

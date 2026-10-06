@@ -83,6 +83,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    // @id để JSON-LD các trang khác (publisher của bài viết) trỏ về cùng một thực thể
+    '@id': `${baseUrl}/#organization`,
     name: 'Remak® Vietnam',
     url: baseUrl,
     logo: `${baseUrl}/images/Logo_remak_800.png`,

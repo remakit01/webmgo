@@ -45,6 +45,14 @@
     "./rich-translate": {
       "types": "./dist/rich-translate.d.ts",
       "default": "./dist/rich-translate.js"
+    },
+    "./rich-inline": {
+      "types": "./dist/rich-inline.d.ts",
+      "default": "./dist/rich-inline.js"
+    },
+    "./content-score": {
+      "types": "./dist/content-score.d.ts",
+      "default": "./dist/content-score.js"
     }
   },
   "files": [
