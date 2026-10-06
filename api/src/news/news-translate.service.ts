@@ -10,7 +10,7 @@ import { resolveUniqueSlug } from '../common/unique-slug.js';
 export const MAX_TRANSLATE_CHARS = 60_000;
 
 /** Ô ngoài nội dung được dịch cùng bài */
-const TEXT_FIELDS = ['title', 'sapo', 'coverAlt', 'coverCaption', 'seoTitle', 'seoDescription'] as const;
+const TEXT_FIELDS = ['title', 'sapo', 'coverAlt', 'coverCaption', 'focusKeyword', 'seoTitle', 'seoDescription'] as const;
 const CONTENT_PREFIX = 'c.';
 
 /** AI đôi khi tự chèn markdown (**đậm**) dù bản gốc không có -> bỏ đi (định dạng thật nằm trong thẻ giữ chỗ) */
@@ -97,6 +97,7 @@ export class NewsTranslateService {
       content: doc,
       coverAlt: translated.coverAlt ?? '',
       coverCaption: translated.coverCaption ?? null,
+      focusKeyword: translated.focusKeyword ?? null,
       seoTitle: translated.seoTitle ?? null,
       seoDescription: translated.seoDescription ?? null,
       // Tên nguồn là tên riêng, link nguồn giữ nguyên

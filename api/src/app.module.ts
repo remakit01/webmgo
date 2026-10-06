@@ -11,6 +11,7 @@ import { StorageModule } from './storage/storage.module.js';
 import { RevalidateModule } from './revalidate/revalidate.module.js';
 import { BannersModule } from './banners/banners.module.js';
 import { HomepageModule } from './homepage/homepage.module.js';
+import { AiModule } from './ai/ai.module.js';
 import { TranslationModule } from './translation/translation.module.js';
 import { ContentCacheModule } from './content-cache/content-cache.module.js';
 import { SlugRedirectModule } from './slug-redirect/slug-redirect.module.js';
@@ -34,6 +35,7 @@ import configuration from './config/configuration.js';
     RevalidateModule,
     BannersModule,
     HomepageModule,
+    AiModule,
     TranslationModule,
     ContentCacheModule,
     SlugRedirectModule,

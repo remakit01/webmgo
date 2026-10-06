@@ -20,6 +20,7 @@ import { describeAiError } from '@/cms/components/shared/ai-error';
 import AiTranslateDialog, { type AiTranslateState } from '@/cms/components/shared/AiTranslateDialog';
 import { newsApi, uploadContentImage } from '@/cms/lib/news-api';
 import type { NewsAuthorCms, NewsCategoryCms, NewsPostCms, NewsTagCms, RichDoc } from '@/types/news';
+import ContentScorePanel from './ContentScorePanel';
 import PublishPanel from './PublishPanel';
 import TagPicker from './TagPicker';
 import {
@@ -128,6 +129,12 @@ export default function NewsEditor({ postId }: { postId?: string }) {
 
   const vi = post?.translations.vi;
   const en = post?.translations.en;
+
+  // Tác giả đang chọn (chức danh theo ngôn ngữ đang soạn) — một tiêu chí GEO / E-E-A-T
+  const scoreAuthor = useMemo(() => {
+    const a = authors.find((x) => x.id === meta.authorId);
+    return a ? { name: a.name, jobTitle: a.translations[tab]?.jobTitle ?? null } : null;
+  }, [authors, meta.authorId, tab]);
   const enStale = !!vi && !!en && isTranslationStale(vi.contentUpdatedAt, en.sourceUpdatedAt) && !drafts.en.sourceUpdatedAt;
 
   // ── Lưu ────────────────────────────────────────────────────────────────
@@ -309,6 +316,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                 content: draftAi.content,
                 coverAlt: draftAi.coverAlt,
                 coverCaption: draftAi.coverCaption ?? '',
+                focusKeyword: draftAi.focusKeyword ?? '',
                 seoTitle: draftAi.seoTitle ?? '',
                 seoDescription: draftAi.seoDescription ?? '',
                 noindex: draftAi.noindex,
@@ -619,6 +627,25 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                 <input type="checkbox" className="accent-[#5F8A03]" checked={meta.isFeatured} onChange={(e) => setMeta((m) => ({ ...m, isFeatured: e.target.checked }))} />
                 <Star size={13} className="text-amber-500" aria-hidden="true" /> Bài nổi bật (trang chủ & đầu trang Tin tức)
               </label>
+            </Panel>
+
+            <Panel title={`Tối ưu SEO · AEO · GEO (${LOCALE_LABEL[tab]})`}>
+              <ContentScorePanel
+                keyword={draft.focusKeyword}
+                onKeywordChange={(focusKeyword) => setDraft({ focusKeyword })}
+                input={{
+                  title: draft.title,
+                  slug: draft.slug,
+                  sapo: draft.sapo,
+                  seoTitle: draft.seoTitle,
+                  seoDescription: draft.seoDescription,
+                  doc: draft.content,
+                  locale: tab,
+                  author: scoreAuthor,
+                  publishedAt: post?.translations[tab]?.publishedAt ?? null,
+                  updatedAt: post?.translations[tab]?.contentUpdatedAt ?? null,
+                }}
+              />
             </Panel>
 
             <Panel title={`SEO (${LOCALE_LABEL[tab]})`} collapsible>

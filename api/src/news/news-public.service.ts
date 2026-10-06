@@ -158,7 +158,8 @@ export class NewsPublicService {
         noindex: true,
         sourceName: true,
         sourceUrl: true,
-        updatedAt: true,
+        // Lần sửa nội dung cuối (đổi trạng thái xuất bản không tính) — "Cập nhật lần cuối", dateModified
+        contentUpdatedAt: true,
         post: {
           select: {
             ...listItemSelect(locale).post.select,
@@ -182,7 +183,7 @@ export class NewsPublicService {
     return {
       ...item,
       content,
-      updatedAt: t.updatedAt.toISOString(),
+      updatedAt: t.contentUpdatedAt.toISOString(),
       author: t.post.author ? toAuthorPublic(t.post.author, locale) : null,
       tags: t.post.tags.map((x) => toTagPublic(x.tag, locale)),
       seo: {

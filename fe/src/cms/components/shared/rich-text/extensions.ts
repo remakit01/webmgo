@@ -10,11 +10,13 @@ import { HEADING_LEVELS, type CalloutVariant } from '@remak/shared/rich-content'
 import ImageNodeView from './ImageNodeView';
 import CalloutNodeView from './CalloutNodeView';
 import RelatedPostNodeView from './RelatedPostNodeView';
+import { FaqItemNodeView, FaqNodeView } from './FaqNodeView';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     callout: { insertCallout: (variant?: CalloutVariant) => ReturnType };
     relatedPost: { insertRelatedPost: (postId: string) => ReturnType };
+    faq: { insertFaq: () => ReturnType };
   }
 }
 
@@ -79,6 +81,47 @@ const RelatedPost = Node.create({
   },
 });
 
+/** Khối FAQ có cấu trúc (AEO): gồm các cặp hỏi–đáp; trang public sinh JSON-LD FAQPage từ khối này */
+const Faq = Node.create({
+  name: 'faq',
+  group: 'block',
+  content: 'faqItem+',
+  defining: true,
+  isolating: true,
+  parseHTML: () => [{ tag: 'section[data-faq]' }],
+  renderHTML: ({ HTMLAttributes }) => ['section', mergeAttributes(HTMLAttributes, { 'data-faq': '' }), 0],
+  addNodeView() {
+    return ReactNodeViewRenderer(FaqNodeView);
+  },
+  addCommands() {
+    return {
+      insertFaq:
+        () =>
+        ({ commands }) =>
+          commands.insertContent({
+            type: this.name,
+            content: [{ type: 'faqItem', attrs: { question: '' }, content: [{ type: 'paragraph' }] }],
+          }),
+    };
+  },
+});
+
+/** Một câu hỏi (attr question) + câu trả lời (các khối bên trong) */
+const FaqItem = Node.create({
+  name: 'faqItem',
+  content: 'block+',
+  defining: true,
+  isolating: true,
+  addAttributes() {
+    return { question: { default: '', parseHTML: (el) => el.getAttribute('data-question') ?? '' } };
+  },
+  parseHTML: () => [{ tag: 'div[data-faq-item]' }],
+  renderHTML: ({ HTMLAttributes }) => ['div', mergeAttributes({ 'data-faq-item': '', 'data-question': HTMLAttributes.question }), 0],
+  addNodeView() {
+    return ReactNodeViewRenderer(FaqItemNodeView);
+  },
+});
+
 export function richTextExtensions(): AnyExtension[] {
   return [
     StarterKit.configure({
@@ -91,5 +134,7 @@ export function richTextExtensions(): AnyExtension[] {
     Youtube.configure({ nocookie: true, controls: true, width: 640, height: 360 }),
     Callout,
     RelatedPost,
+    Faq,
+    FaqItem,
   ];
 }

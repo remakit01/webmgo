@@ -24,6 +24,8 @@ import {
   Unlink,
   Video,
   Lightbulb,
+  ListChecks,
+  MessageCircleQuestion,
 } from 'lucide-react';
 import { isSafeLink } from '@remak/shared/link';
 import { stableStringify, youtubeId, type RichDoc } from '@remak/shared/rich-content';
@@ -269,7 +271,9 @@ function Toolbar({
       <Btn label="Chèn ảnh (kèm chú thích)" onClick={onImage} icon={uploading ? Loader2 : ImagePlus} spin={uploading} disabled={uploading} />
       <Btn label="Chèn bảng 3×3" onClick={() => c().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} icon={Table} />
       <Btn label="Nhúng video YouTube" onClick={onYoutube} icon={Video} />
+      <Btn label="Tóm tắt nhanh (key takeaways — nên đặt đầu bài)" onClick={() => c().insertCallout('summary').run()} icon={ListChecks} />
       <Btn label="Hộp lưu ý kỹ thuật" onClick={() => c().insertCallout('info').run()} icon={Lightbulb} />
+      <Btn label="Khối câu hỏi thường gặp (FAQ)" onClick={() => c().insertFaq().run()} icon={MessageCircleQuestion} />
       <Btn label="Chèn hộp bài liên quan" onClick={onRelated} icon={Newspaper} />
       <Btn label="Đường kẻ ngang" onClick={() => c().setHorizontalRule().run()} icon={Minus} />
       <Sep />

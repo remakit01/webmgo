@@ -384,6 +384,7 @@ export class NewsPostsService {
       readingMinutes: readingMinutes(contentText),
       coverAlt: dto.coverAlt ?? '',
       coverCaption: blankToNull(dto.coverCaption) ?? null,
+      focusKeyword: blankToNull(dto.focusKeyword) ?? null,
       seoTitle: blankToNull(dto.seoTitle) ?? null,
       seoDescription: blankToNull(dto.seoDescription) ?? null,
       ogImageUrl: blankToNull(dto.ogImageUrl) ?? null,

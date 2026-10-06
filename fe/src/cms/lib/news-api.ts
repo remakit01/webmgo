@@ -26,6 +26,7 @@ export interface NewsTranslationInput {
   content: RichDoc;
   coverAlt?: string;
   coverCaption?: string | null;
+  focusKeyword?: string | null;
   seoTitle?: string | null;
   seoDescription?: string | null;
   ogImageUrl?: string | null;

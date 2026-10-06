@@ -1,6 +1,6 @@
 import React from 'react';
 import { getTranslations } from 'next-intl/server';
-import { ArrowRight, Info, Lightbulb, TriangleAlert } from 'lucide-react';
+import { ArrowRight, Info, Lightbulb, ListChecks, TriangleAlert } from 'lucide-react';
 import { isInternalLink } from '@remak/shared/link';
 import { extractHeadings, nodeText, youtubeId, type CalloutVariant, type RichDoc, type RichMark, type RichNode } from '@remak/shared/rich-content';
 import type { NewsRelatedRef } from '@remak/shared/contracts/news';
@@ -28,6 +28,7 @@ export default async function RichContent({
     info: t('callout.info'),
     warning: t('callout.warning'),
     tip: t('callout.tip'),
+    summary: t('callout.summary'),
   };
 
   function renderMarks(text: React.ReactNode, marks: RichMark[] = [], key: React.Key): React.ReactNode {
@@ -156,8 +157,8 @@ export default async function RichContent({
         );
       }
       case 'callout': {
-        const variant = (['info', 'warning', 'tip'].includes(String(node.attrs?.variant)) ? node.attrs?.variant : 'info') as CalloutVariant;
-        const Icon = variant === 'warning' ? TriangleAlert : variant === 'tip' ? Lightbulb : Info;
+        const variant = (['info', 'warning', 'tip', 'summary'].includes(String(node.attrs?.variant)) ? node.attrs?.variant : 'info') as CalloutVariant;
+        const Icon = variant === 'warning' ? TriangleAlert : variant === 'tip' ? Lightbulb : variant === 'summary' ? ListChecks : Info;
         return (
           <aside key={key} className={`news-callout news-callout-${variant}`}>
             <p className="news-callout-label">
@@ -165,6 +166,22 @@ export default async function RichContent({
             </p>
             {children(node, key)}
           </aside>
+        );
+      }
+      case 'faq': {
+        // Hiển thị đủ hỏi–đáp (không thu gọn) để người đọc và máy (Google, trợ lý AI) đều đọc được; JSON-LD FAQPage sinh ở trang
+        const items = (node.content ?? []).filter((n) => n.type === 'faqItem' && typeof n.attrs?.question === 'string' && n.attrs.question.trim());
+        if (!items.length) return null;
+        return (
+          <section key={key} className="news-faq" aria-labelledby={`faq-${key}`}>
+            <h2 id={`faq-${key}`} className="scroll-mt-24">{t('faqTitle')}</h2>
+            {items.map((item, i) => (
+              <div key={`${key}.q${i}`} className="news-faq-item">
+                <h3 className="news-faq-question">{String(item.attrs?.question).trim()}</h3>
+                <div className="news-faq-answer">{children(item, `${key}.q${i}`)}</div>
+              </div>
+            ))}
+          </section>
         );
       }
       case 'relatedPost': {

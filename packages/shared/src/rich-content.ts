@@ -29,11 +29,17 @@ export const RICH_NODE_TYPES = [
   'youtube',
   'callout',
   'relatedPost',
+  'faq',
+  'faqItem',
 ] as const;
 export type RichNodeType = (typeof RICH_NODE_TYPES)[number];
 
 export const HEADING_LEVELS = [2, 3, 4] as const;
-export const CALLOUT_VARIANTS = ['info', 'warning', 'tip'] as const;
+/** summary = hộp "Tóm tắt nhanh" (key takeaways) đầu bài — trả lời thẳng câu hỏi chính (AEO) */
+export const CALLOUT_VARIANTS = ['info', 'warning', 'tip', 'summary'] as const;
+
+/** Câu hỏi FAQ tối đa bấy nhiêu ký tự */
+export const FAQ_QUESTION_MAX = 300;
 export type CalloutVariant = (typeof CALLOUT_VARIANTS)[number];
 
 export interface RichMark {
@@ -78,6 +84,7 @@ const NODE_ATTRS: Partial<Record<RichNodeType, readonly string[]>> = {
   youtube: ['src', 'start', 'width', 'height'],
   callout: ['variant'],
   relatedPost: ['postId'],
+  faqItem: ['question'],
 };
 
 const TEXT_ALIGNS = ['left', 'center', 'right', 'justify', null];
@@ -134,7 +141,9 @@ export function validateRichDoc(value: unknown, options: RichValidateOptions = {
   function checkAttrs(node: Record<string, unknown>, type: RichNodeType, path: string): RichValidateResult {
     const attrs = node.attrs;
     if (attrs === undefined || attrs === null) {
-      if (type === 'image' || type === 'youtube' || type === 'relatedPost') return fail(path, 'thiếu thuộc tính bắt buộc');
+      if (type === 'image' || type === 'youtube' || type === 'relatedPost' || type === 'faqItem') {
+        return fail(path, 'thiếu thuộc tính bắt buộc');
+      }
       return { ok: true };
     }
     if (!isObject(attrs)) return fail(path, 'attrs phải là object');
@@ -195,6 +204,10 @@ export function validateRichDoc(value: unknown, options: RichValidateOptions = {
         if (typeof attrs.postId !== 'string' || !/^[a-z0-9]{1,40}$/i.test(attrs.postId)) {
           return fail(path, 'hộp bài liên quan thiếu bài viết');
         }
+        break;
+      case 'faqItem':
+        if (typeof attrs.question !== 'string' || !attrs.question.trim()) return fail(path, 'câu hỏi FAQ đang trống');
+        if (attrs.question.length > FAQ_QUESTION_MAX) return fail(path, `câu hỏi FAQ tối đa ${FAQ_QUESTION_MAX} ký tự`);
         break;
     }
     return { ok: true };
@@ -257,6 +270,12 @@ export function toPlainText(doc: RichDoc): string {
       if (text) lines.push(text);
       return;
     }
+    if (node.type === 'faqItem') {
+      const question = typeof node.attrs?.question === 'string' ? node.attrs.question.trim() : '';
+      if (question) lines.push(question);
+      (node.content ?? []).forEach(visit);
+      return;
+    }
     if (node.type === 'image') {
       const caption = typeof node.attrs?.caption === 'string' ? node.attrs.caption.trim() : '';
       if (caption) lines.push(caption);
@@ -317,6 +336,28 @@ export function collectRelatedPostIds(doc: RichDoc): string[] {
   };
   doc.content.forEach(visit);
   return [...ids];
+}
+
+export interface FaqEntry {
+  question: string;
+  /** Câu trả lời dạng chữ thuần (cho JSON-LD FAQPage) */
+  answer: string;
+}
+
+/** Các cặp hỏi–đáp trong khối FAQ (theo thứ tự) — sinh JSON-LD FAQPage, chấm điểm AEO */
+export function collectFaqItems(doc: RichDoc): FaqEntry[] {
+  const items: FaqEntry[] = [];
+  const visit = (node: RichNode) => {
+    if (node.type === 'faqItem') {
+      const question = typeof node.attrs?.question === 'string' ? node.attrs.question.trim() : '';
+      const answer = toPlainText({ type: 'doc', content: node.content ?? [] }).replace(/\n+/g, ' ').trim();
+      if (question && answer) items.push({ question, answer });
+      return;
+    }
+    (node.content ?? []).forEach(visit);
+  };
+  doc.content.forEach(visit);
+  return items;
 }
 
 /** URL các ảnh trong bài (để dọn ảnh không còn dùng, preload...) */

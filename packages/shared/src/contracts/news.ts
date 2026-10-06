@@ -77,6 +77,7 @@ export interface NewsRelatedRef {
 
 export interface NewsPostPublic extends NewsListItem {
   content: RichDoc;
+  /** Lần sửa nội dung cuối (không tính đổi trạng thái xuất bản) — "Cập nhật lần cuối", dateModified */
   updatedAt: string;
   author: NewsAuthorPublic | null;
   tags: NewsTagPublic[];
@@ -129,6 +130,7 @@ export interface NewsAiDraft {
   content: RichDoc;
   coverAlt: string;
   coverCaption: string | null;
+  focusKeyword: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   sourceName: string | null;
@@ -153,6 +155,8 @@ export interface NewsTranslationCms {
   readingMinutes: number;
   coverAlt: string;
   coverCaption: string | null;
+  /** Keyword chính (chấm điểm SEO/AEO/GEO) */
+  focusKeyword: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
   ogImageUrl: string | null;

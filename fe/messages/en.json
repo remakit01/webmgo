@@ -266,12 +266,16 @@
     "callout": {
       "info": "Technical note",
       "warning": "Important",
-      "tip": "Installation tip"
+      "tip": "Installation tip",
+      "summary": "Key takeaways"
     },
     "consultTitle": "Fire-Protection Technical Advice",
     "consultText": "Need an installation method for duct encasement or EI-rated partitions on your project? Talk to a Remak engineer.",
     "sampleCta": "Request Free Samples",
     "homeSection": "News",
-    "homeSectionAria": "Latest technical news"
+    "homeSectionAria": "Latest technical news",
+    "faqTitle": "Frequently asked questions",
+    "updatedAt": "Last updated: {date}",
+    "aboutAuthor": "About the author"
   }
 }
