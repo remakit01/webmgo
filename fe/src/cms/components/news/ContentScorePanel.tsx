@@ -80,7 +80,7 @@ export default function ContentScorePanel({
               aria-selected={selected}
               onClick={() => setActive(g.key)}
               className={`flex flex-col items-center gap-0.5 rounded-lg border px-2 py-2 cursor-pointer transition-colors ${
-                selected ? 'border-slate-900 bg-slate-50' : 'border-slate-200 bg-white hover:border-slate-400'
+                selected ? 'border-slate-900 bg-slate-50' : 'border-slate-300 bg-white hover:border-slate-400'
               }`}
             >
               <span className={`text-lg font-black tabular-nums leading-none border-b-2 pb-0.5 ${scoreColor(s)}`}>{s}</span>

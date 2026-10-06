@@ -62,9 +62,9 @@ export default function AdminShell({
   return (
     <ConfirmDialogProvider>
       <PageLoadingBar />
-      <div className="flex min-h-screen bg-slate-50 text-slate-800 antialiased font-sans admin-typography">
+      <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans admin-typography">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
           {children}
         </div>
       </div>

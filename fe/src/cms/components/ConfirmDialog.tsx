@@ -294,9 +294,9 @@ export function ConfirmDialogProvider({ children }: { children: React.ReactNode 
         </div>
       )}
 
-      {/* HỆ THỐNG TOAST FEEDBACK TOÀN CỤC CHUẨN UI/UX PRO MAX */}
+      {/* HỆ THỐNG TOAST FEEDBACK TOÀN CỤC CHUẨN UI/UX PRO MAX (TOP-CENTER BRAND REMAK) */}
       {toasts.length > 0 && (
-        <div className="fixed bottom-5 right-5 z-[110] flex flex-col gap-2 max-w-sm w-full pointer-events-none admin-typography select-none">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[110] flex flex-col items-center gap-2.5 max-w-md w-full px-4 pointer-events-none admin-typography select-none">
           {toasts.map((toast) => {
             const isSuccess = toast.type === 'success';
             const isError = toast.type === 'error';
@@ -307,28 +307,28 @@ export function ConfirmDialogProvider({ children }: { children: React.ReactNode 
                 key={toast.id}
                 role="status"
                 aria-live="polite"
-                className={`pointer-events-auto flex items-center justify-between gap-3 p-3.5 rounded-xl border shadow-xl backdrop-blur-md animate-in slide-in-from-bottom-3 duration-200 transition-all ${
+                className={`pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border shadow-2xl backdrop-blur-md animate-in slide-in-from-top-4 fade-in duration-200 transition-all w-full sm:w-auto sm:min-w-[320px] max-w-md ${
                   isSuccess
-                    ? 'bg-slate-900/95 text-white border-slate-700/80 shadow-slate-900/30'
+                    ? 'bg-[#182602]/95 text-white border-[#7CB305]/70 shadow-[#5F8A03]/25 ring-1 ring-[#7CB305]/30'
                     : isError
-                    ? 'bg-rose-900/95 text-white border-rose-700/80 shadow-rose-900/30'
+                    ? 'bg-[#2E0B11]/95 text-white border-rose-500/70 shadow-rose-950/40 ring-1 ring-rose-500/30'
                     : isWarning
-                    ? 'bg-amber-900/95 text-white border-amber-700/80 shadow-amber-900/30'
-                    : 'bg-slate-900/95 text-white border-slate-700/80'
+                    ? 'bg-[#2D1602]/95 text-white border-[#EA580C]/70 shadow-orange-950/40 ring-1 ring-orange-500/30'
+                    : 'bg-[#182602]/95 text-white border-[#5F8A03]/70 shadow-[#5F8A03]/20 ring-1 ring-[#5F8A03]/30'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  {isSuccess && <CheckCircle2 size={18} className="text-[#7CB305] shrink-0" />}
+                  {isSuccess && <CheckCircle2 size={18} className="text-[#8AEB05] shrink-0" />}
                   {isError && <AlertCircle size={18} className="text-rose-400 shrink-0" />}
-                  {isWarning && <AlertTriangle size={18} className="text-amber-400 shrink-0" />}
-                  {!isSuccess && !isError && !isWarning && <Info size={18} className="text-sky-400 shrink-0" />}
-                  <span className="text-xs sm:text-sm font-semibold truncate">{toast.message}</span>
+                  {isWarning && <AlertTriangle size={18} className="text-[#FB923C] shrink-0" />}
+                  {!isSuccess && !isError && !isWarning && <Info size={18} className="text-[#A3E635] shrink-0" />}
+                  <span className="text-xs sm:text-sm font-semibold truncate leading-tight">{toast.message}</span>
                 </div>
 
                 <button
                   type="button"
                   onClick={() => removeToast(toast.id)}
-                  className="p-1 rounded-md text-white/60 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                  className="p-1 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer ml-2"
                   title="Đóng thông báo"
                 >
                   <X size={14} />

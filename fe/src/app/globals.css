@@ -36,11 +36,16 @@
   --font-be-vietnam: var(--font-be-vietnam-pro), sans-serif;
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-be-vietnam-pro), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: clip;
 }
 
 /* Chuẩn hóa Typography toàn hệ thống Admin CMS dùng Be Vietnam Pro - To Rõ Đẹp */

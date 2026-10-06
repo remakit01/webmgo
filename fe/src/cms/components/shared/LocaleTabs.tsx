@@ -43,7 +43,11 @@ export default function LocaleTabs({
   };
 
   return (
-    <div role="tablist" aria-label="Ngôn ngữ nội dung" className="flex flex-wrap gap-2 font-sans">
+    <div
+      role="tablist"
+      aria-label="Ngôn ngữ nội dung"
+      className="inline-flex items-center p-1 bg-slate-100/90 rounded-lg border border-slate-300 gap-1 font-sans"
+    >
       {tabs.map((tab, i) => {
         const selected = tab.locale === active;
         return (
@@ -60,13 +64,19 @@ export default function LocaleTabs({
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(tab.locale)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={`px-4 py-2 rounded-lg border text-xs sm:text-sm font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5F8A03] focus-visible:ring-offset-1 ${
+            className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5F8A03] focus-visible:ring-offset-1 flex items-center gap-1.5 ${
               selected
-                ? 'border-[#5F8A03] bg-[#F4F9E8] text-[#5F8A03] shadow-2xs'
-                : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50'
+                ? 'bg-white text-[#5F8A03] border border-slate-300 shadow-2xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 border border-transparent'
             }`}
           >
             {tab.label}
+            {tab.dirty && (
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"
+                title="Có thay đổi chưa lưu"
+              />
+            )}
           </button>
         );
       })}
