@@ -41,12 +41,13 @@ export interface RichTextEditorProps {
   currentPostId?: string;
   editable?: boolean;
   ariaLabel?: string;
+  embedded?: boolean;
 }
 
 type InlineInput = { kind: 'link' | 'youtube'; value: string; error?: string } | null;
 
 /** Trình soạn bài theo khối (TipTap) — xuất JSON RichDoc, không xuất HTML */
-export default function RichTextEditor({ value, onChange, onUploadImage, currentPostId, editable = true, ariaLabel = 'Nội dung bài viết' }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, onUploadImage, currentPostId, editable = true, ariaLabel = 'Nội dung bài viết', embedded = false }: RichTextEditorProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const [uploading, setUploading] = useState(false);
@@ -134,11 +135,11 @@ export default function RichTextEditor({ value, onChange, onUploadImage, current
   };
 
   if (!editor) {
-    return <div className="min-h-[480px] rounded-xl border border-slate-300 bg-white animate-pulse" aria-busy="true" />;
+    return <div className={`min-h-[480px] bg-white animate-pulse ${embedded ? '' : 'rounded-xl border border-slate-200'}`} aria-busy="true" />;
   }
 
   return (
-    <div className="rounded-xl border border-slate-300 bg-white shadow-2xs focus-within:border-[#5F8A03] transition-colors">
+    <div className={embedded ? 'bg-white' : 'rounded-xl border border-slate-200 bg-white shadow-xs focus-within:border-[#5F8A03] transition-colors'}>
       {editable && (
         <Toolbar
           editor={editor}
@@ -252,7 +253,7 @@ function Toolbar({
   const c = () => editor.chain().focus();
 
   return (
-    <div role="toolbar" aria-label="Định dạng nội dung" className="sticky top-16 z-10 flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-slate-200 bg-white/95 backdrop-blur rounded-t-xl">
+    <div role="toolbar" aria-label="Định dạng nội dung" className="sticky top-16 z-10 flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-b border-slate-200 bg-white/95 backdrop-blur">
       <Btn label="Tiêu đề lớn (H2)" active={s.h2} onClick={() => c().toggleHeading({ level: 2 }).run()} icon={Heading2} />
       <Btn label="Tiêu đề nhỏ (H3)" active={s.h3} onClick={() => c().toggleHeading({ level: 3 }).run()} icon={Heading3} />
       <Btn label="Tiêu đề mục (H4)" active={s.h4} onClick={() => c().toggleHeading({ level: 4 }).run()} icon={Heading4} />
@@ -330,9 +331,9 @@ function Btn({
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`p-2 rounded-md transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
-        active ? 'bg-[#F4F9E8] text-[#4E7202]' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-      }`}
+      className={`p-1.5 sm:p-2 rounded-md transition-colors cursor-pointer border ${
+        active ? 'bg-[#F4F9E8] text-[#5F8A03] border-[#7CB305]/40 font-bold' : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+      } disabled:opacity-30 disabled:cursor-not-allowed`}
     >
       <Icon size={16} className={spin ? 'animate-spin' : undefined} />
     </button>

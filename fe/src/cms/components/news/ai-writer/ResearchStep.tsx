@@ -40,14 +40,14 @@ function CheckList({
 }) {
   if (!items.length) return null;
   return (
-    <fieldset className="space-y-1.5">
-      <div className="flex items-center justify-between gap-2">
+    <fieldset className="space-y-2 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
         <legend className="text-xs font-bold text-slate-800">
           {title} <span className="font-normal text-slate-500">({selected.size}/{items.length})</span>
         </legend>
         {action}
       </div>
-      <ul className="space-y-1">
+      <ul className="space-y-1 max-h-56 overflow-y-auto pr-1">
         {items.map((item, i) => (
           <li key={i}>
             <label className="flex items-start gap-2 text-xs text-slate-700 leading-relaxed cursor-pointer rounded-md px-1.5 py-1 hover:bg-slate-50">
@@ -150,41 +150,45 @@ export default function ResearchStep({
         )}
       </fieldset>
 
-      <CheckList
-        title="Bài đã đăng liên quan (ngữ cảnh + link nội bộ)"
-        items={research.relatedArticles.map((a) => a.title)}
-        selected={selection.articles}
-        onToggle={(i) => onSelectionChange({ ...selection, articles: toggle(selection.articles, i) })}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CheckList
+          title="Ý chính đưa vào bài"
+          items={research.keyPoints}
+          selected={selection.keyPoints}
+          onToggle={(i) => onSelectionChange({ ...selection, keyPoints: toggle(selection.keyPoints, i) })}
+        />
+        <CheckList
+          title="Câu hỏi người đọc hay hỏi (làm mục / FAQ)"
+          items={research.questions}
+          selected={selection.questions}
+          onToggle={(i) => onSelectionChange({ ...selection, questions: toggle(selection.questions, i) })}
+        />
+      </div>
 
-      <CheckList
-        title="Ý chính đưa vào bài"
-        items={research.keyPoints}
-        selected={selection.keyPoints}
-        onToggle={(i) => onSelectionChange({ ...selection, keyPoints: toggle(selection.keyPoints, i) })}
-      />
-      <CheckList
-        title="Câu hỏi người đọc hay hỏi (làm mục / FAQ)"
-        items={research.questions}
-        selected={selection.questions}
-        onToggle={(i) => onSelectionChange({ ...selection, questions: toggle(selection.questions, i) })}
-      />
-      <CheckList
-        title="Keyword phụ"
-        items={research.relatedKeywords}
-        selected={selection.keywords}
-        onToggle={(i) => onSelectionChange({ ...selection, keywords: toggle(selection.keywords, i) })}
-        action={
-          <button
-            type="button"
-            onClick={onApplyTags}
-            disabled={!selection.keywords.size || tagsBusy}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-300 bg-white text-[11px] font-semibold text-slate-700 hover:text-[#5F8A03] cursor-pointer disabled:opacity-50"
-          >
-            <Tags size={12} aria-hidden="true" /> Gắn thành tag
-          </button>
-        }
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CheckList
+          title="Bài đã đăng liên quan (ngữ cảnh + link)"
+          items={research.relatedArticles.map((a) => a.title)}
+          selected={selection.articles}
+          onToggle={(i) => onSelectionChange({ ...selection, articles: toggle(selection.articles, i) })}
+        />
+        <CheckList
+          title="Keyword phụ"
+          items={research.relatedKeywords}
+          selected={selection.keywords}
+          onToggle={(i) => onSelectionChange({ ...selection, keywords: toggle(selection.keywords, i) })}
+          action={
+            <button
+              type="button"
+              onClick={onApplyTags}
+              disabled={!selection.keywords.size || tagsBusy}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-300 bg-white text-[11px] font-semibold text-slate-700 hover:text-[#5F8A03] cursor-pointer disabled:opacity-50"
+            >
+              <Tags size={12} aria-hidden="true" /> Gắn thành tag
+            </button>
+          }
+        />
+      </div>
 
       {research.knowledgeSuggestions.length > 0 && (
         <fieldset className="space-y-1.5 rounded-lg border border-violet-200 bg-violet-50/50 p-2.5">

@@ -19,6 +19,7 @@ export default function SlugField({
   autoFromSource,
   published,
   checkAvailable,
+  compact = false,
 }: {
   value: string;
   onChange: (slug: string) => void;
@@ -30,6 +31,7 @@ export default function SlugField({
   autoFromSource: boolean;
   published?: boolean;
   checkAvailable?: (slug: string) => Promise<{ available: boolean; suggestion: string }>;
+  compact?: boolean;
 }) {
   const id = useId();
   const [locked, setLocked] = useState(true);
@@ -57,6 +59,72 @@ export default function SlugField({
   const valid = value === '' || isValidSlug(value);
   const status = check && check.slug === value ? check : null;
   const changedAfterPublish = published && initial && value !== initial;
+
+  if (compact) {
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-xs flex-wrap">
+          <span className="font-semibold text-slate-500 flex items-center gap-1 shrink-0">
+            <Link2 size={13} className="text-slate-400" aria-hidden="true" />
+            <span className="hidden sm:inline">Đường dẫn:</span>
+            <span className="text-slate-400 font-normal">{prefix}</span>
+          </span>
+          {locked ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-300 text-slate-800 font-mono text-[11px] font-semibold">
+              {value || 'chua-co-slug'}
+            </span>
+          ) : (
+            <input
+              id={id}
+              value={value}
+              onChange={(e) => onChange(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+              onBlur={() => onChange(slugify(value) || value)}
+              aria-invalid={!valid || (status ? !status.available : false)}
+              className="px-2.5 py-1 rounded-md border border-slate-300 font-mono text-[11px] font-semibold text-slate-900 bg-white focus:outline-none focus:border-[#5F8A03] focus:ring-1 focus:ring-[#5F8A03]"
+              spellCheck={false}
+              placeholder="nhap-duong-dan"
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setLocked((l) => !l)}
+            className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded border border-slate-300 bg-white text-slate-600 hover:text-[#5F8A03] hover:border-slate-400 cursor-pointer transition-colors"
+            title={locked ? 'Mở khoá để chỉnh sửa đường dẫn' : 'Khoá đường dẫn'}
+          >
+            {locked ? (
+              <>
+                <Lock size={11} aria-hidden="true" /> Sửa slug
+              </>
+            ) : (
+              <>
+                <Check size={11} aria-hidden="true" /> Xong
+              </>
+            )}
+          </button>
+        </div>
+
+        {!valid ? (
+          <p className="text-[11px] font-semibold text-rose-600">Chỉ dùng chữ thường không dấu, số và dấu gạch ngang</p>
+        ) : status && !status.available ? (
+          <p className="text-[11px] font-semibold text-rose-600 flex items-center gap-1.5 flex-wrap">
+            <TriangleAlert size={12} aria-hidden="true" /> Đường dẫn đã được dùng.
+            <button type="button" onClick={() => onChange(status.suggestion)} className="underline cursor-pointer">
+              Dùng “{status.suggestion}”
+            </button>
+          </p>
+        ) : status?.available ? (
+          <p className="text-[11px] font-semibold text-[#4E7202] flex items-center gap-1">
+            <Check size={12} aria-hidden="true" /> Đường dẫn dùng được
+          </p>
+        ) : null}
+        {changedAfterPublish && (
+          <p className="text-[11px] text-amber-700">
+            Bài đã đăng: đường dẫn cũ <code className="font-mono">{initial}</code> sẽ tự chuyển hướng (301) sang đường dẫn mới.
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1.5">

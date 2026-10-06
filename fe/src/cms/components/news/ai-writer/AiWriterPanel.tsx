@@ -1,13 +1,24 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { AlertCircle, Loader2, Sparkles, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import {
+  AlertCircle,
+  Check,
+  Loader2,
+  Sparkles,
+  X,
+  Maximize2,
+  Minimize2,
+  ChevronRight,
+} from 'lucide-react';
 import type { AiResearchEvent, AiResearchResult } from '@remak/shared/contracts/ai-writer';
 import { aiWriterApi } from '@/cms/lib/ai-writer-api';
 import { aiKnowledgeApi } from '@/cms/lib/ai-knowledge-api';
 import { ApiError } from '@/cms/lib/api-client';
 import { useToast } from '@/cms/components/ConfirmDialog';
 import { assembleAiDoc, emptySlots, hasLink, removeLink, type AiDocSlots } from './ai-doc';
+import { useMounted, useBodyScrollLock } from '@/hooks';
 import KeywordStep, { type KeywordForm } from './KeywordStep';
 import ResearchStep, { type ResearchSelection } from './ResearchStep';
 import OutlineStep, { type EditableOutline } from './OutlineStep';
@@ -51,6 +62,7 @@ function describeError(err: unknown): string {
 export default function AiWriterPanel({ open, onClose, host }: { open: boolean; onClose: () => void; host: AiWriterHost }) {
   const showToast = useToast();
   const [step, setStep] = useState<Step>('keyword');
+  const [isExpanded, setIsExpanded] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<KeywordForm>({ keyword: host.initialKeyword, secondary: '', audience: 'contractor', length: 'medium', notes: '' });
@@ -74,6 +86,9 @@ export default function AiWriterPanel({ open, onClose, host }: { open: boolean; 
 
   // Rời trang / đóng editor khi AI đang chạy -> ngắt kết nối để server dừng gọi Gemini
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  const mounted = useMounted();
+  useBodyScrollLock(open);
 
   // Esc đóng panel (không huỷ việc đang chạy)
   useEffect(() => {
@@ -322,50 +337,155 @@ export default function AiWriterPanel({ open, onClose, host }: { open: boolean; 
     setWriting((w) => ({ ...w, links: w.links.map((l) => (l.href === href ? { ...l, removed: true } : l)) }));
   };
 
+  const canGoToStep = (targetStep: Step) => {
+    if (busy || writing.running) return false;
+    if (targetStep === 'keyword') return true;
+    if (targetStep === 'research') return !!research;
+    if (targetStep === 'outline') return !!outline;
+    if (targetStep === 'writing') return writing.sectionsDone > 0 || writing.finished;
+    return false;
+  };
+
+  const goToStep = (targetStep: Step) => {
+    if (!canGoToStep(targetStep)) return;
+    setStep(targetStep);
+  };
+
   const cancel = () => abortRef.current?.abort();
   const stepIndex = STEPS.findIndex((s) => s.key === step);
+
+  const isStepCompleted = (sKey: Step) => {
+    if (sKey === 'keyword') return !!research || stepIndex > 0;
+    if (sKey === 'research') return !!outline || stepIndex > 1;
+    if (sKey === 'outline') return writing.sectionsDone > 0 || writing.finished || stepIndex > 2;
+    if (sKey === 'writing') return writing.finished;
+    return false;
+  };
+
   const pending = Object.entries(suggestions).filter(([, v]) => v) as [AiFillField, string][];
 
-  return (
-    <aside
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby="ai-writer-title"
-      inert={!open}
-      className={`fixed top-0 right-0 z-40 h-full w-full sm:w-[440px] bg-white border-l border-slate-300 shadow-2xl flex flex-col transition-transform duration-300 ${
-        open ? 'translate-x-0' : 'translate-x-full'
+  if (!mounted) return null;
+
+  return createPortal(
+    <div
+      className={`fixed inset-0 z-50 transition-all duration-300 ${
+        open ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
       }`}
     >
-      <header className="px-5 pt-4 pb-3 border-b border-slate-200 space-y-3">
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className={`fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] transition-opacity duration-300 ${
+          open ? 'opacity-100' : 'opacity-0'
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* Drawer */}
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ai-writer-title"
+        inert={!open}
+        className={`fixed inset-y-0 right-0 z-50 bg-white border-l border-slate-200 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+          open ? 'translate-x-0' : 'translate-x-full'
+        } ${
+          isExpanded
+            ? 'w-full max-w-[98vw] 2xl:max-w-[95vw]'
+            : 'w-full sm:w-[700px] md:w-[860px] lg:w-[1020px] xl:w-[1180px] 2xl:w-[1320px] max-w-[96vw]'
+        }`}
+      >
+      <header className="px-5 sm:px-6 pt-4 pb-3 border-b border-slate-200 space-y-3">
         <div className="flex items-start gap-3">
           <span className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center shrink-0">
             <Sparkles size={16} aria-hidden="true" />
           </span>
           <div className="flex-1 min-w-0">
-            <h2 id="ai-writer-title" className="text-sm font-bold text-slate-900">Viết cùng AI</h2>
+            <div className="flex items-center gap-2">
+              <h2 id="ai-writer-title" className="text-sm font-bold text-slate-900">Viết cùng AI</h2>
+              <span className="text-[10px] font-semibold text-[#5F8A03] bg-[#F4F9E8] px-1.5 py-0.5 rounded border border-[#7CB305]/30">
+                Gemini
+              </span>
+            </div>
             <p className="text-[11px] text-slate-500">AI điền thẳng vào form bản tiếng Việt; bạn duyệt rồi mới lưu.</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Đóng panel" className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer">
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsExpanded((v) => !v)}
+              aria-label={isExpanded ? 'Thu gọn chiều rộng drawer' : 'Mở rộng toàn màn hình'}
+              title={isExpanded ? 'Thu gọn chuẩn' : 'Mở rộng toàn màn hình'}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Đóng panel"
+              title="Đóng (Esc)"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
-        <ol className="flex items-center gap-1" aria-label="Các bước">
-          {STEPS.map((s, i) => (
-            <li key={s.key} className="flex-1">
-              <span
-                aria-current={i === stepIndex ? 'step' : undefined}
-                className={`block text-center text-[10px] font-bold uppercase tracking-wide py-1 rounded ${
-                  i === stepIndex ? 'bg-[#5F8A03] text-white' : i < stepIndex ? 'bg-[#F4F9E8] text-[#4E7202]' : 'bg-slate-100 text-slate-400'
-                }`}
-              >
-                {i + 1}. {s.label}
-              </span>
-            </li>
-          ))}
-        </ol>
+
+        {/* Modern Interactive Flow Stepper chuẩn UI/UX Pro Max */}
+        <nav aria-label="Quy trình viết bài cùng AI" className="rounded-xl bg-slate-50/80 border border-slate-300 p-1.5 shadow-2xs">
+          <ol className="flex items-center w-full gap-1 sm:gap-1.5">
+            {STEPS.map((s, i) => {
+              const isCurrent = i === stepIndex;
+              const isCompleted = isStepCompleted(s.key);
+              const isClickable = canGoToStep(s.key) && !isCurrent;
+
+              return (
+                <li key={s.key} className="flex-1 flex items-center min-w-0">
+                  <button
+                    type="button"
+                    disabled={!isClickable}
+                    onClick={() => goToStep(s.key)}
+                    aria-current={isCurrent ? 'step' : undefined}
+                    title={isClickable ? `Chuyển tới bước ${s.label}` : isCurrent ? `Đang ở bước ${s.label}` : `Bước ${s.label}`}
+                    className={`flex items-center justify-center gap-1.5 text-center transition-all rounded-lg py-2 px-2 sm:px-2.5 w-full min-w-0 select-none ${
+                      isCurrent
+                        ? 'bg-[#5F8A03] text-white font-bold border border-[#5F8A03] shadow-xs cursor-default'
+                        : isCompleted
+                        ? isClickable
+                          ? 'bg-[#F4F9E8] text-[#2D4402] border border-[#7CB305]/60 hover:bg-[#EAF3D6] hover:border-[#5F8A03] font-semibold shadow-2xs cursor-pointer'
+                          : 'bg-[#F4F9E8] text-[#2D4402] border border-[#7CB305]/40 font-semibold cursor-default'
+                        : 'bg-slate-100/70 text-slate-400 border border-slate-200/80 font-medium cursor-not-allowed'
+                    }`}
+                  >
+                    {isCompleted && (
+                      <Check
+                        size={13}
+                        className={`shrink-0 stroke-[2.5] ${isCurrent ? 'text-white' : 'text-[#5F8A03]'}`}
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className="text-xs truncate">{s.label}</span>
+                  </button>
+
+                  {/* Mũi tên phân cách dòng chảy tinh tế */}
+                  {i < STEPS.length - 1 && (
+                    <div aria-hidden="true" className="shrink-0 flex items-center justify-center px-0.5 sm:px-1">
+                      <ChevronRight
+                        size={14}
+                        className={`transition-colors duration-200 ${
+                          isStepCompleted(s.key) ? 'text-[#7CB305]' : 'text-slate-300'
+                        }`}
+                      />
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-5 space-y-5">
         {error && (
           <div role="alert" className="flex gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs text-rose-800">
             <AlertCircle size={14} className="shrink-0 mt-0.5" aria-hidden="true" />
@@ -440,6 +560,8 @@ export default function AiWriterPanel({ open, onClose, host }: { open: boolean; 
           />
         )}
       </div>
-    </aside>
+      </aside>
+    </div>,
+    document.body
   );
 }

@@ -112,7 +112,7 @@ export default function AdminSidebar() {
   return (
     <aside 
       aria-label="Thanh điều hướng quản trị"
-      className="w-64 bg-white border-r border-slate-300 text-slate-700 flex flex-col flex-shrink-0 h-screen sticky top-0 select-none shadow-xs admin-typography"
+      className="w-64 bg-white border-r border-slate-300 text-slate-700 flex flex-col flex-shrink-0 h-full select-none shadow-xs admin-typography"
     >
       
       {/* Logo thương hiệu */}
