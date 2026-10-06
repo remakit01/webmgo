@@ -29,10 +29,12 @@ model User {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  deletedBanners   Banner[]   @relation("BannerDeletedBy")
-  createdNewsPosts NewsPost[] @relation("NewsPostCreatedBy")
-  updatedNewsPosts NewsPost[] @relation("NewsPostUpdatedBy")
-  deletedNewsPosts NewsPost[] @relation("NewsPostDeletedBy")
+  deletedBanners     Banner[]      @relation("BannerDeletedBy")
+  createdNewsPosts   NewsPost[]    @relation("NewsPostCreatedBy")
+  updatedNewsPosts   NewsPost[]    @relation("NewsPostUpdatedBy")
+  deletedNewsPosts   NewsPost[]    @relation("NewsPostDeletedBy")
+  createdAiKnowledge AiKnowledge[] @relation("AiKnowledgeCreatedBy")
+  updatedAiKnowledge AiKnowledge[] @relation("AiKnowledgeUpdatedBy")
 
   @@map("users")
 }
@@ -326,4 +328,80 @@ model NewsPostTag {
   @@id([postId, tagId])
   @@index([tagId])
   @@map("news_post_tags")
+}
+
+// ─── Kho "Kiến thức AI" ─────────────────────────────────────────────────────
+// Kiến thức công ty cho trợ lý AI viết bài (thông số sản phẩm, chứng nhận, quy trình...).
+// AI tra cứu bằng tìm kiếm lai: từ khoá (BM25) + embedding ngữ nghĩa (ai_embeddings).
+
+enum AiKnowledgeKind {
+  PRODUCT
+  SPEC
+  CERTIFICATION
+  APPLICATION
+  PROJECT
+  FAQ
+  PROCESS
+  COMPANY
+  MARKET
+  OTHER
+
+  @@map("ai_knowledge_kind")
+}
+
+enum AiKnowledgeStatus {
+  ACTIVE
+  ARCHIVED
+
+  @@map("ai_knowledge_status")
+}
+
+enum AiKnowledgeOrigin {
+  SEED // nạp sẵn từ dữ liệu site
+  HUMAN // biên tập viên nhập
+  AI_WEB // AI tìm trên web, biên tập viên đã duyệt
+
+  @@map("ai_knowledge_origin")
+}
+
+model AiKnowledge {
+  id          String            @id @default(cuid())
+  kind        AiKnowledgeKind
+  title       String
+  content     String // CHECK độ dài trong migration
+  tags        String[]          @default([])
+  sourceUrl   String?           @map("source_url")
+  sourceTitle String?           @map("source_title")
+  status      AiKnowledgeStatus @default(ACTIVE)
+  origin      AiKnowledgeOrigin @default(HUMAN)
+  pinned      Boolean           @default(false) // luôn đưa vào ngữ cảnh AI (vd hồ sơ công ty)
+  verifiedAt  DateTime?         @map("verified_at") @db.Timestamptz(3)
+  createdById String?           @map("created_by_id")
+  updatedById String?           @map("updated_by_id")
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  createdBy User? @relation("AiKnowledgeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("AiKnowledgeUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([status, kind])
+  @@index([createdById])
+  @@index([updatedById])
+  @@map("ai_knowledge")
+}
+
+/// Vector embedding theo đoạn của kiến thức / bài Tin tức (cosine tính trong Node — kho nhỏ, không cần pgvector)
+model AiEmbedding {
+  sourceType String   @map("source_type") // 'knowledge' | 'news'
+  sourceId   String   @map("source_id")
+  chunk      Int
+  model      String
+  textHash   String   @map("text_hash")
+  text       String
+  vector     Float[]  @db.Real
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // model đứng đầu: mọi truy vấn đều lọc theo model trước (WHERE model = ... [AND source_type / source_id])
+  @@id([model, sourceType, sourceId, chunk])
+  @@map("ai_embeddings")
 }

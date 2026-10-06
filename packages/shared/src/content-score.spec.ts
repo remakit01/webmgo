@@ -1,4 +1,4 @@
-import { analyzeContent, normalizeText, type ContentScoreInput } from './content-score.js';
+import { analyzeContent, contentScores, normalizeText, VERIFY_MARK, type ContentScoreInput } from './content-score.js';
 import type { RichDoc, RichNode } from './rich-content.js';
 
 const p = (text: string, marks?: RichNode['marks']): RichNode => ({ type: 'paragraph', content: [{ type: 'text', text, ...(marks ? { marks } : {}) }] });
@@ -113,6 +113,33 @@ describe('analyzeContent — bài kém', () => {
   it('nội dung cũ hơn 2 năm -> độ mới kém', () => {
     const r = analyzeContent({ ...base, publishedAt: '2024-01-01T00:00:00Z' });
     expect(status(r.geo, 'geo-freshness')).toBe('bad');
+  });
+
+  it('còn [cần kiểm chứng] -> GEO đỏ, nặng điểm', () => {
+    const marked: RichDoc = { type: 'doc', content: [...GOOD_DOC.content, p(`Tỷ trọng 963 kg/m³ ${VERIFY_MARK}.`)] };
+    const r = analyzeContent({ ...base, doc: marked });
+    expect(status(r.geo, 'geo-verify-marks')).toBe('bad');
+    expect(r.geo.score).toBeLessThan(analyzeContent(base).geo.score);
+    expect(analyzeContent(base).geo.checks.find((c) => c.id === 'geo-verify-marks')).toBeUndefined();
+  });
+
+  it('thực thể: thiếu thương hiệu / tiêu chuẩn viết tắt không số hiệu -> cảnh báo', () => {
+    const noBrand: RichDoc = { type: 'doc', content: [p('Tấm MGO đạt yêu cầu QCVN về chống cháy.')] };
+    expect(status(analyzeContent({ ...base, doc: noBrand }).geo, 'geo-entity')).toBe('warn');
+    expect(status(analyzeContent(base).geo, 'geo-entity')).toBe('good');
+  });
+
+  it('FAQ trả lời quá ngắn -> cảnh báo độ dài', () => {
+    const shortFaq: RichDoc = {
+      type: 'doc',
+      content: [{ type: 'faq', content: [{ type: 'faqItem', attrs: { question: 'Hỏi?' }, content: [p('Có.')] }] }],
+    };
+    expect(status(analyzeContent({ ...base, doc: shortFaq }).aeo, 'aeo-faq-answers')).toBe('warn');
+  });
+
+  it('contentScores bỏ các mục ngoài nội dung (tác giả, độ mới...)', () => {
+    const r = analyzeContent({ ...base, author: null, publishedAt: '2020-01-01T00:00:00Z' });
+    expect(contentScores(r).geo).toBeGreaterThan(r.geo.score);
   });
 
   it('tiêu đề tiếng Anh dạng câu hỏi được nhận diện', () => {

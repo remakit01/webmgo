@@ -34,6 +34,8 @@ export default () => ({
     // Model dự phòng khi model chính quá tải (503/429); để trống để tắt
     geminiFallbackModel: process.env.GEMINI_FALLBACK_MODEL ?? 'gemini-3.1-flash-lite',
     timeoutMs: parseInt(process.env.TRANSLATE_TIMEOUT_MS ?? '30000', 10),
+    // Embedding cho kho "Kiến thức AI" (tìm theo ngữ nghĩa); lỗi -> tự tìm theo từ khoá
+    geminiEmbeddingModel: process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001',
   },
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',

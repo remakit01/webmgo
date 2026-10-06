@@ -88,6 +88,29 @@ const EXPERT_PATTERN: Record<Locale, RegExp> = {
 
 const REFERENCE_HEADING = /(tài liệu tham khảo|nguồn tham khảo|nguồn|references|sources)/i;
 
+/** Đánh dấu AI chèn khi thiếu nguồn — bài còn dấu này thì chưa nên đăng */
+export const VERIFY_MARK = '[cần kiểm chứng]';
+
+/** Thương hiệu / sản phẩm của site (thực thể rõ ràng giúp AI trích dẫn đúng chủ thể) */
+const BRAND_PATTERN = /(remak|fireoff)/i;
+/** Có nhắc QCVN/TCVN thì ít nhất một lần phải viết đủ số hiệu (vd QCVN 06:2022/BXD, TCVN 9311-8:2012) */
+const STANDARD_MENTION = /\b(qcvn|tcvn)\b/i;
+const STANDARD_FULL = /\b(qcvn|tcvn)\s?[\d-]+:\d{4}(\/[a-z]+)?/i;
+
+/**
+ * Mục kiểm phụ thuộc thông tin ngoài nội dung bài (tác giả, ngày, slug, SEO title/description...) —
+ * bỏ khi chỉ chấm phần nội dung (vd AI tự sửa bài, chưa có các ô này).
+ */
+export const NON_CONTENT_CHECKS: readonly string[] = [
+  'geo-author',
+  'geo-freshness',
+  'seo-slug-kw',
+  'seo-title-length',
+  'seo-seotitle-length',
+  'seo-meta-length',
+  'seo-meta-kw',
+];
+
 const DAY = 24 * 60 * 60 * 1000;
 
 // ─── Phân tích cấu trúc tài liệu ────────────────────────────────────────────
@@ -179,6 +202,20 @@ function analyzeDoc(doc: RichDoc): DocFacts {
 
 const VALUE: Record<CheckStatus, number> = { good: 1, warn: 0.5, bad: 0 };
 
+/** Điểm 0–100 của một nhóm mục kiểm (trung bình có trọng số: đạt 1, cảnh báo 0,5, chưa đạt 0) */
+export function scoreChecks(checks: ContentCheck[]): number {
+  const total = checks.reduce((n, c) => n + c.weight, 0);
+  const got = checks.reduce((n, c) => n + c.weight * VALUE[c.status], 0);
+  return total ? Math.round((got / total) * 100) : 0;
+}
+
+/** Điểm chỉ tính phần nội dung (bỏ NON_CONTENT_CHECKS) */
+export const contentScores = (score: ContentScore) => ({
+  seo: scoreChecks(score.seo.checks.filter((c) => !NON_CONTENT_CHECKS.includes(c.id))),
+  aeo: scoreChecks(score.aeo.checks.filter((c) => !NON_CONTENT_CHECKS.includes(c.id))),
+  geo: scoreChecks(score.geo.checks.filter((c) => !NON_CONTENT_CHECKS.includes(c.id))),
+});
+
 function group(checks: ContentCheck[]): ScoreGroup {
   const total = checks.reduce((n, c) => n + c.weight, 0);
   const got = checks.reduce((n, c) => n + c.weight * VALUE[c.status], 0);
@@ -268,6 +305,7 @@ export function analyzeContent(input: ContentScoreInput): ContentScore {
   const answerRatio = facts.firstParagraphAfterH2.length ? answered / facts.firstParagraphAfterH2.length : 0;
   const longParagraphs = facts.paragraphs.filter((p) => countWords(p) > 120).length;
   const goodFaq = faq.filter((f) => countWords(f.answer) >= 20 && countWords(f.answer) <= 90).length;
+  const faqAnswerOff = faq.filter((f) => countWords(f.answer) < 35 || countWords(f.answer) > 90).length;
 
   const aeo: ContentCheck[] = [
     sapoWords >= 25 && sapoWords <= 70 && (!kw || containsKeyword(sapo, kw))
@@ -293,6 +331,13 @@ export function analyzeContent(input: ContentScoreInput): ContentScore {
     longParagraphs === 0
       ? check('aeo-paragraphs', 'good', 'Đoạn văn ngắn gọn')
       : check('aeo-paragraphs', 'warn', `${longParagraphs} đoạn dài hơn 120 từ — tách nhỏ cho dễ đọc`),
+    ...(faq.length
+      ? [
+          faqAnswerOff === 0
+            ? check('aeo-faq-answers', 'good', 'Câu trả lời FAQ dài vừa (40–80 từ) để được chọn làm câu trả lời')
+            : check('aeo-faq-answers', 'warn', `${faqAnswerOff}/${faq.length} câu trả lời FAQ quá ngắn hoặc quá dài — nên 40–80 từ, câu đầu trả lời thẳng`),
+        ]
+      : []),
   ];
 
   // ── GEO ──
@@ -312,7 +357,24 @@ export function analyzeContent(input: ContentScoreInput): ContentScore {
     return tokens.length > 0 && tokens.filter((t) => coverageText.includes(t)).length / tokens.length >= 0.6;
   }).length;
 
+  const verifyMarks = `${title}\n${sapo}\n${facts.plain}`.split(VERIFY_MARK).length - 1;
+  const brandNamed = BRAND_PATTERN.test(`${title}\n${sapo}\n${facts.plain}`);
+  const standardOk = !STANDARD_MENTION.test(facts.plain) || STANDARD_FULL.test(`${sapo}\n${facts.plain}`);
+
   const geo: ContentCheck[] = [
+    // Chỉ xuất hiện khi còn dấu cần kiểm chứng: lỗi nặng, phải xử lý trước khi đăng
+    ...(verifyMarks
+      ? [check('geo-verify-marks', 'bad', `Còn ${verifyMarks} chỗ "${VERIFY_MARK}" — kiểm tra nguồn, sửa hoặc xoá trước khi đăng`, 3)]
+      : []),
+    brandNamed && standardOk
+      ? check('geo-entity', 'good', 'Thực thể rõ ràng: có tên thương hiệu, tiêu chuẩn viết đủ số hiệu')
+      : check(
+          'geo-entity',
+          'warn',
+          !brandNamed
+            ? 'Nêu rõ thương hiệu Remak® / FireOFF ít nhất một lần để AI trích dẫn đúng chủ thể'
+            : 'Viết đủ số hiệu tiêu chuẩn ít nhất một lần (vd QCVN 06:2022/BXD, TCVN 9311-8:2012)',
+        ),
     statSentences >= 3 && (sources > 0 || facts.hasReferenceSection)
       ? check('geo-statistics', 'good', `${statSentences} câu có số liệu cụ thể, có nguồn`, 2)
       : statSentences > 0

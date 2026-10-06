@@ -71,10 +71,16 @@ export const isConflict = (err: unknown) => err instanceof ApiError && err.statu
 /**
  * POST nhận luồng NDJSON (mỗi dòng một JSON) — cho tác vụ dài có tiến trình (vd AI dịch bài).
  * Gọi onEvent cho từng dòng ngay khi tới. Lỗi trước khi luồng bắt đầu -> ApiError như apiFetch.
- * Huỷ bằng signal -> ném DOMException 'AbortError' (caller tự bỏ qua).
+ * Huỷ bằng signal -> ném DOMException 'AbortError' (caller tự bỏ qua). `body` (tuỳ chọn) gửi dạng JSON.
  */
-export async function apiStreamNdjson<T>(path: string, onEvent: (event: T) => void, signal?: AbortSignal): Promise<void> {
-  const doFetch = () => fetch(`${API_URL}${path}`, { method: 'POST', credentials: 'include', signal });
+export async function apiStreamNdjson<T>(path: string, onEvent: (event: T) => void, signal?: AbortSignal, body?: unknown): Promise<void> {
+  const doFetch = () =>
+    fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      credentials: 'include',
+      signal,
+      ...(body === undefined ? {} : { body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } }),
+    });
   let res: Response;
   try {
     res = await doFetch();
