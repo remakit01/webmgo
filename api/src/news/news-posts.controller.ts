@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  HttpException,
+  Logger,
+  Res,
   Delete,
   Get,
   Headers,
@@ -18,7 +21,10 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiCookieAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import type { Response } from 'express';
+import type { NewsAiDraftEvent } from '@remak/shared/contracts/news';
 import { NewsTranslateService } from './news-translate.service.js';
+import { TranslationAbortedError } from '../translation/translation.service.js';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
@@ -50,6 +56,8 @@ interface AuthUser {
 @Roles('ADMIN', 'EDITOR')
 @ApiCookieAuth('access_token')
 export class NewsPostsController {
+  private readonly logger = new Logger(NewsPostsController.name);
+
   constructor(
     private readonly posts: NewsPostsService,
     private readonly translate: NewsTranslateService,
@@ -124,6 +132,54 @@ export class NewsPostsController {
   @ApiOperation({ summary: 'AI (Gemini) dịch cả bài vi -> en, trả bản nháp để biên tập viên duyệt (KHÔNG lưu)' })
   aiDraft(@Param('id') id: string) {
     return this.translate.aiDraft(id);
+  }
+
+  /**
+   * Như ai-draft nhưng trả luồng NDJSON (mỗi dòng một sự kiện NewsAiDraftEvent) để CMS hiện tiến trình thật:
+   * prepare -> progress (sau mỗi lô Gemini) -> assemble -> result | error.
+   * Lỗi trước sự kiện đầu tiên (404, 400, 503...) trả đúng mã HTTP; đóng kết nối = huỷ, server dừng trước lô kế tiếp.
+   */
+  @Post(':id/translations/en/ai-draft/stream')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({ summary: 'AI dịch cả bài vi -> en, trả tiến trình từng bước (NDJSON) rồi bản nháp (KHÔNG lưu)' })
+  async aiDraftStream(@Param('id') id: string, @Res() res: Response) {
+    const abort = new AbortController();
+    res.on('close', () => {
+      if (!res.writableEnded) abort.abort();
+    });
+    let started = false;
+    const send = (event: NewsAiDraftEvent) => {
+      if (res.writableEnded || abort.signal.aborted) return;
+      if (!started) {
+        started = true;
+        res.status(200);
+        res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
+        res.setHeader('X-Accel-Buffering', 'no'); // nginx không gom buffer -> tiến trình tới ngay
+        res.flushHeaders();
+      }
+      res.write(`${JSON.stringify(event)}\n`);
+    };
+
+    try {
+      const draft = await this.translate.aiDraft(id, { onEvent: send, signal: abort.signal });
+      send({ type: 'result', draft });
+    } catch (err) {
+      if (err instanceof TranslationAbortedError) return void res.end();
+      const status = err instanceof HttpException ? err.getStatus() : 500;
+      const body = err instanceof HttpException ? err.getResponse() : null;
+      const message =
+        typeof body === 'object' && body && 'message' in body
+          ? String((body as { message: unknown }).message)
+          : err instanceof Error && status !== 500
+            ? err.message
+            : 'Không dịch được lúc này, vui lòng thử lại';
+      if (status === 500) this.logger.error(`AI dịch bài ${id} lỗi: ${(err as Error).message}`);
+      if (!started) return void res.status(status).json({ statusCode: status, message });
+      send({ type: 'error', status, message });
+    }
+    res.end();
   }
 
   @Post(':id/translations/:locale/publish')

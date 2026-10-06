@@ -107,6 +107,20 @@ export interface NewsSitemapEntry {
 
 // ─── CMS ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Sự kiện tiến trình AI dịch bài (luồng NDJSON: mỗi dòng một JSON) — POST .../translations/en/ai-draft/stream
+ * prepare -> progress (nhiều lần, sau mỗi lô Gemini) -> assemble -> result | error
+ */
+export type NewsAiDraftEvent =
+  /** Đã đọc bài: số ô cần dịch (tiêu đề, sapo, SEO, từng đoạn/ảnh) và tổng ký tự */
+  | { type: 'prepare'; fields: number; chars: number; blocks: number; images: number }
+  /** done/total ô đã có bản dịch (gồm ô dùng lại từ bộ nhớ dịch — cached), batchesDone/batchesTotal lô gọi Gemini */
+  | { type: 'progress'; done: number; total: number; cached: number; batchesDone: number; batchesTotal: number }
+  /** Đang ghép bản dịch vào cấu trúc bài và tạo đường dẫn tiếng Anh */
+  | { type: 'assemble' }
+  | { type: 'result'; draft: NewsAiDraft }
+  | { type: 'error'; status: number; message: string };
+
 /** Bản nháp tiếng Anh do AI dịch từ bản tiếng Việt (chưa lưu) — POST /news/posts/:id/translations/en/ai-draft */
 export interface NewsAiDraft {
   title: string;

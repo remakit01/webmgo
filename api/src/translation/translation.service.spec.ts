@@ -136,10 +136,31 @@ describe('TranslationService chia lô (bài dài)', () => {
     const res = await service.translate(fields, 'news-article');
     expect(Object.keys(res)).toHaveLength(96);
     expect(res['c.t94']).toBe('EN:Đoạn văn số 94');
-    // 95 ô ngắn -> 3 lô (40/40/15) + ô dài tách lô riêng vì vượt 6.000 ký tự
+    // 95 ô ngắn -> lô tối đa 15 ô + ô dài tách lô riêng vì vượt 3.000 ký tự
     expect(generateContent.mock.calls.length).toBeGreaterThanOrEqual(3);
     for (const [arg] of generateContent.mock.calls as unknown as [{ contents: string }][]) {
-      expect(Object.keys(JSON.parse(arg.contents)).length).toBeLessThanOrEqual(40);
+      expect(Object.keys(JSON.parse(arg.contents)).length).toBeLessThanOrEqual(15);
     }
+  });
+});
+
+describe('TranslationService tiến trình & huỷ', () => {
+  it('báo tiến trình sau mỗi lô, tính cả ô lấy từ cache', async () => {
+    const { service } = setup({ apiKey: 'k' });
+    await service.translate({ a: 'Câu A' }, 'news-article'); // đưa "Câu A" vào cache
+    const events: { done: number; total: number; cached: number; batchesDone: number }[] = [];
+    const fields = { a: 'Câu A', ...Object.fromEntries(Array.from({ length: 50 }, (_, i) => [`t${i}`, `Đoạn ${i}`])) };
+    await service.translate(fields, 'news-article', { onProgress: (p) => events.push(p) });
+    expect(events[0]).toMatchObject({ done: 1, total: 51, cached: 1, batchesDone: 0 });
+    expect(events.at(-1)).toMatchObject({ done: 51, total: 51, batchesDone: 4, batchesTotal: 4 }); // 50 ô mới / 15
+  });
+
+  it('huỷ giữa chừng -> dừng trước lô kế tiếp', async () => {
+    const { service, generateContent } = setup({ apiKey: 'k' });
+    const abort = new AbortController();
+    abort.abort();
+    const fields = Object.fromEntries(Array.from({ length: 10 }, (_, i) => [`t${i}`, `Đoạn huỷ ${i}`]));
+    await expect(service.translate(fields, 'news-article', { signal: abort.signal })).rejects.toThrow('Đã huỷ dịch');
+    expect(generateContent).not.toHaveBeenCalled();
   });
 });

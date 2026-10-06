@@ -67,16 +67,16 @@ export default async function NewsIndexView({
         {/* Breadcrumb + tiêu đề + chuyên mục */}
         <header className="space-y-4">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <Link href="/" className="hover:text-remak-green-dark transition-colors">{t('home')}</Link>
-            <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
+            <Link href="/" className="hover:text-[#5F8A03] transition-colors">{t('home')}</Link>
+            <ChevronRight size={14} className="text-slate-400 shrink-0" aria-hidden="true" />
             {activeCategory ? (
               <>
-                <Link href="/tin-tuc" className="hover:text-remak-green-dark transition-colors">{t('title')}</Link>
-                <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
-                <span className="text-remak-green-dark font-bold" aria-current="page">{activeCategory.name}</span>
+                <Link href="/tin-tuc" className="hover:text-[#5F8A03] transition-colors">{t('title')}</Link>
+                <ChevronRight size={14} className="text-slate-400 shrink-0" aria-hidden="true" />
+                <span className="text-[#5F8A03] font-bold" aria-current="page">{activeCategory.name}</span>
               </>
             ) : (
-              <span className="text-remak-green-dark font-bold" aria-current="page">{t('title')}</span>
+              <span className="text-[#5F8A03] font-bold" aria-current="page">{t('title')}</span>
             )}
           </nav>
 
