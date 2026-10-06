@@ -53,6 +53,22 @@
     "./content-score": {
       "types": "./dist/content-score.d.ts",
       "default": "./dist/content-score.js"
+    },
+    "./rich-ai": {
+      "types": "./dist/rich-ai.d.ts",
+      "default": "./dist/rich-ai.js"
+    },
+    "./contracts/ai-writer": {
+      "types": "./dist/contracts/ai-writer.d.ts",
+      "default": "./dist/contracts/ai-writer.js"
+    },
+    "./contracts/ai-knowledge": {
+      "types": "./dist/contracts/ai-knowledge.d.ts",
+      "default": "./dist/contracts/ai-knowledge.js"
+    },
+    "./text-rank": {
+      "types": "./dist/text-rank.d.ts",
+      "default": "./dist/text-rank.js"
     }
   },
   "files": [

@@ -50,6 +50,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'sample-requests', name: 'Yêu Cầu Mẫu Thử', href: '/admin/sample-requests' },
   { id: 'tech-library', name: 'Hồ Sơ & Chứng Chỉ', href: '/admin/tech-library' },
   { id: 'projects', name: 'Dự Án Tiêu Biểu', href: '/admin/projects' },
+  { id: 'ai-knowledge', name: 'Kiến Thức AI', href: '/admin/ai-knowledge' },
 ];
 
 const ALL_HREFS = [

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ChevronDown, Copy, Loader2, RefreshCw, Save, Sparkles, Star, TriangleAlert } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ChevronDown, Copy, Loader2, PenLine, RefreshCw, Save, Sparkles, Star, TriangleAlert } from 'lucide-react';
 import type { Locale } from '@remak/shared/locale';
 import { isTranslationStale } from '@remak/shared/translation';
 import AdminHeader from '@/cms/components/AdminHeader';
@@ -20,7 +20,11 @@ import { describeAiError } from '@/cms/components/shared/ai-error';
 import AiTranslateDialog, { type AiTranslateState } from '@/cms/components/shared/AiTranslateDialog';
 import { newsApi, uploadContentImage } from '@/cms/lib/news-api';
 import type { NewsAuthorCms, NewsCategoryCms, NewsPostCms, NewsTagCms, RichDoc } from '@/types/news';
+import AiBadge from '@/cms/components/shared/AiBadge';
 import ContentScorePanel from './ContentScorePanel';
+import AiWriterPanel from './ai-writer/AiWriterPanel';
+import { docHasText } from './ai-writer/ai-doc';
+import { AI_FILL_FIELDS, type AiFillField, type AiWriterHost } from './ai-writer/types';
 import PublishPanel from './PublishPanel';
 import TagPicker from './TagPicker';
 import {
@@ -72,6 +76,18 @@ export default function NewsEditor({ postId }: { postId?: string }) {
   const [aiResult, setAiResult] = useState<{ fallbackBlocks: number } | null>(null);
   const [aiState, setAiState] = useState<AiTranslateState | null>(null);
   const aiAbort = useRef<AbortController | null>(null);
+  // ── Viết cùng AI ──
+  const [writerOpen, setWriterOpen] = useState(false);
+  const [aiWriting, setAiWriting] = useState(false);
+  /** Giá trị AI đã điền từng ô (bản tiếng Việt) — ô còn đúng giá trị này = chưa bị người dùng sửa -> hiện nhãn "AI" */
+  const [aiFilled, setAiFilled] = useState<Partial<Record<AiFillField | 'categoryId', string>>>({});
+  const [fanOut, setFanOut] = useState<string[]>([]);
+  // Bản mới nhất của state cho các hàm async của panel (tránh closure cũ)
+  const latest = useRef({ drafts, meta, tags, aiFilled });
+  useEffect(() => {
+    latest.current = { drafts, meta, tags, aiFilled };
+  }, [drafts, meta, tags, aiFilled]);
+  const categoryTouched = useRef(false);
   // Rời trang khi đang dịch -> ngắt kết nối để server dừng gọi Gemini
   useEffect(() => () => aiAbort.current?.abort(), []);
 
@@ -135,6 +151,83 @@ export default function NewsEditor({ postId }: { postId?: string }) {
     const a = authors.find((x) => x.id === meta.authorId);
     return a ? { name: a.name, jobTitle: a.translations[tab]?.jobTitle ?? null } : null;
   }, [authors, meta.authorId, tab]);
+  const categoryOptions = useMemo(
+    () => categories.filter((c) => c.isActive).map((c) => ({ id: c.id, name: c.translations.vi?.name ?? c.id })),
+    [categories],
+  );
+
+  const writerHost = useMemo<AiWriterHost>(
+    () => ({
+      initialKeyword: drafts.vi.focusKeyword,
+      categories: categoryOptions,
+      fill: (patch, options) => {
+        const { drafts: d, aiFilled: filled } = latest.current;
+        const apply: Partial<Record<AiFillField, string>> = {};
+        const skipped: AiFillField[] = [];
+        for (const field of AI_FILL_FIELDS) {
+          const value = patch[field];
+          if (value === undefined) continue;
+          const current = d.vi[field];
+          // Chỉ điền ô trống hoặc ô AI điền trước đó mà người dùng chưa sửa
+          if (options?.force || !current.trim() || current === filled[field]) apply[field] = value;
+          else skipped.push(field);
+        }
+        if (Object.keys(apply).length) {
+          setDrafts((x) => ({ ...x, vi: { ...x.vi, ...apply } }));
+          setAiFilled((f) => ({ ...f, ...apply }));
+        }
+        return skipped;
+      },
+      setCategory: (id, options) => {
+        if (categoryTouched.current && !options?.force) return false;
+        setMeta((m) => ({ ...m, categoryId: id }));
+        setAiFilled((f) => ({ ...f, categoryId: id }));
+        return true;
+      },
+      addTags: async (names) => {
+        const { meta: m, tags: all } = latest.current;
+        const norm = (x: string) => x.trim().toLowerCase();
+        const ids: string[] = [];
+        const created: NewsTagCms[] = [];
+        for (const name of names) {
+          const found = [...all, ...created].find((t) => norm(t.translations.vi?.name ?? '') === norm(name));
+          if (found) {
+            ids.push(found.id);
+          } else {
+            const tag = await newsApi.createTag({ translations: { vi: { name: name.trim() } } });
+            created.push(tag);
+            ids.push(tag.id);
+          }
+        }
+        if (created.length) setTags((t) => [...created, ...t]);
+        const added = ids.filter((id) => !m.tagIds.includes(id));
+        if (added.length) setMeta((x) => ({ ...x, tagIds: [...x.tagIds, ...added.filter((id) => !x.tagIds.includes(id))] }));
+        return added.length;
+      },
+      confirmReplaceContent: async () =>
+        !docHasText(latest.current.drafts.vi.content) ||
+        confirm({
+          title: 'Thay nội dung bài bằng bài AI viết?',
+          description:
+            'Nội dung tiếng Việt đang có trong editor sẽ được thay bằng bài AI viết (chưa lưu cho tới khi bạn bấm Lưu nháp). Bấm Huỷ để giữ nguyên.',
+          confirmText: 'Thay bằng bài AI',
+          variant: 'warning',
+        }),
+      setContent: (doc) => setDrafts((x) => ({ ...x, vi: { ...x.vi, content: doc, origin: 'AI' } })),
+      getContent: () => latest.current.drafts.vi.content,
+      setWriting: setAiWriting,
+      setFanOut,
+    }),
+    [categoryOptions, confirm, drafts.vi.focusKeyword],
+  );
+
+  const openWriter = () => {
+    setTab('vi');
+    setWriterOpen(true);
+  };
+  /** Ô bản tiếng Việt vẫn đang giữ đúng giá trị AI điền */
+  const isAi = (field: AiFillField) => tab === 'vi' && !!aiFilled[field] && drafts.vi[field] === aiFilled[field];
+
   const enStale = !!vi && !!en && isTranslationStale(vi.contentUpdatedAt, en.sourceUpdatedAt) && !drafts.en.sourceUpdatedAt;
 
   // ── Lưu ────────────────────────────────────────────────────────────────
@@ -494,7 +587,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             {tab === 'en' && vi && <ViReference vi={vi} />}
 
             <div className="bg-white rounded-xl border border-slate-300 shadow-2xs p-5 space-y-4">
-              <Field label="Tiêu đề *" error={tabErrors.title}>
+              <Field label="Tiêu đề *" error={tabErrors.title} ai={isAi('title')}>
                 {(id) => (
                   <textarea
                     id={id}
@@ -520,7 +613,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                 checkAvailable={checkSlug}
               />
 
-              <Field label="Sapo (đoạn mở đầu in đậm)" error={tabErrors.sapo} hint={`${draft.sapo.length}/600 · hiển thị ở danh sách tin và làm mô tả chia sẻ`}>
+              <Field label="Sapo (đoạn mở đầu in đậm)" error={tabErrors.sapo} ai={isAi('sapo')} hint={`${draft.sapo.length}/600 · hiển thị ở danh sách tin và làm mô tả chia sẻ`}>
                 {(id) => (
                   <textarea
                     id={id}
@@ -537,8 +630,14 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             </div>
 
             <div className="space-y-1.5">
+              {tab === 'vi' && aiWriting && (
+                <p aria-live="polite" className="flex items-center gap-1.5 text-[11px] font-semibold text-[#4E7202]">
+                  <Loader2 size={12} className="animate-spin" aria-hidden="true" /> AI đang viết — editor tạm khoá, các mục sẽ hiện dần bên dưới.
+                </p>
+              )}
               <RichTextEditor
                 key={tab}
+                editable={!(tab === 'vi' && aiWriting)}
                 value={draft.content}
                 onChange={onContentChange}
                 onUploadImage={async (file) => (await uploadContentImage(file)).url}
@@ -553,6 +652,18 @@ export default function NewsEditor({ postId }: { postId?: string }) {
 
           {/* ── CỘT PHẢI: XUẤT BẢN & THÔNG TIN BÀI ── */}
           <aside className="space-y-4 lg:sticky lg:top-20">
+            <button
+              type="button"
+              onClick={openWriter}
+              className="w-full text-left rounded-xl border border-[#7CB305]/50 bg-gradient-to-r from-[#F4F9E8] to-white px-4 py-3 hover:border-[#5F8A03] cursor-pointer group"
+            >
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+                <Sparkles size={14} className="text-[#5F8A03]" aria-hidden="true" /> Viết cùng AI
+                <PenLine size={12} className="ml-auto text-slate-400 group-hover:text-[#5F8A03]" aria-hidden="true" />
+              </span>
+              <span className="block mt-0.5 text-[11px] text-slate-600">Nhập keyword → AI nghiên cứu, lập dàn ý, viết và tự điền các ô (bản tiếng Việt).</span>
+            </button>
+
             <Panel title="Xuất bản">
               <PublishPanel
                 key={`${tab}-${post?.translations[tab]?.version ?? 'none'}`}
@@ -576,7 +687,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                 uploading={busy === 'save' && coverFile !== null}
                 hint="Mọi kích thước đều đăng được; nên dùng ảnh ngang ≥ 1200×630 để chia sẻ Facebook/Zalo đẹp."
               />
-              <Field label={`Mô tả ảnh (alt, ${LOCALE_LABEL[tab]}) *`} error={tabErrors.coverAlt}>
+              <Field label={`Mô tả ảnh (alt, ${LOCALE_LABEL[tab]}) *`} error={tabErrors.coverAlt} ai={isAi('coverAlt')}>
                 {(id) => (
                   <input id={id} value={draft.coverAlt} maxLength={300} onChange={(e) => setDraft({ coverAlt: e.target.value })} placeholder="Nội dung ảnh, vd: Thi công tấm MGO bọc ống gió" aria-invalid={!!tabErrors.coverAlt} className={inputClass} />
                 )}
@@ -587,9 +698,17 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             </Panel>
 
             <Panel title="Phân loại">
-              <Field label="Chuyên mục *">
+              <Field label="Chuyên mục *" ai={!!aiFilled.categoryId && meta.categoryId === aiFilled.categoryId}>
                 {(id) => (
-                  <select id={id} value={meta.categoryId} onChange={(e) => setMeta((m) => ({ ...m, categoryId: e.target.value }))} className={inputClass}>
+                  <select
+                    id={id}
+                    value={meta.categoryId}
+                    onChange={(e) => {
+                      categoryTouched.current = true;
+                      setMeta((m) => ({ ...m, categoryId: e.target.value }));
+                    }}
+                    className={inputClass}
+                  >
                     <option value="" disabled>Chọn chuyên mục</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -632,6 +751,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             <Panel title={`Tối ưu SEO · AEO · GEO (${LOCALE_LABEL[tab]})`}>
               <ContentScorePanel
                 keyword={draft.focusKeyword}
+                keywordFromAi={isAi('focusKeyword')}
                 onKeywordChange={(focusKeyword) => setDraft({ focusKeyword })}
                 input={{
                   title: draft.title,
@@ -644,6 +764,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                   author: scoreAuthor,
                   publishedAt: post?.translations[tab]?.publishedAt ?? null,
                   updatedAt: post?.translations[tab]?.contentUpdatedAt ?? null,
+                  fanOutQueries: tab === 'vi' && fanOut.length ? fanOut : undefined,
                 }}
               />
             </Panel>
@@ -656,6 +777,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                 fallbackTitle={draft.title}
                 fallbackDescription={draft.sapo}
                 noindex={draft.noindex}
+                aiFilled={{ seoTitle: isAi('seoTitle'), seoDescription: isAi('seoDescription') }}
                 onChange={(p) => setDraft(p)}
               />
             </Panel>
@@ -670,6 +792,8 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             </Panel>
           </aside>
         </div>
+
+        <AiWriterPanel open={writerOpen} onClose={() => setWriterOpen(false)} host={writerHost} />
 
         <AiTranslateDialog
           open={aiState !== null}
@@ -730,11 +854,27 @@ function Panel({ title, children, collapsible }: { title: string; children: Reac
   );
 }
 
-function Field({ label, error, hint, children }: { label: string; error?: string; hint?: string; children: (id: string) => React.ReactNode }) {
+function Field({
+  label,
+  error,
+  hint,
+  ai,
+  children,
+}: {
+  label: string;
+  error?: string;
+  hint?: string;
+  /** Ô do AI điền, người dùng chưa sửa */
+  ai?: boolean;
+  children: (id: string) => React.ReactNode;
+}) {
   const id = React.useId();
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="text-xs font-bold text-slate-700">{label}</label>
+      <label htmlFor={id} className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+        {label}
+        {ai && <AiBadge />}
+      </label>
       {children(id)}
       {error ? <p role="alert" className="text-[11px] font-semibold text-rose-600">{error}</p> : hint ? <p className="text-[11px] text-slate-500">{hint}</p> : null}
     </div>

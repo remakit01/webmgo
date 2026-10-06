@@ -3,6 +3,7 @@
 import React, { useDeferredValue, useId, useMemo, useState } from 'react';
 import { CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
 import { analyzeContent, type CheckStatus, type ContentScore, type ContentScoreInput } from '@remak/shared/content-score';
+import AiBadge from '@/cms/components/shared/AiBadge';
 import { inputClass } from '@/cms/components/shared/form-styles';
 
 type GroupKey = keyof ContentScore;
@@ -29,10 +30,12 @@ const scoreColor = (score: number) => (score >= 80 ? 'text-[#4E7202] border-[#7C
  */
 export default function ContentScorePanel({
   keyword,
+  keywordFromAi,
   onKeywordChange,
   input,
 }: {
   keyword: string;
+  keywordFromAi?: boolean;
   onKeywordChange: (value: string) => void;
   input: Omit<ContentScoreInput, 'keyword'>;
 }) {
@@ -51,7 +54,9 @@ export default function ContentScorePanel({
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <label htmlFor={keywordId} className="text-xs font-bold text-slate-700">Keyword chính</label>
+        <label htmlFor={keywordId} className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+          Keyword chính {keywordFromAi && <AiBadge />}
+        </label>
         <input
           id={keywordId}
           value={keyword}

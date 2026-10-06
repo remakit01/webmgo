@@ -17,6 +17,8 @@ import { ContentCacheModule } from './content-cache/content-cache.module.js';
 import { SlugRedirectModule } from './slug-redirect/slug-redirect.module.js';
 import { MediaModule } from './media/media.module.js';
 import { NewsModule } from './news/news.module.js';
+import { AiWriterModule } from './ai-writer/ai-writer.module.js';
+import { AiKnowledgeModule } from './ai-knowledge/ai-knowledge.module.js';
 import configuration from './config/configuration.js';
 
 @Module({
@@ -41,6 +43,8 @@ import configuration from './config/configuration.js';
     SlugRedirectModule,
     MediaModule,
     NewsModule,
+    AiKnowledgeModule,
+    AiWriterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
+import AiBadge from './AiBadge';
 import { inputClass } from './form-styles';
 
 const TITLE_IDEAL = 60;
@@ -29,6 +30,7 @@ export default function SeoPanel({
   onChange,
   titleMax = 120,
   descriptionMax = 320,
+  aiFilled,
 }: {
   url: string;
   seoTitle: string;
@@ -39,6 +41,8 @@ export default function SeoPanel({
   onChange: (patch: { seoTitle?: string; seoDescription?: string; noindex?: boolean }) => void;
   titleMax?: number;
   descriptionMax?: number;
+  /** Ô do AI điền, người dùng chưa sửa -> hiện nhãn "AI" */
+  aiFilled?: { seoTitle?: boolean; seoDescription?: boolean };
 }) {
   const titleId = useId();
   const descId = useId();
@@ -49,7 +53,9 @@ export default function SeoPanel({
     <div className="space-y-3">
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <label htmlFor={titleId} className="text-xs font-bold text-slate-700">Tiêu đề SEO</label>
+          <label htmlFor={titleId} className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            Tiêu đề SEO {aiFilled?.seoTitle && <AiBadge />}
+          </label>
           <Counter length={(seoTitle || fallbackTitle).length} ideal={TITLE_IDEAL} max={titleMax} />
         </div>
         <input
@@ -64,7 +70,9 @@ export default function SeoPanel({
 
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <label htmlFor={descId} className="text-xs font-bold text-slate-700">Mô tả SEO (meta description)</label>
+          <label htmlFor={descId} className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            Mô tả SEO (meta description) {aiFilled?.seoDescription && <AiBadge />}
+          </label>
           <Counter length={(seoDescription || fallbackDescription).length} ideal={DESC_IDEAL} max={descriptionMax} />
         </div>
         <textarea
