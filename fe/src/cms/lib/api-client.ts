@@ -67,3 +67,35 @@ export const ifMatch = (version: string | null | undefined): Record<string, stri
   version ? { 'If-Match': `"${version}"` } : {};
 
 export const isConflict = (err: unknown) => err instanceof ApiError && err.status === 409;
+
+/**
+ * POST nhận luồng NDJSON (mỗi dòng một JSON) — cho tác vụ dài có tiến trình (vd AI dịch bài).
+ * Gọi onEvent cho từng dòng ngay khi tới. Lỗi trước khi luồng bắt đầu -> ApiError như apiFetch.
+ * Huỷ bằng signal -> ném DOMException 'AbortError' (caller tự bỏ qua).
+ */
+export async function apiStreamNdjson<T>(path: string, onEvent: (event: T) => void, signal?: AbortSignal): Promise<void> {
+  const doFetch = () => fetch(`${API_URL}${path}`, { method: 'POST', credentials: 'include', signal });
+  let res: Response;
+  try {
+    res = await doFetch();
+    if (res.status === 401 && (await refreshSession())) res = await doFetch();
+  } catch (err) {
+    if (signal?.aborted) throw err;
+    throw new ApiError('Không thể kết nối đến máy chủ API', 0);
+  }
+  if (!res.ok) throw await toError(res);
+  if (!res.body) throw new ApiError('Trình duyệt không hỗ trợ nhận tiến trình', 0);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value, { stream: !done });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) if (line.trim()) onEvent(JSON.parse(line) as T);
+    if (done) break;
+  }
+  if (buffer.trim()) onEvent(JSON.parse(buffer) as T);
+}

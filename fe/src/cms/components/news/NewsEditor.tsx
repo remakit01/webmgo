@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,7 +16,8 @@ import SlugField from '@/cms/components/shared/SlugField';
 import { inputClass } from '@/cms/components/shared/form-styles';
 import Skeleton from '@/cms/components/ui/Skeleton';
 import { ApiError, isConflict } from '@/cms/lib/api-client';
-import { describeAiError, type AiErrorInfo } from '@/cms/components/shared/ai-error';
+import { describeAiError } from '@/cms/components/shared/ai-error';
+import AiTranslateDialog, { type AiTranslateState } from '@/cms/components/shared/AiTranslateDialog';
 import { newsApi, uploadContentImage } from '@/cms/lib/news-api';
 import type { NewsAuthorCms, NewsCategoryCms, NewsPostCms, NewsTagCms, RichDoc } from '@/types/news';
 import PublishPanel from './PublishPanel';
@@ -68,7 +69,10 @@ export default function NewsEditor({ postId }: { postId?: string }) {
   const [authors, setAuthors] = useState<NewsAuthorCms[]>([]);
   const [tags, setTags] = useState<NewsTagCms[]>([]);
   const [aiResult, setAiResult] = useState<{ fallbackBlocks: number } | null>(null);
-  const [aiError, setAiError] = useState<AiErrorInfo | null>(null);
+  const [aiState, setAiState] = useState<AiTranslateState | null>(null);
+  const aiAbort = useRef<AbortController | null>(null);
+  // Rời trang khi đang dịch -> ngắt kết nối để server dừng gọi Gemini
+  useEffect(() => () => aiAbort.current?.abort(), []);
 
   const applyPost = useCallback((p: NewsPostCms) => {
     setPost(p);
@@ -269,34 +273,75 @@ export default function NewsEditor({ postId }: { postId?: string }) {
       });
       if (!ok) return;
     }
+    void startAiTranslate();
+  };
+
+  /** Chạy AI dịch kèm dialog tiến trình (prepare -> từng lô -> ghép bài); Huỷ = ngắt kết nối, server dừng lô kế tiếp */
+  const startAiTranslate = async () => {
+    if (!post) return;
+    aiAbort.current?.abort();
+    const abort = new AbortController();
+    aiAbort.current = abort;
     setBusy('ai');
-    setAiError(null);
     setAiResult(null);
+    const startedAt = Date.now();
+    setAiState({ phase: 'connecting', startedAt });
     try {
-      const draftAi = await newsApi.aiDraft(post.id);
-      setDrafts((d) => ({
-        ...d,
-        en: {
-          title: draftAi.title,
-          slug: draftAi.slug,
-          sapo: draftAi.sapo,
-          content: draftAi.content,
-          coverAlt: draftAi.coverAlt,
-          coverCaption: draftAi.coverCaption ?? '',
-          seoTitle: draftAi.seoTitle ?? '',
-          seoDescription: draftAi.seoDescription ?? '',
-          noindex: draftAi.noindex,
-          sourceName: draftAi.sourceName ?? '',
-          sourceUrl: draftAi.sourceUrl ?? '',
-          origin: 'AI',
-          sourceUpdatedAt: draftAi.sourceUpdatedAt,
+      await newsApi.aiDraftStream(
+        post.id,
+        (event) => {
+          if (event.type === 'prepare') {
+            setAiState((s) => s && { ...s, phase: 'prepare', prepare: event, lastEventAt: Date.now() });
+          } else if (event.type === 'progress') {
+            setAiState((s) => s && { ...s, phase: 'translate', progress: event, lastEventAt: Date.now() });
+          } else if (event.type === 'assemble') {
+            setAiState((s) => s && { ...s, phase: 'assemble' });
+          } else if (event.type === 'error') {
+            setAiState((s) => s && { ...s, phase: 'error', finishedAt: Date.now(), error: describeAiError(event.status, event.message) });
+          } else if (event.type === 'result') {
+            const draftAi = event.draft;
+            setDrafts((d) => ({
+              ...d,
+              en: {
+                title: draftAi.title,
+                slug: draftAi.slug,
+                sapo: draftAi.sapo,
+                content: draftAi.content,
+                coverAlt: draftAi.coverAlt,
+                coverCaption: draftAi.coverCaption ?? '',
+                seoTitle: draftAi.seoTitle ?? '',
+                seoDescription: draftAi.seoDescription ?? '',
+                noindex: draftAi.noindex,
+                sourceName: draftAi.sourceName ?? '',
+                sourceUrl: draftAi.sourceUrl ?? '',
+                origin: 'AI',
+                sourceUpdatedAt: draftAi.sourceUpdatedAt,
+              },
+            }));
+            setAiResult({ fallbackBlocks: draftAi.fallbackBlocks });
+            setTab('en');
+            setAiState((s) => s && { ...s, phase: 'done', finishedAt: Date.now(), fallbackBlocks: draftAi.fallbackBlocks });
+          }
         },
-      }));
-      setAiResult({ fallbackBlocks: draftAi.fallbackBlocks });
-      setTab('en');
+        abort.signal,
+      );
     } catch (err) {
-      setAiError(describeAiError(err instanceof ApiError ? err.status : 500, err instanceof Error ? err.message : ''));
+      if (abort.signal.aborted) {
+        setAiState(null);
+        showToast('Đã huỷ dịch — bản tiếng Anh giữ nguyên như trước', 'info');
+      } else {
+        setAiState(
+          (s) =>
+            s && {
+              ...s,
+              phase: 'error',
+              finishedAt: Date.now(),
+              error: describeAiError(err instanceof ApiError ? err.status : 500, err instanceof Error ? err.message : ''),
+            },
+        );
+      }
     } finally {
+      if (aiAbort.current === abort) aiAbort.current = null;
       setBusy(null);
     }
   };
@@ -308,7 +353,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
       ...d,
       en: { ...toTranslationDraft(vi), slug: d.en.slug, origin: 'HUMAN', sourceUpdatedAt: vi.contentUpdatedAt },
     }));
-    setAiError(null);
+    setAiState(null);
     setTab('en');
   };
 
@@ -430,17 +475,6 @@ export default function NewsEditor({ postId }: { postId?: string }) {
                     {busy === 'ai' ? 'Đang dịch… (bài dài có thể mất 1 phút)' : en ? 'Dịch lại bằng AI' : 'Dịch bằng AI'}
                   </button>
                 </div>
-              </div>
-            )}
-            {tab === 'en' && aiError && (
-              <div role="alert" className="rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs text-rose-800 flex items-start gap-2">
-                <AlertCircle size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
-                <span className="flex-1">
-                  <strong className="font-bold">{aiError.title}:</strong> {aiError.message}
-                </span>
-                <button type="button" onClick={aiError.action === 'copy' ? copyViToEn : runAiTranslate} className="shrink-0 px-3 py-1.5 rounded-lg border border-rose-300 bg-white font-semibold hover:bg-rose-100 cursor-pointer">
-                  {aiError.action === 'copy' ? 'Chép nguyên văn tiếng Việt' : 'Thử lại'}
-                </button>
               </div>
             )}
             {tab === 'en' && aiResult && drafts.en.origin === 'AI' && (
@@ -609,6 +643,15 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             </Panel>
           </aside>
         </div>
+
+        <AiTranslateDialog
+          open={aiState !== null}
+          state={aiState}
+          onCancel={() => aiAbort.current?.abort()}
+          onClose={() => setAiState(null)}
+          onRetry={() => void startAiTranslate()}
+          onCopySource={copyViToEn}
+        />
 
         {/* THANH LƯU CỐ ĐỊNH */}
         <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-md p-3 sm:p-4 rounded-xl border border-slate-300 shadow-lg flex items-center justify-between gap-2.5 flex-wrap">

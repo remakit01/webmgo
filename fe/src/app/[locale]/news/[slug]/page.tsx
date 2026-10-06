@@ -118,13 +118,19 @@ export default async function NewsDetailPage({ params }: Props) {
       <div className="max-w-[1440px] mx-auto px-4 lg:px-8 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-slate-200 pb-4">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500 overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-remak-green-dark">{t('home')}</Link>
+            <Link href="/" className="hover:text-[#5F8A03] transition-colors">{t('home')}</Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
-            <Link href="/tin-tuc" className="hover:text-remak-green-dark">{t('title')}</Link>
+            <Link href="/tin-tuc" className="hover:text-[#5F8A03] transition-colors">{t('title')}</Link>
             <ChevronRight size={13} className="text-slate-400 shrink-0" aria-hidden="true" />
-            <Link href={`/tin-tuc/chuyen-muc/${post.category.slug}`} className="hover:text-remak-green-dark">{post.category.name}</Link>
+            <Link
+              href={`/tin-tuc/chuyen-muc/${post.category.slug}`}
+              className="text-[#5F8A03] font-bold hover:underline transition-colors"
+              aria-current="page"
+            >
+              {post.category.name}
+            </Link>
           </nav>
-          <Link href="/tin-tuc" className="inline-flex items-center gap-1.5 text-xs font-bold text-remak-green-dark hover:text-remak-green shrink-0">
+          <Link href="/tin-tuc" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#5F8A03] hover:text-[#7CB305] shrink-0 transition-colors">
             <ArrowLeft size={14} aria-hidden="true" /> {t('backToList')}
           </Link>
         </div>

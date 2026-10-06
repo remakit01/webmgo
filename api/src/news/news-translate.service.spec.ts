@@ -64,6 +64,32 @@ describe('NewsTranslateService.aiDraft', () => {
     expect(draft.fallbackBlocks).toBe(0);
   });
 
+  it('phát sự kiện prepare -> assemble theo thứ tự (CMS hiện tiến trình)', async () => {
+    const { service } = setup([viTranslation()]);
+    const types: string[] = [];
+    let prepare: Record<string, unknown> | undefined;
+    await service.aiDraft('p1', {
+      onEvent: (e) => {
+        types.push(e.type);
+        if (e.type === 'prepare') prepare = e;
+      },
+    });
+    expect(types[0]).toBe('prepare');
+    expect(types.at(-1)).toBe('assemble');
+    expect(prepare).toMatchObject({ blocks: 1, images: 1 });
+  });
+
+  it('AI tự chèn markdown ** vào tiêu đề/nội dung -> bỏ đi khi bản gốc không có', async () => {
+    const { service, translation } = setup([viTranslation()]);
+    translation.translate.mockImplementationOnce(async (fields: Record<string, string>) =>
+      Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, k === 'title' ? '**Combined** Solutions' : `**${v}**`])),
+    );
+    const draft = await service.aiDraft('p1');
+    expect(draft.title).toBe('Combined Solutions');
+    expect(draft.sapo).toBe('Sapo tiếng Việt');
+    expect(JSON.stringify(draft.content)).not.toContain('**');
+  });
+
   it('đã có bản tiếng Anh thì giữ đường dẫn tiếng Anh cũ', async () => {
     const { service } = setup([viTranslation(), { ...viTranslation(), locale: 'en', slug: 'old-english-slug' }]);
     expect((await service.aiDraft('p1')).slug).toBe('old-english-slug');

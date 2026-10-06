@@ -5,6 +5,7 @@
 import type { Locale } from '@remak/shared/locale';
 import type {
   NewsAiDraft,
+  NewsAiDraftEvent,
   NewsAuthorCms,
   NewsCategoryCms,
   NewsCategoryColor,
@@ -16,7 +17,7 @@ import type {
   RichDoc,
   TranslationOrigin,
 } from '@/types/news';
-import { apiFetch, ifMatch } from './api-client';
+import { apiFetch, apiStreamNdjson, ifMatch } from './api-client';
 
 export interface NewsTranslationInput {
   title: string;
@@ -104,6 +105,9 @@ export const newsApi = {
     ),
   /** AI dịch cả bài vi -> en (không lưu); có thể mất 10–60 giây với bài dài */
   aiDraft: (id: string) => apiFetch<NewsAiDraft>(`/news/posts/${id}/translations/en/ai-draft`, { method: 'POST' }),
+  /** Như aiDraft nhưng nhận tiến trình từng bước (chuẩn bị -> từng lô dịch -> ghép bài -> kết quả) */
+  aiDraftStream: (id: string, onEvent: (event: NewsAiDraftEvent) => void, signal?: AbortSignal) =>
+    apiStreamNdjson<NewsAiDraftEvent>(`/news/posts/${id}/translations/en/ai-draft/stream`, onEvent, signal),
   setFeatured: (ids: string[]) =>
     apiFetch<Paginated<NewsPostListItemCms>>('/news/posts/featured', { method: 'PUT', body: json({ ids }) }),
 
