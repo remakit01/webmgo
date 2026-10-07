@@ -17,7 +17,8 @@ import {
   ChevronRight,
   ExternalLink
 } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
+import NewsTrafficOverview from '@/cms/components/dashboard/NewsTrafficOverview';
 import { 
   INITIAL_PRODUCTS, 
   INITIAL_APPLICATIONS, 
@@ -67,13 +68,13 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Bảng Điều Khiển Tổng Quan" 
-        subtitle="Quản lý toàn bộ danh mục sản phẩm, giải pháp PCCC và xử lý đơn lead yêu cầu mẫu"
-      />
+        subtitle="Quản lý toàn bộ danh mục sản phẩm, giải pháp PCCC và xử lý đơn lead yêu cầu mẫu">
 
-      <div className="p-6 space-y-6 max-w-7xl w-full mx-auto">
+      <AdminPageBody>
+        {/* Tin tức: số liệu thật (lượt xem, đọc hết, nguồn truy cập) */}
+        <NewsTrafficOverview />
         
         {/* KPI Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -219,7 +220,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

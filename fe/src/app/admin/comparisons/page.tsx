@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Scale, Check, X, Shield, Sparkles } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 const COMPARISON_CRITERIA = [
   {
@@ -44,15 +44,13 @@ const COMPARISON_CRITERIA = [
 
 export default function AdminComparisonsPage() {
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Dữ Liệu So Sánh Vật Liệu" 
         subtitle="Bảng so sánh kỹ thuật giữa Remak® MGO FireOFF với Tấm Cemboard và Thạch cao chống cháy"
         actionText="Thêm Tiêu Chí So Sánh"
-        onAction={() => alert('Thêm tiêu chí so sánh vật liệu')}
-      />
+        onAction={() => alert('Thêm tiêu chí so sánh vật liệu')}>
 
-      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+      <AdminPageBody>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
             <span className="text-xs font-bold flex items-center gap-1.5">
@@ -97,7 +95,7 @@ export default function AdminComparisonsPage() {
             </table>
           </div>
         </div>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

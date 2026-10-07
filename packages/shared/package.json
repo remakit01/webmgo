@@ -10,6 +10,10 @@
       "types": "./dist/locale.d.ts",
       "default": "./dist/locale.js"
     },
+    "./date": {
+      "types": "./dist/date.d.ts",
+      "default": "./dist/date.js"
+    },
     "./slug": {
       "types": "./dist/slug.d.ts",
       "default": "./dist/slug.js"
@@ -69,6 +73,14 @@
     "./text-rank": {
       "types": "./dist/text-rank.d.ts",
       "default": "./dist/text-rank.js"
+    },
+    "./traffic-source": {
+      "types": "./dist/traffic-source.d.ts",
+      "default": "./dist/traffic-source.js"
+    },
+    "./contracts/news-stats": {
+      "types": "./dist/contracts/news-stats.d.ts",
+      "default": "./dist/contracts/news-stats.js"
     }
   },
   "files": [

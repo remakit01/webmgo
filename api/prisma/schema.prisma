@@ -252,6 +252,8 @@ model NewsPost {
   coverImageUrl String?   @map("cover_image_url")
   coverImages   Json?     @map("cover_images") // [{ width, format, url }] — CHECK là mảng JSON
   isFeatured    Boolean   @default(false) @map("is_featured")
+  /// Tổng lượt xem mọi ngôn ngữ — tăng cùng lệnh ghi news_post_daily_stats (sắp / lọc danh sách không phải cộng bảng ngày)
+  viewCount     Int       @default(0) @map("view_count")
   featuredOrder Int?      @map("featured_order")
   createdById   String?   @map("created_by_id")
   updatedById   String?   @map("updated_by_id")
@@ -268,6 +270,7 @@ model NewsPost {
   deletedBy    User?                 @relation("NewsPostDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull)
   translations NewsPostTranslation[]
   tags         NewsPostTag[]
+  dailyStats   NewsPostDailyStat[]
 
   @@index([categoryId])
   @@index([authorId])
@@ -404,4 +407,37 @@ model AiEmbedding {
   // model đứng đầu: mọi truy vấn đều lọc theo model trước (WHERE model = ... [AND source_type / source_id])
   @@id([model, sourceType, sourceId, chunk])
   @@map("ai_embeddings")
+}
+
+// ─── Lượt xem bài Tin tức ───────────────────────────────────────────────────
+// Gộp theo ngày (giờ Việt Nam) / ngôn ngữ / nguồn truy cập — không lưu từng lượt, không lưu IP.
+
+enum TrafficSource {
+  DIRECT // không có referrer
+  INTERNAL // từ trang khác của chính site
+  SEARCH // Google, Bing, Cốc Cốc...
+  AI // ChatGPT, Perplexity, Gemini, Copilot, Claude...
+  SOCIAL // Facebook, Zalo, LinkedIn, YouTube...
+  OTHER
+
+  @@map("traffic_source")
+}
+
+model NewsPostDailyStat {
+  postId      String        @map("post_id")
+  locale      ContentLocale
+  day         DateTime      @db.Date
+  source      TrafficSource
+  views       Int           @default(0)
+  /// Lượt đọc tới 75% bài
+  reads       Int           @default(0)
+  /// Tổng số giây đọc thật (tab đang mở)
+  readSeconds BigInt        @default(0) @map("read_seconds")
+
+  post NewsPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // PK bắt đầu bằng post_id: thống kê một bài + upsert tăng số; index day: "xem nhiều N ngày", Dashboard
+  @@id([postId, locale, day, source])
+  @@index([day])
+  @@map("news_post_daily_stats")
 }

@@ -208,7 +208,20 @@ export interface NewsPostListItemCms {
   updatedAt: string;
   deletedAt: string | null;
   locales: Partial<Record<Locale, NewsLocaleSummary>>;
+  /** Tổng lượt xem từ trước tới nay (mọi ngôn ngữ) */
+  views: number;
+  /** Lượt xem trong kỳ đã chọn ở danh sách (viewsDays); không chọn kỳ thì bằng views */
+  viewsInPeriod: number;
 }
+
+/** Kỳ tính lượt xem ở danh sách bài CMS (ngày) */
+export const NEWS_LIST_VIEW_DAYS = [7, 30, 90] as const;
+/** Lọc danh sách bài CMS theo lượt xem */
+export const NEWS_LIST_VIEW_FILTERS = ['has_views', 'no_views'] as const;
+export type NewsListViewFilter = (typeof NEWS_LIST_VIEW_FILTERS)[number];
+/** Sắp xếp danh sách bài CMS */
+export const NEWS_LIST_SORTS = ['updated', 'views_desc', 'views_asc'] as const;
+export type NewsListSort = (typeof NEWS_LIST_SORTS)[number];
 
 /** Bản dịch của chuyên mục / tag / tác giả trong CMS */
 export interface NewsCategoryTranslationCms {

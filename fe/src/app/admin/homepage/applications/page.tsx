@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface AppItem {
   id: string;
@@ -153,11 +153,9 @@ export default function AdminApplicationsManagerPage() {
   const filteredApps = activeCategory === 'all' ? apps : apps.filter(a => a.category === activeCategory);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Giải Pháp Ứng Dụng" 
-        subtitle="Quản trị các giải pháp thi công: Bọc ống gió, Vách chống cháy, Lót sàn và Lõi cửa thép"
-      />
+        subtitle="Quản trị các giải pháp thi công: Bọc ống gió, Vách chống cháy, Lót sàn và Lõi cửa thép">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -166,7 +164,7 @@ export default function AdminApplicationsManagerPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -298,7 +296,7 @@ export default function AdminApplicationsManagerPage() {
           ))}
         </div>
 
-      </div>
+      </AdminPageBody>
 
       {/* CỬA SỔ THÊM / SỬA GIẢI PHÁP */}
       {isModalOpen && editingItem && (
@@ -415,6 +413,6 @@ export default function AdminApplicationsManagerPage() {
         </div>
       )}
 
-    </div>
+    </AdminPage>
   );
 }

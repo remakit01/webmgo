@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface CalculatorPricing {
   lossPercentage: number;
@@ -88,11 +88,9 @@ export default function AdminCalculatorManagerPage() {
   const totalFrame = Math.ceil(testArea * settings.framePerM2);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Bộ Dự Toán Chi Phí" 
-        subtitle="Quản trị đơn giá tấm theo độ dày, hệ số hao hụt % và định mức phụ kiện thi công"
-      />
+        subtitle="Quản trị đơn giá tấm theo độ dày, hệ số hao hụt % và định mức phụ kiện thi công">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -101,7 +99,7 @@ export default function AdminCalculatorManagerPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -289,7 +287,7 @@ export default function AdminCalculatorManagerPage() {
 
         </div>
 
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

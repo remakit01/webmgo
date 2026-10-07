@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Loader2, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Locale } from '@remak/shared/locale';
 import { isValidSlug, slugify } from '@remak/shared/slug';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import LocaleTabs from '@/cms/components/shared/LocaleTabs';
 import { inputClass } from '@/cms/components/shared/form-styles';
@@ -139,10 +139,9 @@ export default function AdminNewsCategoriesPage() {
   const tr = form?.translations[tab];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader title="Chuyên Mục Tin Tức" subtitle="Tên, đường dẫn và mô tả chuyên mục theo từng ngôn ngữ" />
+    <AdminPage title="Chuyên Mục Tin Tức" subtitle="Tên, đường dẫn và mô tả chuyên mục theo từng ngôn ngữ">
 
-      <div className="p-4 sm:p-6 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6 items-start">
+      <AdminPageBody className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px] gap-6 items-start">
         <div className="bg-white rounded-xl border border-slate-300 shadow-2xs overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
             <h2 className="text-sm font-bold text-slate-900">Danh sách chuyên mục</h2>
@@ -266,7 +265,7 @@ export default function AdminNewsCategoriesPage() {
             Chọn một chuyên mục để sửa, hoặc bấm “Thêm chuyên mục”.
           </div>
         )}
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

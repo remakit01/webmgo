@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Eye, EyeOff, Filter, Loader2, RefreshCw } from 'lucide-react';
 import { NextIntlClientProvider } from 'next-intl';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBand, AdminPageBody, ADMIN_BODY } from '@/cms/components/layout/AdminPage';
 import { useToast } from '@/cms/components/ConfirmDialog';
 import { apiFetch, ApiError } from '@/cms/lib/api-client';
 import HomeHeroSection from '@/components/home/HomeHeroSection';
@@ -208,23 +208,21 @@ export default function AdminHeroManagerPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-        <AdminHeader
+      <AdminPage
           title="Quản Lý Tiêu Đề & Điểm Nhấn"
-          subtitle="Quản trị tiêu đề chính, mô tả kỹ thuật và các cam kết chất lượng ở đầu trang chủ"
-        />
+          subtitle="Quản trị tiêu đề chính, mô tả kỹ thuật và các cam kết chất lượng ở đầu trang chủ">
 
         {/* Khung Xem Trước Skeleton 1:1 */}
-        <div className="w-full bg-white border-b border-slate-300 select-none font-sans">
+        <AdminPageBand className="select-none font-sans">
           <div className="px-6 py-3 border-b border-slate-300 bg-white flex items-center justify-between gap-3">
             <Skeleton className="h-4 w-36 rounded" />
             <Skeleton className="h-7 w-36 rounded-lg" />
           </div>
           <Skeleton className="w-full h-64 sm:h-72 rounded-none" />
-        </div>
+        </AdminPageBand>
 
         {/* Khối Form Nhập Liệu Skeleton 1:1 */}
-        <div className="p-6 space-y-6 w-full">
+        <AdminPageBody>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl p-5 border border-slate-300 shadow-2xs space-y-4">
               <Skeleton className="h-4 w-44 rounded" />
@@ -248,8 +246,8 @@ export default function AdminHeroManagerPage() {
               <Skeleton className="h-10 w-full rounded-lg" />
             </div>
           </div>
-        </div>
-      </div>
+        </AdminPageBody>
+      </AdminPage>
     );
   }
 
@@ -259,14 +257,12 @@ export default function AdminHeroManagerPage() {
       : { ...draftVi, image: saved.image };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader
+    <AdminPage
         title="Quản Lý Tiêu Đề & Điểm Nhấn"
-        subtitle="Quản trị tiêu đề chính, mô tả kỹ thuật và các cam kết chất lượng ở đầu trang chủ"
-      />
+        subtitle="Quản trị tiêu đề chính, mô tả kỹ thuật và các cam kết chất lượng ở đầu trang chủ">
 
       {/* KHUNG XEM TRƯỚC HERO - FULL WIDTH 100%, KHÔNG CÓ BORDER TOP (CHUẨN BANNERS) */}
-      <div className="w-full bg-white border-b border-slate-300 select-none font-sans">
+      <AdminPageBand className="select-none font-sans">
         <div className="px-6 py-3 border-b border-slate-300 bg-white flex items-center justify-between gap-3 flex-wrap">
           <h3 className="text-sm font-bold text-slate-900">
             Xem trước trực tiếp
@@ -310,9 +306,9 @@ export default function AdminHeroManagerPage() {
             </button>
           </div>
         )}
-      </div>
+      </AdminPageBand>
 
-      <form onSubmit={handleSave} className="p-6 space-y-6 w-full" noValidate={tab === 'en'}>
+      <form onSubmit={handleSave} className={ADMIN_BODY} noValidate={tab === 'en'}>
 
         {/* CHỌN NGÔN NGỮ & BỘ LỌC DỊCH (ĐẶT NGAY TRÊN FORM) */}
         <div className="flex items-end justify-between gap-3 flex-wrap pt-1">
@@ -416,6 +412,6 @@ export default function AdminHeroManagerPage() {
           </button>
         </div>
       </form>
-    </div>
+    </AdminPage>
   );
 }

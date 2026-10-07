@@ -55,7 +55,9 @@ function setup(opts: { translations?: Tr[]; cover?: string | null; slugTaken?: s
   const storage = { isOwnPublicUrl: (url: string, prefix: string) => url.startsWith(MINIO + prefix) };
   const cache = { invalidate: vi.fn(async () => undefined) };
   const slugRedirects = { record: vi.fn(async () => undefined), release: vi.fn(async () => undefined) };
-  const service = new NewsPostsService(prisma as never, {} as never, storage as never, cache as never, slugRedirects as never);
+  const service = new NewsPostsService(prisma as never, {} as never, storage as never, cache as never, slugRedirects as never, {
+    viewsForPosts: async () => new Map(),
+  } as never);
   return { service, prisma, cache, slugRedirects, updateMany, tx };
 }
 
@@ -145,5 +147,73 @@ describe('NewsPostsService.upsertTranslation', () => {
     const data = (updateMany.mock.calls[0] as unknown as [{ data: Record<string, unknown> }])[0].data;
     expect(data.origin).toBe('AI_REVIEWED');
     expect(data).not.toHaveProperty('contentUpdatedAt');
+  });
+});
+
+describe('NewsPostsService.list — sắp theo lượt xem', () => {
+  const row = (id: string) => ({
+    id,
+    categoryId: 'c1',
+    coverImageUrl: null,
+    isFeatured: false,
+    updatedAt: new Date('2026-10-01T00:00:00Z'),
+    deletedAt: null,
+    category: { translations: [{ name: 'Kỹ thuật' }] },
+    translations: [],
+  });
+  function setup(viewsInPeriod: Record<string, number>) {
+    const findMany = vi.fn(async (args: { select: Record<string, unknown>; where?: { id?: { in: string[] } } }) =>
+      // Lần 1: chỉ lấy id theo mới cập nhật; lần 2: chi tiết các bài của trang
+      args.where?.id ? args.where.id.in.map(row) : ['a', 'b', 'c', 'd'].map((id) => ({ id })),
+    );
+    const stats = {
+      sinceDay: () => new Date('2026-09-09T00:00:00Z'),
+      viewsForPosts: vi.fn(async (ids: string[]) => new Map(ids.map((id) => [id, { views: 100, viewsInPeriod: viewsInPeriod[id] ?? 0 }]))),
+    };
+    const prisma = { newsPost: { findMany, count: vi.fn() } };
+    const service = new NewsPostsService(prisma as never, {} as never, {} as never, {} as never, {} as never, stats as never);
+    return { service, findMany, stats };
+  }
+
+  it('xem nhiều nhất trong kỳ lên đầu, cùng lượt xem giữ thứ tự mới cập nhật, phân trang đúng', async () => {
+    const { service, stats } = setup({ b: 50, c: 50, d: 7 });
+    const r = await service.list({ sort: 'views_desc', viewsDays: 30, page: 1, pageSize: 3 });
+    expect(r.items.map((i) => i.id)).toEqual(['b', 'c', 'd']);
+    expect(r.total).toBe(4);
+    expect(r.items[0]).toMatchObject({ views: 100, viewsInPeriod: 50 });
+    expect(stats.viewsForPosts).toHaveBeenCalledWith(['a', 'b', 'c', 'd'], 30);
+    const p2 = await service.list({ sort: 'views_desc', viewsDays: 30, page: 2, pageSize: 3 });
+    expect(p2.items.map((i) => i.id)).toEqual(['a']);
+  });
+
+  it('xem ít nhất trong kỳ: bài chưa có lượt xem lên đầu', async () => {
+    const { service } = setup({ a: 9, b: 1 });
+    const r = await service.list({ sort: 'views_asc', viewsDays: 7, page: 1, pageSize: 4 });
+    expect(r.items.map((i) => i.id)).toEqual(['c', 'd', 'b', 'a']);
+  });
+
+  it('mọi thời gian: ORDER BY view_count trong DB, phân trang bằng skip/take (không đọc id mọi bài)', async () => {
+    const { service, findMany, stats } = setup({});
+    findMany.mockImplementationOnce((async () => [row('a')]) as never);
+    (service as unknown as { prisma: { newsPost: { count: () => Promise<number> } } }).prisma.newsPost.count = async () => 1;
+    await service.list({ sort: 'views_desc', page: 2, pageSize: 3 });
+    const args = (findMany.mock.calls[0] as unknown as [{ orderBy: unknown; skip: number; take: number }])[0];
+    expect(args.orderBy).toEqual([{ viewCount: 'desc' }, { updatedAt: 'desc' }]);
+    expect(args).toMatchObject({ skip: 3, take: 3 });
+    expect(stats.viewsForPosts).toHaveBeenCalledWith(['a'], undefined);
+  });
+});
+
+describe('NewsPostsService.list — lọc ngày cập nhật theo giờ Việt Nam', () => {
+  it('07/10 = [06/10 17:00Z, 07/10 17:00Z) — không mất bài sửa lúc 0h–7h sáng giờ VN', async () => {
+    const findMany = vi.fn(async () => []);
+    const prisma = { newsPost: { findMany, count: vi.fn(async () => 0) } };
+    const stats = { viewsForPosts: vi.fn(async () => new Map()), sinceDay: vi.fn() };
+    const service = new NewsPostsService(prisma as never, {} as never, {} as never, {} as never, {} as never, stats as never);
+    await service.list({ fromDate: '2026-10-07', toDate: '2026-10-07' });
+    const where = (findMany.mock.calls[0] as unknown as [{ where: { AND: Record<string, unknown>[] } }])[0].where;
+    const range = where.AND.find((c) => 'updatedAt' in c)!.updatedAt as { gte: Date; lt: Date };
+    expect(range.gte.toISOString()).toBe('2026-10-06T17:00:00.000Z');
+    expect(range.lt.toISOString()).toBe('2026-10-07T17:00:00.000Z');
   });
 });

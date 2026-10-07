@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface FaqItem {
   id: string;
@@ -128,11 +128,9 @@ export default function AdminFaqManagerPage() {
   }, null, 2);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Câu Hỏi Thường Gặp" 
-        subtitle="Quản trị danh sách giải đáp thắc mắc và cấu trúc dữ liệu tìm kiếm Google"
-      />
+        subtitle="Quản trị danh sách giải đáp thắc mắc và cấu trúc dữ liệu tìm kiếm Google">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -141,7 +139,7 @@ export default function AdminFaqManagerPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -292,7 +290,7 @@ export default function AdminFaqManagerPage() {
 
         </div>
 
-      </div>
+      </AdminPageBody>
 
       {/* CỬA SỔ THÊM / SỬA CÂU HỎI */}
       {isModalOpen && editingItem && (
@@ -416,6 +414,6 @@ export default function AdminFaqManagerPage() {
         </div>
       )}
 
-    </div>
+    </AdminPage>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface BenefitItem {
   id: string;
@@ -148,11 +148,9 @@ export default function AdminBenefitsManagerPage() {
   const currentItem = benefits[activeTab] || benefits[0];
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Đặc Tính Nổi Bật" 
-        subtitle="Quản trị 4 khối đặc tính kỹ thuật cốt lõi của tấm chống cháy MGO trên trang chủ"
-      />
+        subtitle="Quản trị 4 khối đặc tính kỹ thuật cốt lõi của tấm chống cháy MGO trên trang chủ">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -161,7 +159,7 @@ export default function AdminBenefitsManagerPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -433,7 +431,7 @@ export default function AdminBenefitsManagerPage() {
           </div>
         </form>
 
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

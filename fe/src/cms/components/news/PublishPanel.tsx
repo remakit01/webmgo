@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { Archive, CalendarClock, ExternalLink, Loader2, Send, Undo2 } from 'lucide-react';
-import { formatDate, type Locale } from '@remak/shared/locale';
+import { formatDateTime } from '@remak/shared/date';
+import type { Locale } from '@remak/shared/locale';
 import type { NewsTranslationCms } from '@/types/news';
 import StatusBadge from '@/cms/components/shared/StatusBadge';
 import { LOCALE_LABEL, publicPath, toLocalInput } from './news-form';
@@ -46,8 +47,7 @@ export default function PublishPanel({
       {translation?.publishedAt && live && (
         <p className="text-[11px] text-slate-600 flex items-center gap-1.5">
           <CalendarClock size={12} aria-hidden="true" />
-          {status === 'SCHEDULED' ? 'Sẽ đăng lúc' : 'Đăng ngày'} {formatDate(translation.publishedAt, 'vi')}{' '}
-          {new Date(translation.publishedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+          {status === 'SCHEDULED' ? 'Sẽ đăng lúc' : 'Đăng ngày'} {formatDateTime(translation.publishedAt)}
         </p>
       )}
 

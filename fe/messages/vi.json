@@ -251,6 +251,8 @@
     "empty": "Chưa có bài viết trong chuyên mục này.",
     "viewAllNews": "Xem tất cả bài viết",
     "readingTime": "{minutes} phút đọc",
+    "views": "{count} lượt xem",
+    "popular": "Xem nhiều nhất",
     "by": "Theo {name}",
     "source": "Nguồn: {name}",
     "toc": "Nội dung bài viết",

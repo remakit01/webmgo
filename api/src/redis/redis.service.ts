@@ -151,6 +151,19 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
+   * SET NX EX — true: khoá mới được đặt; false: khoá đã có; null: Redis lỗi (caller tự quyết, vd vẫn đếm lượt xem).
+   * Khác acquireLock (lỗi -> false) vì ở đây "không biết" phải phân biệt được với "đã có".
+   */
+  async setIfAbsent(key: string, ttlSeconds: number): Promise<boolean | null> {
+    try {
+      return (await this.client.set(key, '1', 'EX', ttlSeconds, 'NX')) === 'OK';
+    } catch (err) {
+      this.warn('SETNX', key, err);
+      return null;
+    }
+  }
+
+  /**
    * Chạy fn khi giành được lock (job định kỳ nhiều instance); không giành được -> bỏ lượt, trả undefined.
    * Luôn nhả lock sau khi chạy xong, kể cả khi fn lỗi.
    */

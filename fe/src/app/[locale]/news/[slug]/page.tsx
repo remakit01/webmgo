@@ -10,6 +10,8 @@ import JsonLd from '@/components/shared/JsonLd';
 import { SetLocaleAlternates } from '@/components/layout/LocaleAlternates';
 import RichContent from '@/components/news/RichContent';
 import ShareButtons from '@/components/news/ShareButtons';
+import NewsViewTracker from '@/components/news/NewsViewTracker';
+import PopularNews from '@/components/news/PopularNews';
 import { CategoryChip, NewsCoverImage, NewsTile } from '@/components/news/NewsCards';
 import { routing, type Locale } from '@/i18n/routing';
 import { getNewsList, getNewsPost } from '@/lib/api';
@@ -183,6 +185,7 @@ export default async function NewsDetailPage({ params }: Props) {
                 <span className="inline-flex items-center gap-1.5">
                   <Clock size={13} className="text-remak-green" aria-hidden="true" /> {readingLabel}
                 </span>
+                <NewsViewTracker postId={post.id} locale={locale} bodyId="news-article-body" />
               </p>
             </header>
 
@@ -211,7 +214,9 @@ export default async function NewsDetailPage({ params }: Props) {
               </nav>
             )}
 
-            <RichContent doc={post.content} relatedRefs={post.relatedRefs} />
+            <div id="news-article-body">
+              <RichContent doc={post.content} relatedRefs={post.relatedRefs} />
+            </div>
 
             {post.source && (
               <p className="text-right text-sm font-semibold text-slate-600">
@@ -286,6 +291,8 @@ export default async function NewsDetailPage({ params }: Props) {
                 </div>
               </div>
             )}
+
+            <PopularNews locale={locale} excludeId={post.id} />
           </aside>
         </div>
       </div>
