@@ -1,10 +1,19 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { LOCALES, type Locale } from '@remak/shared/locale';
-import type { NewsAuthorCms, NewsCategoryCms, NewsCategoryColor, NewsTagCms } from '@remak/shared/contracts/news';
+import type {
+  NewsAuthorCms,
+  NewsCategoryCms,
+  NewsCategoryColor,
+  NewsTagCms,
+  NewsTagFilter,
+  NewsTagSort,
+  NewsTagStats,
+} from '@remak/shared/contracts/news';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ContentCacheService } from '../content-cache/content-cache.service.js';
 import { assertUpdated, assertVersion, versionOf } from '../common/versioning.js';
 import { resolveUniqueSlug } from '../common/unique-slug.js';
+import { likeContainsPattern } from '../common/search.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import type {
   CategoryTranslationDto,
@@ -151,10 +160,22 @@ export class NewsTaxonomyService {
 
   // ── Tag ─────────────────────────────────────────────────────────────────
 
-  async listTags(q?: string): Promise<NewsTagCms[]> {
+  /** Không truyền gì = như cũ (200 tag mới tạo) — TagPicker của trình soạn bài dùng kiểu này */
+  async listTags(query: { q?: string; filter?: NewsTagFilter; sort?: NewsTagSort } = {}): Promise<NewsTagCms[]> {
+    const and: Prisma.NewsTagWhereInput[] = [];
+    const pattern = likeContainsPattern(query.q);
+    if (pattern) {
+      // Không phân biệt hoa thường + dấu: hàm search_normalize (migration 20261009000000_news_title_search)
+      const rows = await this.prisma.$queryRaw<{ tag_id: string }[]>`
+        SELECT DISTINCT tag_id FROM news_tag_translations
+        WHERE public.search_normalize(name) LIKE public.search_normalize(${pattern}) ESCAPE '\\'`;
+      and.push({ id: { in: rows.map((r) => r.tag_id) } });
+    }
+    if (query.filter === 'missing_en') and.push({ translations: { none: { locale: 'en' } } });
+    if (query.filter === 'unused') and.push({ posts: { none: {} } });
     const rows = await this.prisma.newsTag.findMany({
-      where: q?.trim() ? { translations: { some: { name: { contains: q.trim(), mode: 'insensitive' } } } } : undefined,
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      where: and.length ? { AND: and } : undefined,
+      orderBy: query.sort === 'usage' ? [{ posts: { _count: 'desc' } }, { id: 'desc' }] : [{ createdAt: 'desc' }, { id: 'desc' }],
       take: 200,
       include: { translations: true, _count: { select: { posts: true } } },
     });
@@ -169,6 +190,7 @@ export class NewsTaxonomyService {
   async createTag(dto: UpsertNewsTagDto) {
     const translations = await this.tagTranslations(dto, undefined);
     const tag = await this.prisma.newsTag.create({ data: { translations: { create: translations } } });
+    await this.cache.invalidate(NEWS_INVALIDATE);
     return (await this.listTagsByIds([tag.id]))[0];
   }
 
@@ -193,6 +215,22 @@ export class NewsTaxonomyService {
     });
     await this.cache.invalidate(NEWS_INVALIDATE);
     return { success: true };
+  }
+
+  async tagStats(): Promise<NewsTagStats> {
+    const [total, missingEn, unused] = await Promise.all([
+      this.prisma.newsTag.count(),
+      this.prisma.newsTag.count({ where: { translations: { none: { locale: 'en' } } } }),
+      this.prisma.newsTag.count({ where: { posts: { none: {} } } }),
+    ]);
+    return { total, missingEn, unused };
+  }
+
+  /** Xoá nhiều tag một lệnh (liên kết bài – tag xoá theo Cascade) */
+  async bulkDeleteTags(ids: string[]) {
+    const { count } = await this.prisma.newsTag.deleteMany({ where: { id: { in: ids } } });
+    if (count) await this.cache.invalidate(NEWS_INVALIDATE);
+    return { deleted: count };
   }
 
   private async listTagsByIds(ids: string[]): Promise<NewsTagCms[]> {

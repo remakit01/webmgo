@@ -18,7 +18,7 @@ import type {
   TranslationOrigin,
 } from '@/types/news';
 import type { NewsPostStats, NewsStatsOverview } from '@remak/shared/contracts/news-stats';
-import type { NEWS_LIST_VIEW_DAYS, NewsListSort, NewsListViewFilter } from '@remak/shared/contracts/news';
+import type { NEWS_LIST_VIEW_DAYS, NewsListSort, NewsListViewFilter, NewsTagFilter, NewsTagSort, NewsTagStats } from '@remak/shared/contracts/news';
 import { apiFetch, apiStreamNdjson, ifMatch } from './api-client';
 
 export interface NewsTranslationInput {
@@ -135,7 +135,11 @@ export const newsApi = {
   reorderCategories: (ids: string[]) => apiFetch<NewsCategoryCms[]>('/news/categories/order', { method: 'PUT', body: json({ ids }) }),
 
   // ── Tag ──
-  tags: (q?: string) => apiFetch<NewsTagCms[]>(`/news/tags${toQuery({ q })}`),
+  /** TagPicker gọi tags(q) như cũ; trang Tag dùng thêm lọc / sắp */
+  tags: (q?: string, opts: { filter?: NewsTagFilter; sort?: NewsTagSort } = {}) =>
+    apiFetch<NewsTagCms[]>(`/news/tags${toQuery({ q, ...opts })}`),
+  tagStats: () => apiFetch<NewsTagStats>('/news/tags/stats'),
+  bulkDeleteTags: (ids: string[]) => apiFetch<{ deleted: number }>('/news/tags/bulk-delete', { method: 'POST', body: json({ ids }) }),
   createTag: (body: TagInput) => apiFetch<NewsTagCms>('/news/tags', { method: 'POST', body: json(body) }),
   updateTag: (id: string, body: TagInput, version: string) =>
     apiFetch<NewsTagCms>(`/news/tags/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),

@@ -16,7 +16,14 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { NEWS_CATEGORY_COLORS, type NewsCategoryColor } from '@remak/shared/contracts/news';
+import {
+  NEWS_CATEGORY_COLORS,
+  NEWS_TAG_FILTERS,
+  NEWS_TAG_SORTS,
+  type NewsCategoryColor,
+  type NewsTagFilter,
+  type NewsTagSort,
+} from '@remak/shared/contracts/news';
 import { IsSafeLink, IsSlug } from '../../common/validators.js';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
@@ -122,6 +129,34 @@ class TagTranslationsDto {
   @ValidateNested()
   @Type(() => TagTranslationDto)
   en?: TagTranslationDto | null;
+}
+
+export class NewsTagListQueryDto {
+  @ApiPropertyOptional({ description: 'Tìm theo tên (không phân biệt hoa thường, dấu)' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  q?: string;
+
+  @ApiPropertyOptional({ enum: NEWS_TAG_FILTERS, description: 'missing_en: chưa có tên tiếng Anh · unused: chưa gắn bài nào' })
+  @IsOptional()
+  @IsIn(NEWS_TAG_FILTERS)
+  filter?: NewsTagFilter;
+
+  @ApiPropertyOptional({ enum: NEWS_TAG_SORTS, description: 'recent (mặc định) / usage: dùng nhiều nhất' })
+  @IsOptional()
+  @IsIn(NEWS_TAG_SORTS)
+  sort?: NewsTagSort;
+}
+
+export class BulkDeleteNewsTagsDto {
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(200)
+  @ArrayUnique()
+  @IsString({ each: true })
+  ids!: string[];
 }
 
 export class UpsertNewsTagDto {

@@ -76,3 +76,60 @@ describe('ReorderNewsCategoriesDto', () => {
     expect(await errors({ ids: [1, 2] })).toEqual(['ids']);
   });
 });
+
+describe('NewsTaxonomyService — tag', () => {
+  function setupTags() {
+    const tagRow = (id: string) => ({ id, updatedAt: new Date('2026-10-01T00:00:00Z'), translations: [], _count: { posts: 0 } });
+    const prisma = {
+      newsTag: {
+        findMany: vi.fn(async () => [tagRow('t1')]),
+        count: vi.fn(async (args?: { where?: unknown }) => (args?.where ? 2 : 9)),
+        deleteMany: vi.fn(async () => ({ count: 2 })),
+      },
+      $queryRaw: vi.fn(async () => [{ tag_id: 't1' }, { tag_id: 't2' }]),
+    };
+    const cache = { invalidate: vi.fn(async () => undefined) };
+    return { service: new NewsTaxonomyService(prisma as never, cache as never), prisma, cache };
+  }
+  const findArgs = (prisma: ReturnType<typeof setupTags>['prisma']) =>
+    (prisma.newsTag.findMany.mock.calls[0] as unknown as [{ where?: { AND: unknown[] }; orderBy: unknown; take: number }])[0];
+
+  it('không truyền gì: như cũ — 200 tag mới tạo, không lọc', async () => {
+    const { service, prisma } = setupTags();
+    await service.listTags();
+    const args = findArgs(prisma);
+    expect(args.where).toBeUndefined();
+    expect(args.orderBy).toEqual([{ createdAt: 'desc' }, { id: 'desc' }]);
+    expect(args.take).toBe(200);
+    expect(prisma.$queryRaw).not.toHaveBeenCalled();
+  });
+
+  it('tìm không phân biệt dấu (search_normalize) + lọc chưa dùng + sắp dùng nhiều', async () => {
+    const { service, prisma } = setupTags();
+    await service.listTags({ q: 'chong chay', filter: 'unused', sort: 'usage' });
+    const [strings, pattern] = prisma.$queryRaw.mock.calls[0] as unknown as [TemplateStringsArray, string];
+    expect(strings.join('?')).toContain("public.search_normalize(name) LIKE public.search_normalize(?) ESCAPE '\\'");
+    expect(pattern).toBe('%chong chay%');
+    const args = findArgs(prisma);
+    expect(args.where?.AND).toEqual([{ id: { in: ['t1', 't2'] } }, { posts: { none: {} } }]);
+    expect(args.orderBy).toEqual([{ posts: { _count: 'desc' } }, { id: 'desc' }]);
+  });
+
+  it('lọc chưa dịch tiếng Anh', async () => {
+    const { service, prisma } = setupTags();
+    await service.listTags({ filter: 'missing_en' });
+    expect(findArgs(prisma).where?.AND).toEqual([{ translations: { none: { locale: 'en' } } }]);
+  });
+
+  it('thống kê cho nút lọc', async () => {
+    const { service } = setupTags();
+    expect(await service.tagStats()).toEqual({ total: 9, missingEn: 2, unused: 2 });
+  });
+
+  it('xoá hàng loạt một lệnh + xoá cache', async () => {
+    const { service, prisma, cache } = setupTags();
+    expect(await service.bulkDeleteTags(['a', 'b'])).toEqual({ deleted: 2 });
+    expect(prisma.newsTag.deleteMany).toHaveBeenCalledWith({ where: { id: { in: ['a', 'b'] } } });
+    expect(cache.invalidate).toHaveBeenCalledWith(NEWS_INVALIDATE);
+  });
+});
