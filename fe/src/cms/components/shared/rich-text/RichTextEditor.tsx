@@ -3,6 +3,10 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
 import {
+  AlignCenter,
+  AlignJustify,
+  AlignLeft,
+  AlignRight,
   Bold,
   Heading2,
   Heading3,
@@ -241,6 +245,10 @@ function Toolbar({
       underline: e.isActive('underline'),
       strike: e.isActive('strike'),
       link: e.isActive('link'),
+      alignLeft: e.isActive({ textAlign: 'left' }),
+      alignCenter: e.isActive({ textAlign: 'center' }),
+      alignRight: e.isActive({ textAlign: 'right' }),
+      alignJustify: e.isActive({ textAlign: 'justify' }),
       bullet: e.isActive('bulletList'),
       ordered: e.isActive('orderedList'),
       quote: e.isActive('blockquote'),
@@ -264,6 +272,11 @@ function Toolbar({
       <Btn label="Gạch ngang" active={s.strike} onClick={() => c().toggleStrike().run()} icon={Strikethrough} />
       <Btn label="Chèn/sửa link" active={s.link} onClick={onLink} icon={Link2} />
       {s.link && <Btn label="Gỡ link" onClick={() => c().extendMarkRange('link').unsetLink().run()} icon={Unlink} />}
+      <Sep />
+      <Btn label="Căn lề trái (Ctrl+Shift+L)" active={s.alignLeft} onClick={() => c().setTextAlign('left').run()} icon={AlignLeft} />
+      <Btn label="Căn giữa (Ctrl+Shift+E)" active={s.alignCenter} onClick={() => c().setTextAlign('center').run()} icon={AlignCenter} />
+      <Btn label="Căn lề phải (Ctrl+Shift+R)" active={s.alignRight} onClick={() => c().setTextAlign('right').run()} icon={AlignRight} />
+      <Btn label="Căn đều 2 bên (Ctrl+Shift+J)" active={s.alignJustify} onClick={() => c().setTextAlign('justify').run()} icon={AlignJustify} />
       <Sep />
       <Btn label="Danh sách chấm" active={s.bullet} onClick={() => c().toggleBulletList().run()} icon={List} />
       <Btn label="Danh sách số" active={s.ordered} onClick={() => c().toggleOrderedList().run()} icon={ListOrdered} />

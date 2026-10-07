@@ -3,7 +3,7 @@ import { isSafeLink } from '@remak/shared/link';
 import { isValidSlug, SLUG_MAX_LENGTH } from '@remak/shared/slug';
 import { validateRichDoc } from '@remak/shared/rich-content';
 
-// Decorator class-validator bọc các hàm kiểm tra của @remak/shared — một quy tắc cho cả api và CMS.
+// Decorator class-validator bọc các hàm kiểm tra của @remak/shared — đồng bộ quy tắc cho api và CMS.
 
 /** Kích thước JSON nội dung tối đa (byte gần đúng) — chặn payload quá lớn trước khi duyệt cây */
 export const MAX_RICH_DOC_CHARS = 600_000;
