@@ -9,6 +9,7 @@ import {
   type NewsPostBySlugResponse,
   type NewsSitemapEntry,
 } from '@remak/shared/contracts/news';
+import type { PopularNewsItem } from '@remak/shared/contracts/news-stats';
 
 export type {
   BannerImageVariant,
@@ -88,6 +89,11 @@ export function getNewsPost(locale: Locale, slug: string) {
 
 export function getNewsCategories(locale: Locale) {
   return getPublic<NewsCategoryPublic[]>(`/news/public/categories?${query({ locale })}`, NEWS_REVALIDATE_TAG);
+}
+
+/** Bài xem nhiều nhất 7 ngày (API cache 5 phút; trang ISR theo tag "news") */
+export function getPopularNews(locale: Locale) {
+  return getPublic<PopularNewsItem[]>(`/news/public/popular?${query({ locale, days: 7, limit: 6 })}`, NEWS_REVALIDATE_TAG);
 }
 
 /** Mọi bài đang hiển thị kèm slug từng ngôn ngữ (sitemap + hreflang) */

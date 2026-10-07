@@ -62,11 +62,13 @@ export default function AdminShell({
   return (
     <ConfirmDialogProvider>
       <PageLoadingBar />
-      <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans admin-typography">
+      {/* relative ở cả hai khung: phần tử absolute (sr-only, tooltip, popover) định vị theo khung cuộn,
+          không thoát ra kéo dài <html> -> trước đây làm cả trang (header, sidebar) cuộn theo */}
+      <div className="relative flex h-screen overflow-hidden bg-slate-50 text-slate-800 antialiased font-sans admin-typography">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
+        <main id="admin-main" className="relative flex-1 flex flex-col min-w-0 h-full overflow-y-auto overscroll-contain">
           {children}
-        </div>
+        </main>
       </div>
     </ConfirmDialogProvider>
   );

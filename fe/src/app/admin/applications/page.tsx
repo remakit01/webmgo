@@ -3,22 +3,20 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Layers, Plus, Edit2, Shield, ExternalLink } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { INITIAL_APPLICATIONS, Application } from '@/cms/lib/cms-data';
 
 export default function AdminApplicationsPage() {
   const [apps, setApps] = useState<Application[]>(INITIAL_APPLICATIONS);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Giải Pháp Thi Công PCCC" 
         subtitle="Hệ thống thi công bọc ống gió, vách ngăn chống cháy, trần và sàn chịu lực đạt chuẩn EI/REI"
         actionText="Thêm Giải Pháp Mới"
-        onAction={() => alert('Thêm giải pháp thi công mới')}
-      />
+        onAction={() => alert('Thêm giải pháp thi công mới')}>
 
-      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+      <AdminPageBody>
         <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
@@ -80,7 +78,7 @@ export default function AdminApplicationsPage() {
             </table>
           </div>
         </div>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

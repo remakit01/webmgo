@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface SampleConfig {
   headline: string;
@@ -97,11 +97,9 @@ export default function AdminSampleRequestManagerPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Đăng Ký Mẫu Thử" 
-        subtitle="Quản trị nội dung giới thiệu hộp mẫu thử, đường dây nóng tư vấn và danh sách đơn nhận mẫu"
-      />
+        subtitle="Quản trị nội dung giới thiệu hộp mẫu thử, đường dây nóng tư vấn và danh sách đơn nhận mẫu">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -110,7 +108,7 @@ export default function AdminSampleRequestManagerPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -311,7 +309,7 @@ export default function AdminSampleRequestManagerPage() {
 
         </div>
 
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

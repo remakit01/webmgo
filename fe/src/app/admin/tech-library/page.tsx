@@ -2,22 +2,20 @@
 
 import React, { useState } from 'react';
 import { FileCode2, Download, Plus, FileText, CheckCircle2 } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { INITIAL_TECH_DOCS, TechDocument } from '@/cms/lib/cms-data';
 
 export default function AdminTechLibraryPage() {
   const [docs, setDocs] = useState<TechDocument[]>(INITIAL_TECH_DOCS);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Thư Viện Kỹ Thuật & Hồ Sơ PCCC IBST" 
         subtitle="Quản lý hồ sơ thử nghiệm, chứng chỉ chống cháy A1, bản vẽ CAD DWG và tài liệu kỹ thuật"
         actionText="Tải Lên Hồ Sơ Mới"
-        onAction={() => alert('Tải lên tài liệu kỹ thuật / chứng chỉ mới')}
-      />
+        onAction={() => alert('Tải lên tài liệu kỹ thuật / chứng chỉ mới')}>
 
-      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+      <AdminPageBody>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
@@ -77,7 +75,7 @@ export default function AdminTechLibraryPage() {
             </table>
           </div>
         </div>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

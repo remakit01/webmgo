@@ -10,6 +10,7 @@ import {
   BarChart3,
   ChevronDown,
   Copy,
+  Eye,
   FileText,
   FolderTree,
   Image as ImageIcon,
@@ -32,6 +33,7 @@ import ImageUploadField from '@/cms/components/shared/ImageUploadField';
 import SeoPanel from '@/cms/components/shared/SeoPanel';
 import SlugField from '@/cms/components/shared/SlugField';
 import StatusBadge from '@/cms/components/shared/StatusBadge';
+import { AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { inputClass } from '@/cms/components/shared/form-styles';
 import Skeleton from '@/cms/components/ui/Skeleton';
 import { ApiError, isConflict } from '@/cms/lib/api-client';
@@ -41,6 +43,7 @@ import { newsApi, uploadContentImage } from '@/cms/lib/news-api';
 import type { NewsAuthorCms, NewsCategoryCms, NewsPostCms, NewsTagCms, RichDoc } from '@/types/news';
 import AiBadge from '@/cms/components/shared/AiBadge';
 import ContentScorePanel from './ContentScorePanel';
+import NewsStatsPanel from './NewsStatsPanel';
 import AiWriterPanel from './ai-writer/AiWriterPanel';
 import { docHasText } from './ai-writer/ai-doc';
 import { AI_FILL_FIELDS, type AiFillField, type AiWriterHost } from './ai-writer/types';
@@ -561,7 +564,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
 
   if (busy === 'load') {
     return (
-      <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
+      <div className="flex grow shrink-0 flex-col bg-slate-50 min-h-full">
         <div className="h-16 px-6 bg-white border-b border-slate-300 flex items-center justify-between">
           <Skeleton className="h-5 w-48 rounded" />
           <div className="flex items-center gap-2">
@@ -569,7 +572,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             <Skeleton className="h-8 w-24 rounded-lg" />
           </div>
         </div>
-        <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
+        <AdminPageBody className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
           <div className="bg-white rounded-xl border border-slate-300 p-6 space-y-4">
             <Skeleton className="h-12 w-full rounded-lg" />
             <Skeleton className="h-6 w-72 rounded" />
@@ -581,7 +584,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             <Skeleton className="h-60 w-full rounded-xl border border-slate-300" />
             <Skeleton className="h-52 w-full rounded-xl border border-slate-300" />
           </div>
-        </div>
+        </AdminPageBody>
       </div>
     );
   }
@@ -591,7 +594,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
   const status = post?.translations[tab]?.status ?? null;
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
+    <div className="flex grow shrink-0 flex-col bg-slate-50 min-h-full">
       {/* ── TOP ACTION BAR (STICKY) ── */}
       <header className="sticky top-0 z-30 h-16 px-4 sm:px-6 bg-white border-b border-slate-300 flex items-center justify-between gap-3 shadow-2xs">
         {/* Left: Quay lại & Tiêu đề bài & Trạng thái */}
@@ -687,7 +690,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
       </div>
 
       {/* ── NỘI DUNG CHÍNH ── */}
-      <div className="p-4 sm:p-6 w-full space-y-5">
+      <AdminPageBody>
         {banner && (
           <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-xs text-rose-700">
             <AlertCircle size={15} className="shrink-0 mt-0.5" aria-hidden="true" />
@@ -969,6 +972,13 @@ export default function NewsEditor({ postId }: { postId?: string }) {
               />
             </Panel>
 
+            {/* Lượt xem & người đọc (chỉ khi bản ngôn ngữ này đã từng xuất bản) */}
+            {post?.translations[tab]?.firstPublishedAt && (
+              <Panel title={`Lượt xem & người đọc (${LOCALE_LABEL[tab]})`} icon={Eye} collapsible>
+                <NewsStatsPanel postId={post.id} locale={tab} />
+              </Panel>
+            )}
+
             {/* Panel 5: Cài đặt nâng cao (SEO Google & Nguồn tin) */}
             <Panel title={`Tùy chọn nâng cao (${LOCALE_LABEL[tab]})`} icon={SlidersHorizontal} collapsible>
               <div className="space-y-4">
@@ -1038,7 +1048,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
             </button>
           </aside>
         )}
-      </div>
+      </AdminPageBody>
     </div>
   );
 }

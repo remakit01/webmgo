@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Building2, Plus, Edit2, ExternalLink } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 const PROJECTS = [
   {
@@ -33,15 +33,13 @@ const PROJECTS = [
 
 export default function AdminProjectsPage() {
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Dự Án Tiêu Biểu" 
         subtitle="Hồ sơ công trình trọng điểm quốc gia, nhà máy FDI và TTTM đã sử dụng Remak MGO"
         actionText="Thêm Dự Án Mới"
-        onAction={() => alert('Thêm dự án mới')}
-      />
+        onAction={() => alert('Thêm dự án mới')}>
 
-      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+      <AdminPageBody>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
@@ -93,7 +91,7 @@ export default function AdminProjectsPage() {
             </table>
           </div>
         </div>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

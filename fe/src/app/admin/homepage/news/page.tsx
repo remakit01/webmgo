@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowDown, ArrowUp, ExternalLink, Loader2, Plus, Search, X } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { useToast } from '@/cms/components/ConfirmDialog';
 import StatusBadge from '@/cms/components/shared/StatusBadge';
 import Skeleton from '@/cms/components/ui/Skeleton';
@@ -76,10 +76,9 @@ export default function AdminHomepageNewsPage() {
   const featuredIds = new Set(featured.map((f) => f.id));
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader title="Tin Tức Trang Chủ" subtitle="Chọn và sắp xếp bài nổi bật hiển thị ở khối Tin tức (mục số 9) trên trang chủ" />
+    <AdminPage title="Tin Tức Trang Chủ" subtitle="Chọn và sắp xếp bài nổi bật hiển thị ở khối Tin tức (mục số 9) trên trang chủ">
 
-      <div className="p-4 sm:p-6 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
+      <AdminPageBody className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
         {/* DANH SÁCH NỔI BẬT THEO THỨ TỰ */}
         <section className="bg-white rounded-xl border border-slate-300 shadow-2xs">
           <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-slate-200 flex-wrap">
@@ -167,8 +166,8 @@ export default function AdminHomepageNewsPage() {
             ))}
           </ul>
         </aside>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }
 

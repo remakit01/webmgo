@@ -16,7 +16,7 @@ import {
   type AiKnowledgeStatus,
 } from '@remak/shared/contracts/ai-knowledge';
 import type { Paginated } from '@remak/shared/pagination';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import Pagination from '@/cms/components/shared/Pagination';
 import { inputClass } from '@/cms/components/shared/form-styles';
@@ -192,12 +192,10 @@ export default function AiKnowledgeManager() {
   const setFilter = (patch: Partial<typeof filters>) => setFilters((f) => ({ ...f, ...patch, page: patch.page ?? 1 }));
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader
+    <AdminPage
         title="Kiến Thức AI"
-        subtitle="Thông số sản phẩm, chứng nhận, quy trình… mà trợ lý AI tra cứu khi viết bài. Chỉ ghi điều đã kiểm chứng — AI coi đây là nguồn đúng nhất."
-      />
-      <div className="p-4 sm:p-6 space-y-4">
+        subtitle="Thông số sản phẩm, chứng nhận, quy trình… mà trợ lý AI tra cứu khi viết bài. Chỉ ghi điều đã kiểm chứng — AI coi đây là nguồn đúng nhất.">
+      <AdminPageBody>
         {/* Thống kê + lập chỉ mục */}
         <div className="flex items-center gap-3 flex-wrap rounded-xl border border-slate-300 bg-white px-4 py-3 text-xs text-slate-700">
           <BrainCircuit size={16} className="text-[#5F8A03]" aria-hidden="true" />
@@ -370,8 +368,8 @@ export default function AiKnowledgeManager() {
             <RetrieveTester />
           )}
         </div>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }
 

@@ -192,7 +192,7 @@ export const cmsListSelect = {
 
 type CmsListRow = Prisma.NewsPostGetPayload<{ select: typeof cmsListSelect }>;
 
-export function toPostListItemCms(row: CmsListRow): NewsPostListItemCms {
+export function toPostListItemCms(row: CmsListRow, views?: { views: number; viewsInPeriod: number }): NewsPostListItemCms {
   const vi = row.translations.find((t) => t.locale === 'vi');
   return {
     id: row.id,
@@ -203,6 +203,8 @@ export function toPostListItemCms(row: CmsListRow): NewsPostListItemCms {
     isFeatured: row.isFeatured,
     updatedAt: iso(row.updatedAt),
     deletedAt: isoOrNull(row.deletedAt),
+    views: views?.views ?? 0,
+    viewsInPeriod: views?.viewsInPeriod ?? 0,
     locales: Object.fromEntries(
       row.translations.map((t) => [
         t.locale,

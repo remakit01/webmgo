@@ -2,13 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
+
+  // Sau reverse proxy: lấy IP thật từ X-Forwarded-For (chỉ tin đúng số proxy đã khai báo)
+  const trustProxy = config.get<number>('trustProxy', 0);
+  if (trustProxy > 0) app.set('trust proxy', trustProxy);
 
   // Cookie parser — phải đứng trước guards
   app.use(cookieParser());

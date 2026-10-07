@@ -10,6 +10,8 @@ import { MediaService } from '../storage/media.service.js';
 import { StorageService } from '../storage/storage.service.js';
 import { ContentCacheService } from '../content-cache/content-cache.service.js';
 import { SlugRedirectService } from '../slug-redirect/slug-redirect.service.js';
+import { NewsStatsService } from '../news-stats/news-stats.service.js';
+import { dayKeyToUtcRange } from '@remak/shared/date';
 import { assertUpdated, assertVersion } from '../common/versioning.js';
 import { resolveUniqueSlug } from '../common/unique-slug.js';
 import type { NewsPostTranslation, Prisma, TranslationOrigin } from '../generated/prisma/client.js';
@@ -42,6 +44,7 @@ export class NewsPostsService {
     private readonly storage: StorageService,
     private readonly cache: ContentCacheService,
     private readonly slugRedirects: SlugRedirectService,
+    private readonly stats: NewsStatsService,
   ) {}
 
   // ── Đọc ─────────────────────────────────────────────────────────────────
@@ -57,23 +60,91 @@ export class NewsPostsService {
     if (query.q?.trim()) {
       and.push({ translations: { some: { title: { contains: query.q.trim(), mode: 'insensitive' } } } });
     }
+    // Khoảng ngày cập nhật theo GIỜ VIỆT NAM: [00:00 VN ngày đầu, 00:00 VN ngày sau ngày cuối)
+    if (query.fromDate || query.toDate) {
+      const range = dayKeyToUtcRange(query.fromDate?.slice(0, 10), query.toDate?.slice(0, 10));
+      if (range.gte || range.lt) and.push({ updatedAt: range });
+    }
+    // Có / chưa có lượt xem: mọi thời gian -> cột đếm sẵn; theo kỳ -> EXISTS trên bảng ngày (PK post_id, ~1ms/trang)
+    if (query.views) {
+      if (query.viewsDays) {
+        const statsWhere: Prisma.NewsPostDailyStatWhereInput = { views: { gt: 0 }, day: { gte: this.stats.sinceDay(query.viewsDays) } };
+        and.push({ dailyStats: query.views === 'has_views' ? { some: statsWhere } : { none: statsWhere } });
+      } else {
+        and.push({ viewCount: query.views === 'has_views' ? { gt: 0 } : 0 });
+      }
+    }
     const where: Prisma.NewsPostWhereInput = { AND: and };
+    const byViews = query.sort === 'views_desc' || query.sort === 'views_asc';
+
+    // Sắp theo lượt xem TRONG KỲ: phải gộp bảng ngày -> xử lý riêng
+    if (byViews && query.viewsDays) {
+      return this.listByViews(where, query.sort as 'views_desc' | 'views_asc', query.viewsDays, page, pageSize, skip, take);
+    }
 
     const [rows, total] = await Promise.all([
       this.prisma.newsPost.findMany({
         where,
-        orderBy: query.trash
-          ? { deletedAt: 'desc' }
-          : query.featured
-            ? [{ featuredOrder: { sort: 'asc', nulls: 'last' } }, { updatedAt: 'desc' }]
-            : { updatedAt: 'desc' },
+        orderBy: byViews
+          ? // Mọi thời gian: ORDER BY cột đếm sẵn, phân trang ngay trong DB
+            [{ viewCount: query.sort === 'views_desc' ? 'desc' : 'asc' }, { updatedAt: 'desc' }]
+          : query.trash
+            ? { deletedAt: 'desc' }
+            : query.featured
+              ? [{ featuredOrder: { sort: 'asc', nulls: 'last' } }, { updatedAt: 'desc' }]
+              : { updatedAt: 'desc' },
         skip,
         take,
         select: cmsListSelect,
       }),
       this.prisma.newsPost.count({ where }),
     ]);
-    return toPaginated(rows.map(toPostListItemCms), total, page, pageSize);
+    const views = await this.stats.viewsForPosts(
+      rows.map((r) => r.id),
+      query.viewsDays,
+    );
+    return toPaginated(
+      rows.map((r) => toPostListItemCms(r, views.get(r.id))),
+      total,
+      page,
+      pageSize,
+    );
+  }
+
+  /**
+   * Sắp theo lượt xem TRONG KỲ: lượt xem nằm ở bảng thống kê gộp ngày nên không ORDER BY trực tiếp được —
+   * lấy id các bài khớp bộ lọc (cột nhẹ), cộng lượt xem 1 lần, sắp, cắt trang rồi mới đọc chi tiết đúng các bài của trang.
+   * Hợp với quy mô CMS (vài trăm – vài nghìn bài).
+   */
+  private async listByViews(
+    where: Prisma.NewsPostWhereInput,
+    sort: 'views_desc' | 'views_asc',
+    days: number,
+    page: number,
+    pageSize: number,
+    skip: number,
+    take: number,
+  ): Promise<Paginated<NewsPostListItemCms>> {
+    const ids = await this.prisma.newsPost.findMany({ where, orderBy: { updatedAt: 'desc' }, select: { id: true } });
+    const views = await this.stats.viewsForPosts(
+      ids.map((r) => r.id),
+      days,
+    );
+    const score = (id: string) => views.get(id)?.viewsInPeriod ?? 0;
+    // sort ổn định: cùng lượt xem thì giữ thứ tự mới cập nhật
+    const ordered = [...ids].sort((a, b) => (sort === 'views_desc' ? score(b.id) - score(a.id) : score(a.id) - score(b.id)));
+    const pageIds = ordered.slice(skip, skip + take).map((r) => r.id);
+    const rows = await this.prisma.newsPost.findMany({ where: { id: { in: pageIds } }, select: cmsListSelect });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return toPaginated(
+      pageIds.flatMap((id) => {
+        const row = byId.get(id);
+        return row ? [toPostListItemCms(row, views.get(id))] : [];
+      }),
+      ids.length,
+      page,
+      pageSize,
+    );
   }
 
   async get(id: string): Promise<NewsPostCms> {

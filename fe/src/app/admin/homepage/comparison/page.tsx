@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface ComparisonRow {
   id: string;
@@ -119,11 +119,9 @@ export default function AdminComparisonManagerPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý So Sánh Vật Liệu" 
-        subtitle="Quản trị bảng so sánh kỹ thuật giữa MGO Remak, tấm xi măng Cemboard và tấm thạch cao"
-      />
+        subtitle="Quản trị bảng so sánh kỹ thuật giữa MGO Remak, tấm xi măng Cemboard và tấm thạch cao">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -132,7 +130,7 @@ export default function AdminComparisonManagerPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -245,7 +243,7 @@ export default function AdminComparisonManagerPage() {
           </div>
         </div>
 
-      </div>
+      </AdminPageBody>
 
       {/* CỬA SỔ THÊM / SỬA TIÊU CHÍ */}
       {isModalOpen && editingItem && (
@@ -330,6 +328,6 @@ export default function AdminComparisonManagerPage() {
         </div>
       )}
 
-    </div>
+    </AdminPage>
   );
 }

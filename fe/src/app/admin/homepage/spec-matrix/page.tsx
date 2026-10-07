@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 
 interface SpecItem {
   id: string;
@@ -154,11 +154,9 @@ export default function AdminSpecMatrixPage() {
   const filteredSpecs = activeFilter === 'all' ? specs : specs.filter(s => s.category === activeFilter);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Bảng Quy Cách Độ Dày" 
-        subtitle="Quản trị bảng thông số độ dày (5mm - 18mm), khối lượng, mức độ chịu lửa và đơn giá"
-      />
+        subtitle="Quản trị bảng thông số độ dày (5mm - 18mm), khối lượng, mức độ chịu lửa và đơn giá">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -167,7 +165,7 @@ export default function AdminSpecMatrixPage() {
         </div>
       )}
 
-      <div className="p-4 sm:p-6 lg:p-8 space-y-6 w-full">
+      <AdminPageBody>
         
         {/* Thanh công cụ xem trước & khôi phục */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-slate-200">
@@ -308,7 +306,7 @@ export default function AdminSpecMatrixPage() {
           </div>
         </div>
 
-      </div>
+      </AdminPageBody>
 
       {/* CỬA SỔ THÊM / SỬA QUY CÁCH */}
       {isModalOpen && editingItem && (
@@ -449,6 +447,6 @@ export default function AdminSpecMatrixPage() {
         </div>
       )}
 
-    </div>
+    </AdminPage>
   );
 }

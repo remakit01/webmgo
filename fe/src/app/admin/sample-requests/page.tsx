@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Inbox, CheckCircle2, Clock, Truck, AlertCircle, Phone, Mail, Building, MapPin } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { INITIAL_REQUESTS, SampleRequest } from '@/cms/lib/cms-data';
 
 export default function AdminSampleRequestsPage() {
@@ -16,13 +16,11 @@ export default function AdminSampleRequestsPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Yêu Cầu Gửi Mẫu Thử & Báo Giá" 
-        subtitle="Tiếp nhận thông tin khách hàng, tư vấn dự án và theo dõi quá trình giao mẫu tấm MGO"
-      />
+        subtitle="Tiếp nhận thông tin khách hàng, tư vấn dự án và theo dõi quá trình giao mẫu tấm MGO">
 
-      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+      <AdminPageBody>
         
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
@@ -140,7 +138,7 @@ export default function AdminSampleRequestsPage() {
           </div>
         </div>
 
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

@@ -17,6 +17,8 @@ import type {
   RichDoc,
   TranslationOrigin,
 } from '@/types/news';
+import type { NewsPostStats, NewsStatsOverview } from '@remak/shared/contracts/news-stats';
+import type { NEWS_LIST_VIEW_DAYS, NewsListSort, NewsListViewFilter } from '@remak/shared/contracts/news';
 import { apiFetch, apiStreamNdjson, ifMatch } from './api-client';
 
 export interface NewsTranslationInput {
@@ -55,6 +57,13 @@ export interface NewsListQuery {
   trash?: boolean;
   featured?: boolean;
   missing?: Locale;
+  /** Khoảng ngày cập nhật (DayKey 'YYYY-MM-DD', giờ Việt Nam) */
+  fromDate?: string;
+  toDate?: string;
+  views?: NewsListViewFilter;
+  /** Kỳ tính lượt xem (ngày); bỏ trống = từ trước tới nay */
+  viewsDays?: (typeof NEWS_LIST_VIEW_DAYS)[number];
+  sort?: NewsListSort;
 }
 
 const json = (body: unknown) => JSON.stringify(body);
@@ -107,6 +116,10 @@ export const newsApi = {
   /** AI dịch cả bài vi -> en (không lưu); có thể mất 10–60 giây với bài dài */
   aiDraft: (id: string) => apiFetch<NewsAiDraft>(`/news/posts/${id}/translations/en/ai-draft`, { method: 'POST' }),
   /** Như aiDraft nhưng nhận tiến trình từng bước (chuẩn bị -> từng lô dịch -> ghép bài -> kết quả) */
+  /** Lượt xem / đọc hết / nguồn truy cập của một bài theo ngôn ngữ */
+  stats: (id: string, locale: Locale, days = 30) => apiFetch<NewsPostStats>(`/news/posts/${id}/stats${toQuery({ locale, days })}`),
+  /** Báo cáo Tin tức cho trang Tổng Quan */
+  overview: (days = 30) => apiFetch<NewsStatsOverview>(`/news/stats/overview${toQuery({ days })}`),
   aiDraftStream: (id: string, onEvent: (event: NewsAiDraftEvent) => void, signal?: AbortSignal) =>
     apiStreamNdjson<NewsAiDraftEvent>(`/news/posts/${id}/translations/en/ai-draft/stream`, onEvent, signal),
   setFeatured: (ids: string[]) =>

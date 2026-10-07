@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Check, Loader2, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import ImageUploadField from '@/cms/components/shared/ImageUploadField';
 import { inputClass } from '@/cms/components/shared/form-styles';
@@ -24,9 +24,8 @@ export default function AdminNewsTaxonomyPage() {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader title="Tag & Tác Giả" subtitle="Tag gắn bài viết và hồ sơ tác giả (chức danh, tiểu sử) theo từng ngôn ngữ" />
-      <div className="p-4 sm:p-6 space-y-4">
+    <AdminPage title="Tag & Tác Giả" subtitle="Tag gắn bài viết và hồ sơ tác giả (chức danh, tiểu sử) theo từng ngôn ngữ">
+      <AdminPageBody>
         <div role="tablist" aria-label="Loại dữ liệu" className="inline-flex gap-1 bg-slate-200/60 p-1 rounded-lg">
           {(
             [
@@ -47,8 +46,8 @@ export default function AdminNewsTaxonomyPage() {
           ))}
         </div>
         {tab === 'tags' ? <TagsPanel /> : <AuthorsPanel isAdmin={isAdmin} />}
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }
 

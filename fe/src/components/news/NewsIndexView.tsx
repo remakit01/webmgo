@@ -10,6 +10,7 @@ import { newsCategoryPath, newsIndexPath } from '@/lib/news-paths';
 import { NewsRow, NewsTile, NewsCoverImage } from './NewsCards';
 import NewsCarousel from './NewsCarousel';
 import NewsLoadMore from './NewsLoadMore';
+import PopularNews from './PopularNews';
 
 export const NEWS_PAGE_SIZE = 12;
 
@@ -139,6 +140,9 @@ export default async function NewsIndexView({
             </NewsCarousel>
           </section>
         )}
+
+        {/* Xem nhiều nhất 7 ngày — chỉ ở trang Tin tức chính */}
+        {isIndex && <PopularNews locale={locale} variant="strip" />}
 
         {/* Dòng thời gian tin mới */}
         <section className="space-y-4">

@@ -18,7 +18,15 @@ import {
 } from 'class-validator';
 import { LOCALES, type Locale } from '@remak/shared/locale';
 import { PUBLISH_STATUSES, type PublishStatus } from '@remak/shared/publishing';
-import { TRANSLATION_ORIGINS, type TranslationOrigin } from '@remak/shared/contracts/news';
+import {
+  NEWS_LIST_SORTS,
+  NEWS_LIST_VIEW_DAYS,
+  NEWS_LIST_VIEW_FILTERS,
+  TRANSLATION_ORIGINS,
+  type NewsListSort,
+  type NewsListViewFilter,
+  type TranslationOrigin,
+} from '@remak/shared/contracts/news';
 import type { RichDoc } from '@remak/shared/rich-content';
 import { PaginationQueryDto } from '../../common/pagination.dto.js';
 import { IsRichDoc, IsSafeLink, IsSlug } from '../../common/validators.js';
@@ -221,6 +229,35 @@ export class NewsPostListQueryDto extends PaginationQueryDto {
   @IsOptional()
   @IsIn(LOCALES)
   missing?: Locale;
+
+  @ApiPropertyOptional({ description: 'Lọc từ ngày (YYYY-MM-DD)' })
+  @IsOptional()
+  @IsISO8601()
+  fromDate?: string;
+
+  @ApiPropertyOptional({ description: 'Lọc đến ngày (YYYY-MM-DD)' })
+  @IsOptional()
+  @IsISO8601()
+  toDate?: string;
+
+  @ApiPropertyOptional({
+    enum: NEWS_LIST_VIEW_FILTERS,
+    description: 'Có / chưa có lượt xem — tính trong kỳ viewsDays nếu có, không thì từ trước tới nay',
+  })
+  @IsOptional()
+  @IsIn(NEWS_LIST_VIEW_FILTERS)
+  views?: NewsListViewFilter;
+
+  @ApiPropertyOptional({ enum: NEWS_LIST_VIEW_DAYS, description: 'Kỳ tính lượt xem (ngày); bỏ trống = từ trước tới nay' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsIn(NEWS_LIST_VIEW_DAYS)
+  viewsDays?: number;
+
+  @ApiPropertyOptional({ enum: NEWS_LIST_SORTS, description: 'Sắp xếp: mới cập nhật (mặc định) / xem nhiều / xem ít (theo kỳ viewsDays)' })
+  @IsOptional()
+  @IsIn(NEWS_LIST_SORTS)
+  sort?: NewsListSort;
 }
 
 export class SetFeaturedNewsDto {

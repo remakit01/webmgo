@@ -3,6 +3,8 @@ export default () => ({
   nodeEnv: process.env.NODE_ENV ?? 'development',
   feUrl: process.env.FE_URL ?? 'http://localhost:3000',
   cmsUrl: process.env.CMS_URL ?? 'http://localhost:3001',
+  // Số reverse proxy (nginx, load balancer) đứng trước API — để req.ip là IP thật của khách (đếm lượt xem, giới hạn lượt gọi)
+  trustProxy: parseInt(process.env.TRUST_PROXY ?? '0', 10),
   database: {
     url: process.env.DATABASE_URL,
     // Pool kết nối mỗi instance API; tổng mọi instance phải < max_connections của Postgres (mặc định 100)

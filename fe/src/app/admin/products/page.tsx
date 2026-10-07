@@ -3,22 +3,20 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Boxes, Plus, Edit2, Trash2, CheckCircle2, AlertCircle, Shield, ExternalLink } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { INITIAL_PRODUCTS, Product } from '@/cms/lib/cms-data';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Sản Phẩm MGO Remak" 
         subtitle="Quản lý danh sách, thông số kỹ thuật PCCC, độ dày và bảng giá niêm yết"
         actionText="Thêm Sản Phẩm Mới"
-        onAction={() => alert('Chức năng thêm sản phẩm mới (Form Modal)')}
-      />
+        onAction={() => alert('Chức năng thêm sản phẩm mới (Form Modal)')}>
 
-      <div className="p-6 max-w-7xl w-full mx-auto space-y-6">
+      <AdminPageBody>
         <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm text-slate-600">
@@ -84,7 +82,7 @@ export default function AdminProductsPage() {
             </table>
           </div>
         </div>
-      </div>
-    </div>
+      </AdminPageBody>
+    </AdminPage>
   );
 }

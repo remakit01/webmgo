@@ -251,6 +251,8 @@
     "empty": "No articles in this category yet.",
     "viewAllNews": "View all articles",
     "readingTime": "{minutes} min read",
+    "views": "{count} views",
+    "popular": "Most read",
     "by": "By {name}",
     "source": "Source: {name}",
     "toc": "In this article",

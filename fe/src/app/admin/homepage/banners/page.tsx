@@ -24,7 +24,8 @@ import {
   Pause,
   GripVertical,
 } from 'lucide-react';
-import AdminHeader from '@/cms/components/AdminHeader';
+import { formatDateTime } from '@remak/shared/date';
+import { AdminPage, AdminPageBand, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { useConfirm } from '@/cms/components/ConfirmDialog';
 import { apiFetch, ifMatch, isConflict } from '@/cms/lib/api-client';
 import { fetchCurrentUser, type AuthUser } from '@/cms/lib/api-auth';
@@ -82,8 +83,6 @@ const BANNER_MIN_WIDTH = 1024;
 const BANNER_RECOMMENDED = '1920×640px (tỉ lệ 3:1)';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const daysLeft = (purgeAt: string) => Math.max(0, Math.ceil((new Date(purgeAt).getTime() - Date.now()) / DAY_MS));
-const formatDateTime = (iso: string) =>
-  new Date(iso).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
 
 const EMPTY_FORM: BannerForm = {
   id: '',
@@ -532,11 +531,9 @@ export default function AdminBannersManagerPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 min-h-screen">
-      <AdminHeader 
+    <AdminPage 
         title="Quản Lý Banner Trang Chủ" 
-        subtitle="Quản trị nội dung và thứ tự trình chiếu banner ở đầu trang chủ"
-      />
+        subtitle="Quản trị nội dung và thứ tự trình chiếu banner ở đầu trang chủ">
 
       {/* Thông báo thao tác */}
       {toastMessage && (
@@ -547,7 +544,7 @@ export default function AdminBannersManagerPage() {
       )}
 
       {/* KHUNG XEM TRƯỚC BANNER - FULL WIDTH 100%, KHÔNG CÓ BORDER TOP */}
-      <div className="w-full bg-white border-b border-slate-300 select-none">
+      <AdminPageBand className="select-none">
         {/* Thanh tiêu đề & điều khiển xem trước */}
         <div className="px-6 py-3 border-b border-slate-300 flex items-center justify-between flex-wrap gap-3 bg-white">
           <div>
@@ -688,10 +685,10 @@ export default function AdminBannersManagerPage() {
             </div>
           )}
         </div>
-      </div>
+      </AdminPageBand>
 
       {/* NỘI DUNG CHÍNH: DANH SÁCH & CÀI ĐẶT (FULL WIDTH) */}
-      <div className="p-6 space-y-6 w-full">
+      <AdminPageBody>
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           
           {/* Cột 1: Danh sách Banners (8/12) */}
@@ -1118,7 +1115,7 @@ export default function AdminBannersManagerPage() {
           </div>
         </div>
 
-      </div>
+      </AdminPageBody>
 
       {/* CỬA SỔ THÊM / SỬA BANNER THEO CHUẨN UI/UX PRO MAX */}
       {isModalOpen && editingBanner && (
@@ -1604,6 +1601,6 @@ export default function AdminBannersManagerPage() {
         </div>
       )}
 
-    </div>
+    </AdminPage>
   );
 }
