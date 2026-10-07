@@ -69,20 +69,31 @@ export default async function RichContent({
     return (node.content ?? []).map((child, i) => render(child, `${key}.${i}`));
   }
 
+  function getAlignClass(textAlign?: unknown) {
+    if (textAlign === 'center') return 'text-center';
+    if (textAlign === 'right') return 'text-right';
+    if (textAlign === 'justify') return 'text-justify';
+    if (textAlign === 'left') return 'text-left';
+    return undefined;
+  }
+
   function render(node: RichNode, key: string): React.ReactNode {
     switch (node.type) {
       case 'text':
         return renderMarks(node.text ?? '', node.marks, key);
       case 'hardBreak':
         return <br key={key} />;
-      case 'paragraph':
-        return node.content?.length ? <p key={key}>{children(node, key)}</p> : null;
+      case 'paragraph': {
+        const alignClass = getAlignClass(node.attrs?.textAlign ?? node.attrs?.align);
+        return node.content?.length ? <p key={key} className={alignClass}>{children(node, key)}</p> : null;
+      }
       case 'heading': {
         const level = Number(node.attrs?.level ?? 2);
         const Tag = (level === 3 ? 'h3' : level === 4 ? 'h4' : 'h2') as 'h2' | 'h3' | 'h4';
         const id = nodeText(node).trim() ? headingIds[headingIndex++] : undefined;
+        const alignClass = getAlignClass(node.attrs?.textAlign ?? node.attrs?.align);
         return (
-          <Tag key={key} id={id} className="scroll-mt-24">
+          <Tag key={key} id={id} className={`scroll-mt-24 clear-both ${alignClass ?? ''}`.trim()}>
             {children(node, key)}
           </Tag>
         );
@@ -100,18 +111,45 @@ export default async function RichContent({
       case 'blockquote':
         return <blockquote key={key}>{children(node, key)}</blockquote>;
       case 'horizontalRule':
-        return <hr key={key} />;
+        return <hr key={key} className="clear-both" />;
       case 'image': {
         const src = typeof node.attrs?.src === 'string' ? node.attrs.src : null;
         if (!src) return null;
         const caption = typeof node.attrs?.caption === 'string' ? node.attrs.caption : null;
         const width = typeof node.attrs?.width === 'number' ? node.attrs.width : undefined;
         const height = typeof node.attrs?.height === 'number' ? node.attrs.height : undefined;
+        const align = (typeof node.attrs?.align === 'string' ? node.attrs.align : 'center') as 'left' | 'right' | 'center';
+
+        let figureClass = 'my-6 clear-both';
+        const figureStyle: React.CSSProperties = {};
+
+        if (align === 'left') {
+          figureClass = 'float-none sm:float-left my-4 sm:mr-6 sm:mb-4 max-w-full sm:max-w-[60%] clear-left';
+          if (width) figureStyle.width = `${width}px`;
+        } else if (align === 'right') {
+          figureClass = 'float-none sm:float-right my-4 sm:ml-6 sm:mb-4 max-w-full sm:max-w-[60%] clear-right';
+          if (width) figureStyle.width = `${width}px`;
+        } else {
+          figureClass = width ? 'my-6 flex flex-col items-center clear-both' : 'my-6 clear-both';
+        }
+
         return (
-          <figure key={key}>
+          <figure key={key} className={figureClass} style={figureStyle}>
             {/* eslint-disable-next-line @next/next/no-img-element -- ảnh MinIO đã tối ưu WebP sẵn (xem ResponsivePicture) */}
-            <img src={src} alt={String(node.attrs?.alt ?? '')} width={width} height={height} loading="lazy" decoding="async" />
-            {caption && <figcaption>{caption}</figcaption>}
+            <img
+              src={src}
+              alt={String(node.attrs?.alt ?? '')}
+              width={width}
+              height={height}
+              style={
+                width && align === 'center'
+                  ? { width: `${width}px`, maxWidth: '100%', height: 'auto' }
+                  : { width: '100%', maxWidth: '100%', height: 'auto' }
+              }
+              loading="lazy"
+              decoding="async"
+            />
+            {caption && <figcaption className="text-center">{caption}</figcaption>}
           </figure>
         );
       }

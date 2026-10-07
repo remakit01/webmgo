@@ -1,7 +1,7 @@
 // Cấu hình TipTap khớp đúng whitelist của @remak/shared/rich-content (API từ chối khối/thuộc tính nằm ngoài).
 // Thêm khối mới: thêm ở shared (RICH_NODE_TYPES + NODE_ATTRS) trước, rồi thêm extension ở đây và renderer ở fe public.
 
-import { mergeAttributes, Node, ReactNodeViewRenderer, type AnyExtension } from '@tiptap/react';
+import { mergeAttributes, Extension, Node, ReactNodeViewRenderer, type AnyExtension } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { TableKit } from '@tiptap/extension-table';
@@ -17,8 +17,68 @@ declare module '@tiptap/core' {
     callout: { insertCallout: (variant?: CalloutVariant) => ReturnType };
     relatedPost: { insertRelatedPost: (postId: string) => ReturnType };
     faq: { insertFaq: () => ReturnType };
+    textAlign: {
+      setTextAlign: (alignment: 'left' | 'center' | 'right' | 'justify') => ReturnType;
+      unsetTextAlign: () => ReturnType;
+    };
   }
 }
+
+/** Extension căn lề văn bản tương thích 100% chuẩn TipTap và whitelist @remak/shared/rich-content */
+export const TextAlign = Extension.create({
+  name: 'textAlign',
+  addOptions() {
+    return {
+      types: ['heading', 'paragraph'],
+      alignments: ['left', 'center', 'right', 'justify'] as const,
+      defaultAlignment: 'left',
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          textAlign: {
+            default: this.options.defaultAlignment,
+            parseHTML: (element) => element.style.textAlign || this.options.defaultAlignment,
+            renderHTML: (attributes) => {
+              if (!attributes.textAlign || attributes.textAlign === this.options.defaultAlignment) {
+                return {};
+              }
+              return { style: `text-align: ${attributes.textAlign}` };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setTextAlign:
+        (alignment: 'left' | 'center' | 'right' | 'justify') =>
+        ({ commands }) => {
+          if (!this.options.alignments.includes(alignment)) {
+            return false;
+          }
+          return this.options.types.some((type: string) => commands.updateAttributes(type, { textAlign: alignment }));
+        },
+      unsetTextAlign:
+        () =>
+        ({ commands }) => {
+          return this.options.types.some((type: string) => commands.resetAttributes(type, 'textAlign'));
+        },
+    };
+  },
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Shift-l': () => this.editor.commands.setTextAlign('left'),
+      'Mod-Shift-e': () => this.editor.commands.setTextAlign('center'),
+      'Mod-Shift-r': () => this.editor.commands.setTextAlign('right'),
+      'Mod-Shift-j': () => this.editor.commands.setTextAlign('justify'),
+    };
+  },
+});
 
 /** Ảnh dạng khối có chú thích (figure + figcaption); alt bắt buộc */
 const CaptionImage = Image.extend({
@@ -26,6 +86,27 @@ const CaptionImage = Image.extend({
     return {
       ...this.parent?.(),
       caption: { default: null, parseHTML: (el) => el.getAttribute('data-caption'), renderHTML: (a) => (a.caption ? { 'data-caption': a.caption } : {}) },
+      width: {
+        default: null,
+        parseHTML: (el) => {
+          const w = el.getAttribute('width');
+          return w ? parseInt(w, 10) || null : null;
+        },
+        renderHTML: (a) => (a.width ? { width: a.width } : {}),
+      },
+      height: {
+        default: null,
+        parseHTML: (el) => {
+          const h = el.getAttribute('height');
+          return h ? parseInt(h, 10) || null : null;
+        },
+        renderHTML: (a) => (a.height ? { height: a.height } : {}),
+      },
+      align: {
+        default: 'center',
+        parseHTML: (el) => el.getAttribute('data-align') || 'center',
+        renderHTML: (a) => (a.align && a.align !== 'center' ? { 'data-align': a.align } : {}),
+      },
     };
   },
   addNodeView() {
@@ -129,6 +210,7 @@ export function richTextExtensions(): AnyExtension[] {
       heading: { levels: [...HEADING_LEVELS] },
       link: { openOnClick: false, autolink: true, defaultProtocol: 'https', HTMLAttributes: { rel: 'noopener noreferrer nofollow', target: null } },
     }),
+    TextAlign,
     CaptionImage,
     TableKit.configure({ table: { resizable: false } }),
     Youtube.configure({ nocookie: true, controls: true, width: 640, height: 360 }),

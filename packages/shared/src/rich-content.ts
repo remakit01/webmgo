@@ -75,10 +75,10 @@ export const RICH_LIMITS = {
 
 /** Thuộc tính được phép của từng node (attr khác bị từ chối) */
 const NODE_ATTRS: Partial<Record<RichNodeType, readonly string[]>> = {
-  paragraph: ['textAlign'],
-  heading: ['level', 'textAlign'],
+  paragraph: ['textAlign', 'align'],
+  heading: ['level', 'textAlign', 'align'],
   orderedList: ['start', 'type'],
-  image: ['src', 'alt', 'title', 'caption', 'width', 'height'],
+  image: ['src', 'alt', 'title', 'caption', 'width', 'height', 'align'],
   tableHeader: ['colspan', 'rowspan', 'colwidth', 'align'],
   tableCell: ['colspan', 'rowspan', 'colwidth', 'align'],
   youtube: ['src', 'start', 'width', 'height'],
@@ -151,7 +151,8 @@ export function validateRichDoc(value: unknown, options: RichValidateOptions = {
     const unknownAttr = Object.keys(attrs).find((k) => !allowed.includes(k));
     if (unknownAttr) return fail(path, `thuộc tính "${unknownAttr}" không được hỗ trợ`);
 
-    if ('textAlign' in attrs && !TEXT_ALIGNS.includes(attrs.textAlign as string | null)) {
+    const textAlignment = (attrs.textAlign ?? attrs.align) as string | null | undefined;
+    if (textAlignment !== undefined && !TEXT_ALIGNS.includes(textAlignment)) {
       return fail(path, 'căn lề không hợp lệ');
     }
     switch (type) {
@@ -174,6 +175,9 @@ export function validateRichDoc(value: unknown, options: RichValidateOptions = {
         if (!isOptionalString(attrs.title, RICH_LIMITS.maxAltLength)) return fail(path, 'title ảnh không hợp lệ');
         if (!isOptionalPositiveInt(attrs.width) || !isOptionalPositiveInt(attrs.height)) {
           return fail(path, 'kích thước ảnh không hợp lệ');
+        }
+        if (attrs.align !== undefined && attrs.align !== null && !['left', 'right', 'center'].includes(attrs.align as string)) {
+          return fail(path, 'vị trí bố cục ảnh (align) không hợp lệ');
         }
         break;
       case 'tableHeader':
