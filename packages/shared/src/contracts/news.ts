@@ -237,7 +237,10 @@ export interface NewsCategoryCms {
   color: NewsCategoryColor;
   sortOrder: number;
   isActive: boolean;
+  /** Số bài chưa xoá */
   postCount: number;
+  /** Số bài trong thùng rác — vẫn chặn xoá chuyên mục */
+  trashedPostCount: number;
   version: string;
   translations: Partial<Record<Locale, NewsCategoryTranslationCms>>;
 }

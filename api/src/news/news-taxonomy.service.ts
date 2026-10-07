@@ -28,16 +28,22 @@ export class NewsTaxonomyService {
   // ── Chuyên mục ──────────────────────────────────────────────────────────
 
   async listCategories(): Promise<NewsCategoryCms[]> {
-    const rows = await this.prisma.newsCategory.findMany({
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
-      include: { translations: true, _count: { select: { posts: { where: { deletedAt: null } } } } },
-    });
+    const [rows, trashed] = await Promise.all([
+      this.prisma.newsCategory.findMany({
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
+        include: { translations: true, _count: { select: { posts: { where: { deletedAt: null } } } } },
+      }),
+      // Bài trong thùng rác vẫn chặn xoá chuyên mục (FK Restrict) -> CMS cần biết để giải thích nút Xoá bị khoá
+      this.prisma.newsPost.groupBy({ by: ['categoryId'], where: { deletedAt: { not: null } }, _count: { _all: true } }),
+    ]);
+    const trashedBy = new Map(trashed.map((t) => [t.categoryId, t._count._all]));
     return rows.map((r) => ({
       id: r.id,
       color: r.color as NewsCategoryColor,
       sortOrder: r.sortOrder,
       isActive: r.isActive,
       postCount: r._count.posts,
+      trashedPostCount: trashedBy.get(r.id) ?? 0,
       version: versionOf(r),
       translations: Object.fromEntries(
         r.translations.map((t) => [
@@ -80,6 +86,25 @@ export class NewsTaxonomyService {
     });
     await this.cache.invalidate(NEWS_INVALIDATE);
     return this.findCategory(id);
+  }
+
+  /**
+   * Sắp lại thứ tự: ids = toàn bộ chuyên mục theo thứ tự mới.
+   * SQL thô một lệnh (nguyên tử) và KHÔNG đổi updated_at: thứ tự không phải nội dung của form sửa,
+   * nên form đang mở (If-Match theo updated_at) không bị báo xung đột oan.
+   */
+  async reorderCategories(ids: string[]): Promise<NewsCategoryCms[]> {
+    const existing = await this.prisma.newsCategory.findMany({ select: { id: true } });
+    const known = new Set(existing.map((r) => r.id));
+    if (ids.length !== known.size || ids.some((id) => !known.has(id))) {
+      throw new ConflictException('Danh sách chuyên mục vừa thay đổi — tải lại trang rồi sắp lại');
+    }
+    await this.prisma.$executeRaw`
+      UPDATE news_categories AS c SET sort_order = o.ord - 1
+      FROM unnest(${ids}::text[]) WITH ORDINALITY AS o(id, ord)
+      WHERE c.id = o.id`;
+    await this.cache.invalidate(NEWS_INVALIDATE);
+    return this.listCategories();
   }
 
   async removeCategory(id: string) {

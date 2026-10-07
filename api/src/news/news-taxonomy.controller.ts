@@ -5,7 +5,7 @@ import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { parseIfMatch } from '../common/site-settings.js';
 import { NewsTaxonomyService } from './news-taxonomy.service.js';
-import { UpsertNewsAuthorDto, UpsertNewsCategoryDto, UpsertNewsTagDto } from './dto/news-taxonomy.dto.js';
+import { ReorderNewsCategoriesDto, UpsertNewsAuthorDto, UpsertNewsCategoryDto, UpsertNewsTagDto } from './dto/news-taxonomy.dto.js';
 
 @ApiTags('news (CMS)')
 @Controller('news')
@@ -27,6 +27,13 @@ export class NewsTaxonomyController {
   @ApiOperation({ summary: 'Tạo chuyên mục' })
   createCategory(@Body() dto: UpsertNewsCategoryDto) {
     return this.taxonomy.createCategory(dto);
+  }
+
+  // Khai báo TRƯỚC 'categories/:id' để "order" không bị hiểu là id
+  @Put('categories/order')
+  @ApiOperation({ summary: 'Sắp lại thứ tự chuyên mục (gửi toàn bộ id theo thứ tự mới)' })
+  reorderCategories(@Body() dto: ReorderNewsCategoriesDto) {
+    return this.taxonomy.reorderCategories(dto.ids);
   }
 
   @Put('categories/:id')

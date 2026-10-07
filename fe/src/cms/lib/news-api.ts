@@ -131,6 +131,8 @@ export const newsApi = {
   updateCategory: (id: string, body: CategoryInput, version: string) =>
     apiFetch<NewsCategoryCms>(`/news/categories/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),
   removeCategory: (id: string) => apiFetch<{ success: boolean }>(`/news/categories/${id}`, { method: 'DELETE' }),
+  /** Toàn bộ id theo thứ tự mới; không đổi version của chuyên mục */
+  reorderCategories: (ids: string[]) => apiFetch<NewsCategoryCms[]>('/news/categories/order', { method: 'PUT', body: json({ ids }) }),
 
   // ── Tag ──
   tags: (q?: string) => apiFetch<NewsTagCms[]>(`/news/tags${toQuery({ q })}`),

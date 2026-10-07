@@ -37,7 +37,8 @@ export default function SeoPanel({
   seoDescription: string;
   fallbackTitle: string;
   fallbackDescription: string;
-  noindex: boolean;
+  /** Bỏ trống = không có lựa chọn noindex (vd chuyên mục) */
+  noindex?: boolean;
   onChange: (patch: { seoTitle?: string; seoDescription?: string; noindex?: boolean }) => void;
   titleMax?: number;
   descriptionMax?: number;
@@ -93,15 +94,17 @@ export default function SeoPanel({
         <p className="text-xs leading-relaxed text-slate-600 line-clamp-2">{shownDesc}</p>
       </div>
 
-      <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={noindex}
-          onChange={(e) => onChange({ noindex: e.target.checked })}
-          className="accent-[#5F8A03]"
-        />
-        Ẩn khỏi Google (noindex)
-      </label>
+      {noindex !== undefined && (
+        <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={noindex}
+            onChange={(e) => onChange({ noindex: e.target.checked })}
+            className="accent-[#5F8A03]"
+          />
+          Ẩn khỏi Google (noindex)
+        </label>
+      )}
     </div>
   );
 }
