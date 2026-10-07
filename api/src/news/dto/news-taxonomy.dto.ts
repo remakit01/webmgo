@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  ArrayUnique,
+  IsArray,
   IsBoolean,
   IsIn,
   IsInt,
@@ -69,6 +73,16 @@ class CategoryTranslationsDto {
   @ValidateNested()
   @Type(() => CategoryTranslationDto)
   en?: CategoryTranslationDto | null;
+}
+
+export class ReorderNewsCategoriesDto {
+  @ApiProperty({ type: [String], description: 'TOÀN BỘ id chuyên mục theo thứ tự mới (phần tử đầu = vị trí 0)' })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(500)
+  @ArrayUnique({ message: 'Danh sách chuyên mục bị trùng' })
+  @IsString({ each: true })
+  ids!: string[];
 }
 
 export class UpsertNewsCategoryDto {

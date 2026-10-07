@@ -71,6 +71,7 @@ export default function LocaleTabs({
             }`}
           >
             {tab.label}
+            {tab.hint && <span className="text-xs font-semibold text-amber-700">· {tab.hint}</span>}
             {tab.dirty && (
               <span
                 className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"

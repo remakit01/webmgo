@@ -7,6 +7,8 @@ import type { LucideIcon } from 'lucide-react';
  * (thay cho thuộc tính title chỉ hiện khi rê chuột). Tên đọc cho trình đọc màn hình = label.
  * - href: link nội bộ CMS; external: mở tab mới (có báo "mở tab mới" cho trình đọc màn hình).
  * - tipAlign 'end': tooltip neo mép phải (nút sát mép phải bảng, tránh bị cắt).
+ * - disabled: KHÔNG dùng thuộc tính disabled (nút mất focus -> người dùng bàn phím không đọc được lý do);
+ *   dùng aria-disabled, bỏ qua click, label nên ghi rõ lý do bị khoá.
  */
 export default function IconAction({
   label,
@@ -15,6 +17,7 @@ export default function IconAction({
   href,
   external,
   danger,
+  disabled,
   tipAlign = 'center',
 }: {
   label: string;
@@ -23,10 +26,13 @@ export default function IconAction({
   href?: string;
   external?: boolean;
   danger?: boolean;
+  disabled?: boolean;
   tipAlign?: 'center' | 'end';
 }) {
-  const cls = `inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition-colors cursor-pointer hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#5F8A03] ${
-    danger ? 'hover:text-rose-700 hover:bg-rose-50' : 'hover:text-[#4E7202]'
+  const cls = `inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#5F8A03] ${
+    disabled
+      ? 'opacity-40 cursor-not-allowed'
+      : `cursor-pointer hover:bg-slate-100 ${danger ? 'hover:text-rose-700 hover:bg-rose-50' : 'hover:text-[#4E7202]'}`
   }`;
   const icon = <Icon size={17} aria-hidden="true" />;
   const control = href ? (
@@ -40,7 +46,7 @@ export default function IconAction({
       </Link>
     )
   ) : (
-    <button type="button" onClick={onClick} aria-label={label} className={cls}>
+    <button type="button" onClick={disabled ? undefined : onClick} aria-label={label} aria-disabled={disabled || undefined} className={cls}>
       {icon}
     </button>
   );
