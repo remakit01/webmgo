@@ -10,6 +10,10 @@
       "types": "./dist/locale.d.ts",
       "default": "./dist/locale.js"
     },
+    "./text": {
+      "types": "./dist/text.d.ts",
+      "default": "./dist/text.js"
+    },
     "./date": {
       "types": "./dist/date.d.ts",
       "default": "./dist/date.js"

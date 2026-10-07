@@ -5,7 +5,14 @@ import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { parseIfMatch } from '../common/site-settings.js';
 import { NewsTaxonomyService } from './news-taxonomy.service.js';
-import { ReorderNewsCategoriesDto, UpsertNewsAuthorDto, UpsertNewsCategoryDto, UpsertNewsTagDto } from './dto/news-taxonomy.dto.js';
+import {
+  BulkDeleteNewsTagsDto,
+  NewsTagListQueryDto,
+  ReorderNewsCategoriesDto,
+  UpsertNewsAuthorDto,
+  UpsertNewsCategoryDto,
+  UpsertNewsTagDto,
+} from './dto/news-taxonomy.dto.js';
 
 @ApiTags('news (CMS)')
 @Controller('news')
@@ -52,9 +59,21 @@ export class NewsTaxonomyController {
   // ── Tag ──
 
   @Get('tags')
-  @ApiOperation({ summary: 'Tìm tag (tối đa 200)' })
-  listTags(@Query('q') q?: string) {
-    return this.taxonomy.listTags(q?.slice(0, 100));
+  @ApiOperation({ summary: 'Tìm / lọc tag (tối đa 200)' })
+  listTags(@Query() query: NewsTagListQueryDto) {
+    return this.taxonomy.listTags(query);
+  }
+
+  @Get('tags/stats')
+  @ApiOperation({ summary: 'Số tag: tổng / chưa dịch tiếng Anh / chưa dùng' })
+  tagStats() {
+    return this.taxonomy.tagStats();
+  }
+
+  @Post('tags/bulk-delete')
+  @ApiOperation({ summary: 'Xoá nhiều tag (gỡ khỏi các bài)' })
+  bulkDeleteTags(@Body() dto: BulkDeleteNewsTagsDto) {
+    return this.taxonomy.bulkDeleteTags(dto.ids);
   }
 
   @Post('tags')

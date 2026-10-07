@@ -17,6 +17,7 @@ import { routing, type Locale } from '@/i18n/routing';
 import { getNewsList, getNewsPost } from '@/lib/api';
 import { newsCategoryPath, newsIndexPath, newsPostPath } from '@/lib/news-paths';
 import { absoluteUrl, indexable, localizedAlternates } from '@/lib/seo';
+import AuthorBox, { hasAuthorBox } from '@/components/news/AuthorBox';
 
 // ISR 60s. Chỉ dựng sẵn các bài mới nhất; bài khác dựng lần đầu có người xem (dynamicParams mặc định true)
 export const revalidate = 60;
@@ -231,26 +232,7 @@ export default async function NewsDetailPage({ params }: Props) {
             )}
 
             {/* Hộp tác giả (E-E-A-T): chuyên gia đứng tên bài */}
-            {post.author && (post.author.jobTitle || post.author.bio) && (
-              <section aria-label={t('aboutAuthor')} className="flex gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
-                {post.author.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- ảnh MinIO đã tối ưu
-                  <img src={post.author.avatarUrl} alt={post.author.name} width={56} height={56} loading="lazy" className="w-14 h-14 rounded-full object-cover border border-slate-200 shrink-0" />
-                ) : (
-                  <span aria-hidden="true" className="w-14 h-14 rounded-full bg-remak-green-light text-remak-green-dark font-black text-xl flex items-center justify-center shrink-0">
-                    {post.author.name.charAt(0)}
-                  </span>
-                )}
-                <div className="min-w-0">
-                  <p className="text-[11px] font-black uppercase tracking-wide text-slate-500">{t('aboutAuthor')}</p>
-                  <p className="text-sm font-bold text-slate-900">
-                    {post.author.name}
-                    {post.author.jobTitle && <span className="font-medium text-slate-600"> · {post.author.jobTitle}</span>}
-                  </p>
-                  {post.author.bio && <p className="mt-1 text-sm text-slate-600 leading-relaxed">{post.author.bio}</p>}
-                </div>
-              </section>
-            )}
+            {post.author && hasAuthorBox(post.author) && <AuthorBox author={post.author} label={t('aboutAuthor')} />}
 
             <footer className="pt-6 border-t-2 border-slate-100 space-y-4">
               {post.tags.length > 0 && (

@@ -11,6 +11,7 @@ import type { LucideIcon } from 'lucide-react';
  *   dùng aria-disabled, bỏ qua click, label nên ghi rõ lý do bị khoá.
  */
 export default function IconAction({
+  id,
   label,
   icon: Icon,
   onClick,
@@ -20,6 +21,8 @@ export default function IconAction({
   disabled,
   tipAlign = 'center',
 }: {
+  /** Để trả focus về nút sau khi đóng một thao tác (vd huỷ sửa) */
+  id?: string;
   label: string;
   icon: LucideIcon;
   onClick?: () => void;
@@ -46,7 +49,7 @@ export default function IconAction({
       </Link>
     )
   ) : (
-    <button type="button" onClick={disabled ? undefined : onClick} aria-label={label} aria-disabled={disabled || undefined} className={cls}>
+    <button id={id} type="button" onClick={disabled ? undefined : onClick} aria-label={label} aria-disabled={disabled || undefined} className={cls}>
       {icon}
     </button>
   );

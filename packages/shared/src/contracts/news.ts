@@ -223,6 +223,19 @@ export type NewsListViewFilter = (typeof NEWS_LIST_VIEW_FILTERS)[number];
 export const NEWS_LIST_SORTS = ['updated', 'views_desc', 'views_asc'] as const;
 export type NewsListSort = (typeof NEWS_LIST_SORTS)[number];
 
+/** Lọc danh sách tag CMS: chưa có tên tiếng Anh / chưa gắn bài nào */
+export const NEWS_TAG_FILTERS = ['missing_en', 'unused'] as const;
+export type NewsTagFilter = (typeof NEWS_TAG_FILTERS)[number];
+/** Sắp danh sách tag CMS: mới tạo (mặc định) / dùng nhiều nhất */
+export const NEWS_TAG_SORTS = ['recent', 'usage'] as const;
+export type NewsTagSort = (typeof NEWS_TAG_SORTS)[number];
+/** Số đếm cho nút lọc tag */
+export interface NewsTagStats {
+  total: number;
+  missingEn: number;
+  unused: number;
+}
+
 /** Bản dịch của chuyên mục / tag / tác giả trong CMS */
 export interface NewsCategoryTranslationCms {
   name: string;
