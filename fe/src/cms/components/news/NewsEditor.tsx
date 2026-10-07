@@ -94,7 +94,7 @@ function countDocWords(title: string, sapo: string, doc: RichDoc): { words: numb
   return { words, minutes };
 }
 
-export default function NewsEditor({ postId }: { postId?: string }) {
+export default function NewsEditor({ postId, initialTab = 'vi' }: { postId?: string; initialTab?: Locale }) {
   const router = useRouter();
   const confirm = useConfirm();
   const showToast = useToast();
@@ -103,7 +103,7 @@ export default function NewsEditor({ postId }: { postId?: string }) {
   const [meta, setMeta] = useState<MetaDraft>(EMPTY_META);
   const [drafts, setDrafts] = useState<Drafts>({ vi: EMPTY_TRANSLATION, en: EMPTY_TRANSLATION });
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [tab, setTab] = useState<Locale>('vi');
+  const [tab, setTab] = useState<Locale>(initialTab);
   const [busy, setBusy] = useState<Busy>(postId ? 'load' : null);
   const [banner, setBanner] = useState<{ message: string; conflict: boolean } | null>(null);
   const [errors, setErrors] = useState<Partial<Record<Locale, Record<string, string>>>>({});
