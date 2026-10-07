@@ -34,8 +34,10 @@ export default function HomeSpecMatrix() {
       {/* Filter tabs: Mobile Grid 2x2 đối xứng cân đối, Desktop 1 hàng Segmented Capsule */}
       <div className="flex justify-center mb-5 sm:mb-8" role="tablist" aria-label="Lọc theo quy cách thi công">
         <div className="grid grid-cols-2 sm:flex sm:flex-row items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border-2 border-slate-300 w-full max-w-sm sm:max-w-fit shadow-sm">
-          {FILTER_TABS.map(tab => {
+          {FILTER_TABS.map((tab, idx) => {
             const isActive = activeCategory === tab.id;
+            const isFullWidthMobile = FILTER_TABS.length % 2 !== 0 && idx === 0;
+
             return (
               <button
                 key={tab.id}
@@ -44,6 +46,8 @@ export default function HomeSpecMatrix() {
                 aria-selected={isActive}
                 onClick={() => setActiveCategory(tab.id)}
                 className={`px-3.5 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 text-center select-none flex items-center justify-center border-2 ${
+                  isFullWidthMobile ? 'col-span-2' : 'col-span-1'
+                } ${
                   isActive
                     ? 'bg-[#5F8A03] text-white border-[#4E7202] shadow-md shadow-[#5F8A03]/30 font-extrabold'
                     : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:text-slate-900 hover:bg-slate-50'
