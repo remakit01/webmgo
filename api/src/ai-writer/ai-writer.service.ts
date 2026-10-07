@@ -613,7 +613,7 @@ export class AiWriterService {
         status: true,
         focusKeyword: true,
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: [{ updatedAt: 'desc' }, { postId: 'desc' }],
       take: 1000,
     });
     const kw = normalizeText(keyword);
@@ -705,7 +705,7 @@ export class AiWriterService {
   private async categories() {
     const rows = await this.prisma.newsCategory.findMany({
       where: { isActive: true },
-      orderBy: { sortOrder: 'asc' },
+      orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
       select: {
         id: true,
         translations: { where: { locale: 'vi' }, select: { name: true } },
@@ -1046,7 +1046,7 @@ export class AiWriterService {
     const candidates = await this.prisma.newsPostTranslation.findMany({
       where: { locale: 'vi', status: 'PUBLISHED', publishedAt: { lte: new Date() }, post: { deletedAt: null } },
       select: { postId: true, title: true, focusKeyword: true },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ publishedAt: 'desc' }, { postId: 'desc' }],
       take: 300,
     });
     const top = candidates
@@ -1215,7 +1215,7 @@ export class AiWriterService {
         focusKeyword: true,
         publishedAt: true,
       },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ publishedAt: 'desc' }, { postId: 'desc' }],
       take: 300,
     });
     const ranked = posts

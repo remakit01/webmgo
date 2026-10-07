@@ -198,7 +198,7 @@ describe('NewsPostsService.list — sắp theo lượt xem', () => {
     (service as unknown as { prisma: { newsPost: { count: () => Promise<number> } } }).prisma.newsPost.count = async () => 1;
     await service.list({ sort: 'views_desc', page: 2, pageSize: 3 });
     const args = (findMany.mock.calls[0] as unknown as [{ orderBy: unknown; skip: number; take: number }])[0];
-    expect(args.orderBy).toEqual([{ viewCount: 'desc' }, { updatedAt: 'desc' }]);
+    expect(args.orderBy).toEqual([{ viewCount: 'desc' }, { updatedAt: 'desc' }, { id: 'desc' }]);
     expect(args).toMatchObject({ skip: 3, take: 3 });
     expect(stats.viewsForPosts).toHaveBeenCalledWith(['a'], undefined);
   });
@@ -215,5 +215,21 @@ describe('NewsPostsService.list — lọc ngày cập nhật theo giờ Việt N
     const range = where.AND.find((c) => 'updatedAt' in c)!.updatedAt as { gte: Date; lt: Date };
     expect(range.gte.toISOString()).toBe('2026-10-06T17:00:00.000Z');
     expect(range.lt.toISOString()).toBe('2026-10-07T17:00:00.000Z');
+  });
+});
+
+describe('NewsPostsService.list — tìm theo tiêu đề', () => {
+  it('truy vấn search_normalize + LIKE có thoát ký tự, lọc theo id tìm được', async () => {
+    const findMany = vi.fn(async () => []);
+    const $queryRaw = vi.fn(async () => [{ post_id: 'p1' }, { post_id: 'p2' }]);
+    const prisma = { newsPost: { findMany, count: vi.fn(async () => 0) }, $queryRaw };
+    const stats = { viewsForPosts: vi.fn(async () => new Map()), sinceDay: vi.fn() };
+    const service = new NewsPostsService(prisma as never, {} as never, {} as never, {} as never, {} as never, stats as never);
+    await service.list({ q: '  chong chay 50% ' });
+    const [strings, pattern] = $queryRaw.mock.calls[0] as unknown as [TemplateStringsArray, string];
+    expect(strings.join('?')).toContain("public.search_normalize(title) LIKE public.search_normalize(?) ESCAPE '\\'");
+    expect(pattern).toBe('%chong chay 50\\%%');
+    const where = (findMany.mock.calls[0] as unknown as [{ where: { AND: Record<string, unknown>[] } }])[0].where;
+    expect(where.AND).toContainEqual({ id: { in: ['p1', 'p2'] } });
   });
 });

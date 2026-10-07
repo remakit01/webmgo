@@ -29,7 +29,7 @@ export class NewsTaxonomyService {
 
   async listCategories(): Promise<NewsCategoryCms[]> {
     const rows = await this.prisma.newsCategory.findMany({
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
       include: { translations: true, _count: { select: { posts: { where: { deletedAt: null } } } } },
     });
     return rows.map((r) => ({
@@ -129,7 +129,7 @@ export class NewsTaxonomyService {
   async listTags(q?: string): Promise<NewsTagCms[]> {
     const rows = await this.prisma.newsTag.findMany({
       where: q?.trim() ? { translations: { some: { name: { contains: q.trim(), mode: 'insensitive' } } } } : undefined,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: 200,
       include: { translations: true, _count: { select: { posts: true } } },
     });
@@ -205,7 +205,7 @@ export class NewsTaxonomyService {
 
   async listAuthors(): Promise<NewsAuthorCms[]> {
     const rows = await this.prisma.newsAuthor.findMany({
-      orderBy: { name: 'asc' },
+      orderBy: [{ name: 'asc' }, { id: 'asc' }],
       include: { translations: true, _count: { select: { posts: { where: { deletedAt: null } } } } },
     });
     return rows.map((r) => ({

@@ -52,7 +52,7 @@ export class BannersService {
     const [banners, swiper] = await Promise.all([
       this.prisma.banner.findMany({
         where: { isActive: true, ...NOT_DELETED },
-        orderBy: { sortOrder: 'asc' },
+        orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
         select: {
           id: true,
           title: true,
@@ -74,7 +74,7 @@ export class BannersService {
   // ── CMS ───────────────────────────────────────────────────────────────────
 
   findAll() {
-    return this.prisma.banner.findMany({ where: NOT_DELETED, orderBy: { sortOrder: 'asc' } });
+    return this.prisma.banner.findMany({ where: NOT_DELETED, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] });
   }
 
   async create(dto: CreateBannerDto, file?: Express.Multer.File) {
@@ -153,7 +153,7 @@ export class BannersService {
   async findTrash() {
     const banners = await this.prisma.banner.findMany({
       where: { deletedAt: { not: null } },
-      orderBy: { deletedAt: 'desc' },
+      orderBy: [{ deletedAt: 'desc' }, { id: 'desc' }],
       include: { deletedBy: { select: { id: true, username: true, email: true } } },
     });
     const { retentionDays } = await this.getTrashSettings();

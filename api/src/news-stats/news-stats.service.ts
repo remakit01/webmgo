@@ -132,7 +132,7 @@ export class NewsStatsService {
         by: ['postId'],
         where: { locale, day: { gte: dayStart(now, days - 1) } },
         _sum: { views: true },
-        orderBy: { _sum: { views: 'desc' } },
+        orderBy: [{ _sum: { views: 'desc' } }, { postId: 'asc' }],
         take: limit * 3, // dư để bỏ bài đã gỡ / chưa hiển thị
       });
       return this.withTitles(ranked.map((r) => ({ postId: r.postId, locale, views: num(r._sum.views) })), now, limit);
@@ -225,7 +225,7 @@ export class NewsStatsService {
         by: ['postId', 'locale'],
         where: { day: { gte: since } },
         _sum: { views: true, reads: true },
-        orderBy: { _sum: { views: 'desc' } },
+        orderBy: [{ _sum: { views: 'desc' } }, { postId: 'asc' }, { locale: 'asc' }],
         take: 20,
       }),
     ]);

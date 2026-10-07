@@ -56,13 +56,13 @@ export class AiRetrieverService {
       this.prisma.aiKnowledge.findMany({
         where: { status: 'ACTIVE' },
         select: { id: true, kind: true, title: true, content: true, tags: true, sourceUrl: true, pinned: true },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
         take: 3000,
       }),
       this.prisma.newsPostTranslation.findMany({
         where: { locale: 'vi', status: 'PUBLISHED', publishedAt: { lte: new Date() }, post: { deletedAt: null } },
         select: { postId: true, title: true, slug: true, sapo: true, contentText: true },
-        orderBy: { publishedAt: 'desc' },
+        orderBy: [{ publishedAt: 'desc' }, { postId: 'desc' }],
         take: 500,
       }),
     ]);

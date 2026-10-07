@@ -12,6 +12,7 @@ import { ContentCacheService } from '../content-cache/content-cache.service.js';
 import { SlugRedirectService } from '../slug-redirect/slug-redirect.service.js';
 import { NewsStatsService } from '../news-stats/news-stats.service.js';
 import { dayKeyToUtcRange } from '@remak/shared/date';
+import { likeContainsPattern } from '../common/search.js';
 import { assertUpdated, assertVersion } from '../common/versioning.js';
 import { resolveUniqueSlug } from '../common/unique-slug.js';
 import type { NewsPostTranslation, Prisma, TranslationOrigin } from '../generated/prisma/client.js';
@@ -58,7 +59,8 @@ export class NewsPostsService {
     if (query.status) and.push({ translations: { some: { locale, status: query.status } } });
     if (query.missing) and.push({ translations: { none: { locale: query.missing } } });
     if (query.q?.trim()) {
-      and.push({ translations: { some: { title: { contains: query.q.trim(), mode: 'insensitive' } } } });
+      // Không phân biệt hoa thường + dấu ("chong chay" khớp "Chống cháy"), dùng index trigram
+      and.push({ id: { in: await this.searchPostIdsByTitle(query.q) } });
     }
     // Khoảng ngày cập nhật theo GIỜ VIỆT NAM: [00:00 VN ngày đầu, 00:00 VN ngày sau ngày cuối)
     if (query.fromDate || query.toDate) {
@@ -85,14 +87,15 @@ export class NewsPostsService {
     const [rows, total] = await Promise.all([
       this.prisma.newsPost.findMany({
         where,
+        // Luôn kết thúc bằng id (unique): bài trùng mốc thời gian / lượt xem không nhảy trang, lặp hay mất khi phân trang
         orderBy: byViews
           ? // Mọi thời gian: ORDER BY cột đếm sẵn, phân trang ngay trong DB
-            [{ viewCount: query.sort === 'views_desc' ? 'desc' : 'asc' }, { updatedAt: 'desc' }]
+            [{ viewCount: query.sort === 'views_desc' ? 'desc' : 'asc' }, { updatedAt: 'desc' }, { id: 'desc' }]
           : query.trash
-            ? { deletedAt: 'desc' }
+            ? [{ deletedAt: 'desc' }, { id: 'desc' }]
             : query.featured
-              ? [{ featuredOrder: { sort: 'asc', nulls: 'last' } }, { updatedAt: 'desc' }]
-              : { updatedAt: 'desc' },
+              ? [{ featuredOrder: { sort: 'asc', nulls: 'last' } }, { updatedAt: 'desc' }, { id: 'desc' }]
+              : [{ updatedAt: 'desc' }, { id: 'desc' }],
         skip,
         take,
         select: cmsListSelect,
@@ -112,6 +115,20 @@ export class NewsPostsService {
   }
 
   /**
+   * id các bài có tiêu đề (bất kỳ ngôn ngữ) chứa từ khoá, không phân biệt hoa thường và dấu tiếng Việt.
+   * Prisma không gọi được hàm SQL trong where -> truy vấn thô; index GIN trigram
+   * "news_post_translations_title_search_idx" trên search_normalize(title) (migration 20261009000000_news_title_search).
+   */
+  private async searchPostIdsByTitle(q: string): Promise<string[]> {
+    const pattern = likeContainsPattern(q);
+    if (!pattern) return [];
+    const rows = await this.prisma.$queryRaw<{ post_id: string }[]>`
+      SELECT DISTINCT post_id FROM news_post_translations
+      WHERE public.search_normalize(title) LIKE public.search_normalize(${pattern}) ESCAPE '\\'`;
+    return rows.map((r) => r.post_id);
+  }
+
+  /**
    * Sắp theo lượt xem TRONG KỲ: lượt xem nằm ở bảng thống kê gộp ngày nên không ORDER BY trực tiếp được —
    * lấy id các bài khớp bộ lọc (cột nhẹ), cộng lượt xem 1 lần, sắp, cắt trang rồi mới đọc chi tiết đúng các bài của trang.
    * Hợp với quy mô CMS (vài trăm – vài nghìn bài).
@@ -125,7 +142,7 @@ export class NewsPostsService {
     skip: number,
     take: number,
   ): Promise<Paginated<NewsPostListItemCms>> {
-    const ids = await this.prisma.newsPost.findMany({ where, orderBy: { updatedAt: 'desc' }, select: { id: true } });
+    const ids = await this.prisma.newsPost.findMany({ where, orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }], select: { id: true } });
     const views = await this.stats.viewsForPosts(
       ids.map((r) => r.id),
       days,

@@ -72,8 +72,8 @@ export class NewsPublicService {
           this.prisma.newsPostTranslation.findMany({
             where,
             orderBy: featured
-              ? [{ post: { featuredOrder: { sort: 'asc', nulls: 'last' } } }, { publishedAt: 'desc' }]
-              : [{ publishedAt: 'desc' }],
+              ? [{ post: { featuredOrder: { sort: 'asc', nulls: 'last' } } }, { publishedAt: 'desc' }, { postId: 'desc' }]
+              : [{ publishedAt: 'desc' }, { postId: 'desc' }], // đã lọc 1 locale -> postId unique
             skip,
             take,
             select: listItemSelect(locale),
@@ -117,7 +117,7 @@ export class NewsPublicService {
     return this.redis.cacheOrLoad(cacheKey('categories', locale), NEWS_CACHE_TTL, async () => {
       const rows = await this.prisma.newsCategory.findMany({
         where: { isActive: true },
-        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
         select: categorySelect(locale),
       });
       return rows.map((r) => toCategoryPublic(r, locale));
@@ -131,7 +131,7 @@ export class NewsPublicService {
       const rows = await this.prisma.newsPostTranslation.findMany({
         where: { status: 'PUBLISHED', publishedAt: { lte: now }, post: { deletedAt: null } },
         select: { postId: true, locale: true, slug: true, updatedAt: true },
-        orderBy: { publishedAt: 'desc' },
+        orderBy: [{ publishedAt: 'desc' }, { postId: 'desc' }, { locale: 'asc' }], // mọi locale -> (postId, locale) unique
       });
       const byPost = new Map<string, NewsSitemapEntry>();
       for (const r of rows) {
@@ -202,7 +202,7 @@ export class NewsPublicService {
   private async related(locale: Locale, post: NewsPostPublic) {
     const rows = await this.prisma.newsPostTranslation.findMany({
       where: { ...visibleWhere(locale), postId: { not: post.id }, post: { deletedAt: null, categoryId: post.category.id } },
-      orderBy: { publishedAt: 'desc' },
+      orderBy: [{ publishedAt: 'desc' }, { postId: 'desc' }],
       take: NEWS_RELATED_LIMIT,
       select: listItemSelect(locale),
     });
