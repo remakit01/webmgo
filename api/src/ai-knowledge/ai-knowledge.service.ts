@@ -61,7 +61,7 @@ export class AiKnowledgeService {
         : {}),
     };
     const [rows, total] = await Promise.all([
-      this.prisma.aiKnowledge.findMany({ where, orderBy: [{ pinned: 'desc' }, { updatedAt: 'desc' }], skip, take }),
+      this.prisma.aiKnowledge.findMany({ where, orderBy: [{ pinned: 'desc' }, { updatedAt: 'desc' }, { id: 'desc' }], skip, take }),
       this.prisma.aiKnowledge.count({ where }),
     ]);
     const indexed = await this.index.indexedKnowledgeIds(rows.map((r) => r.id));
