@@ -138,12 +138,6 @@ export default function HomeHeroSection({ hero, previewImageUrl }: HomeHeroSecti
               
               {/* 1. Trust Pill & Tiêu đề chính */}
               <div className="space-y-2">
-                <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-[#5F8A03]/10 border border-[#5F8A03]/25 text-[#4E7202] text-[11px] sm:text-xs font-bold tracking-wide w-fit">
-                  <span>Tiêu Chuẩn PCCC QCVN 06:2022/BXD</span>
-                  <span className="text-slate-400">•</span>
-                  <span>Remak® FireOFF</span>
-                </div>
-
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-tight tracking-tight text-balance">
                   {hero.title}
                   {hero.subtitle && (
