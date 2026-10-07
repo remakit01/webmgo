@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowDown, ArrowUp, ArrowUpDown, ExternalLink, FileText, ImageOff, Pencil, RotateCcw, SearchX, Star, Trash2 } from 'lucide-react';
 import type { NewsListSort } from '@remak/shared/contracts/news';
@@ -285,8 +285,219 @@ function UpdatedCell({ item, inTrash }: { item: Item; inTrash: boolean }) {
   );
 }
 
-function RowActions({ item, inTrash, isAdmin, onTrash, onRestore, onPurge }: Props & { item: Item; inTrash: boolean }) {
+function EditLocaleDropdown({ item }: { item: Item }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', handleDown);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleDown);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
+
   const vi = item.locales.vi;
+  const en = item.locales.en;
+
+  return (
+    <div ref={ref} className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label="Chọn ngôn ngữ để sửa bài viết"
+        title="Sửa bài viết (chọn ngôn ngữ)"
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#5F8A03] ${
+          open ? 'bg-[#F4F9E8] text-[#4E7202] ring-2 ring-[#7CB305]/40' : 'text-slate-600 hover:bg-slate-100 hover:text-[#4E7202]'
+        }`}
+      >
+        <Pencil size={17} aria-hidden="true" />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Tùy chọn ngôn ngữ chỉnh sửa"
+          className="absolute right-0 top-full mt-1.5 z-30 w-64 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100"
+        >
+          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 mb-1">
+            Chọn bản dịch để chỉnh sửa
+          </div>
+
+          {/* Bản Tiếng Việt */}
+          <Link
+            href={`/admin/news/${item.id}?locale=vi`}
+            onClick={() => setOpen(false)}
+            role="menuitem"
+            className="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-100 hover:text-[#4E7202]"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-6 items-center justify-center rounded bg-red-100 text-[10px] font-black text-red-700">
+                VI
+              </span>
+              <span className="font-semibold text-slate-900">Tiếng Việt</span>
+            </div>
+            <StatusBadge status={vi?.status ?? null} stale={vi?.stale} className="text-[11px] py-0 px-1.5" />
+          </Link>
+
+          {/* Bản Tiếng Anh */}
+          <Link
+            href={`/admin/news/${item.id}?locale=en`}
+            onClick={() => setOpen(false)}
+            role="menuitem"
+            className="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-100 hover:text-[#4E7202]"
+          >
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 w-6 items-center justify-center rounded bg-blue-100 text-[10px] font-black text-blue-700">
+                EN
+              </span>
+              <span className="font-semibold text-slate-900">Tiếng Anh</span>
+            </div>
+            <StatusBadge status={en?.status ?? null} stale={en?.stale} className="text-[11px] py-0 px-1.5" />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ViewWebsiteDropdown({ item }: { item: Item }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', handleDown);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleDown);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [open]);
+
+  const vi = item.locales.vi;
+  const en = item.locales.en;
+  const isViPublished = vi?.status === 'PUBLISHED' && Boolean(vi?.slug);
+  const isEnPublished = en?.status === 'PUBLISHED' && Boolean(en?.slug);
+
+  if (!isViPublished && !isEnPublished) return null;
+
+  return (
+    <div ref={ref} className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label="Xem bài viết trên website"
+        title="Xem trên website (chọn ngôn ngữ)"
+        className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#5F8A03] ${
+          open ? 'bg-[#F4F9E8] text-[#4E7202] ring-2 ring-[#7CB305]/40' : 'text-slate-600 hover:bg-slate-100 hover:text-[#4E7202]'
+        }`}
+      >
+        <ExternalLink size={17} aria-hidden="true" />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Tùy chọn xem bài viết trên website"
+          className="absolute right-0 top-full mt-1.5 z-30 w-64 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100"
+        >
+          <div className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 mb-1">
+            Xem trên website (tab mới)
+          </div>
+
+          {/* Bản Tiếng Việt */}
+          {isViPublished ? (
+            <a
+              href={publicPath('vi', vi.slug)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              role="menuitem"
+              className="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-100 hover:text-[#4E7202]"
+            >
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-6 items-center justify-center rounded bg-red-100 text-[10px] font-black text-red-700">
+                  VI
+                </span>
+                <span className="font-semibold text-slate-900">Tiếng Việt</span>
+              </div>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4E7202]">
+                Mở xem <ExternalLink size={11} />
+              </span>
+            </a>
+          ) : (
+            <div className="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-400 opacity-60">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-6 items-center justify-center rounded bg-slate-100 text-[10px] font-black text-slate-500">
+                  VI
+                </span>
+                <span>Tiếng Việt</span>
+              </div>
+              <span className="text-[11px] italic text-slate-400">Chưa xuất bản</span>
+            </div>
+          )}
+
+          {/* Bản Tiếng Anh */}
+          {isEnPublished ? (
+            <a
+              href={publicPath('en', en.slug)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              role="menuitem"
+              className="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-100 hover:text-[#4E7202]"
+            >
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-6 items-center justify-center rounded bg-blue-100 text-[10px] font-black text-blue-700">
+                  EN
+                </span>
+                <span className="font-semibold text-slate-900">Tiếng Anh</span>
+              </div>
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#4E7202]">
+                Mở xem <ExternalLink size={11} />
+              </span>
+            </a>
+          ) : (
+            <div className="flex items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-400 opacity-60">
+              <div className="flex items-center gap-2">
+                <span className="flex h-5 w-6 items-center justify-center rounded bg-slate-100 text-[10px] font-black text-slate-500">
+                  EN
+                </span>
+                <span>Tiếng Anh</span>
+              </div>
+              <span className="text-[11px] italic text-slate-400">{en ? 'Chưa xuất bản' : 'Chưa có bản dịch'}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RowActions({ item, inTrash, isAdmin, onTrash, onRestore, onPurge }: Props & { item: Item; inTrash: boolean }) {
   return (
     <div className="flex items-center justify-end gap-1">
       {inTrash ? (
@@ -296,8 +507,8 @@ function RowActions({ item, inTrash, isAdmin, onTrash, onRestore, onPurge }: Pro
         </>
       ) : (
         <>
-          <IconAction label="Sửa bài viết" icon={Pencil} href={`/admin/news/${item.id}`} />
-          {vi?.status === 'PUBLISHED' && <IconAction label="Xem trên website" icon={ExternalLink} href={publicPath('vi', vi.slug)} external />}
+          <EditLocaleDropdown item={item} />
+          <ViewWebsiteDropdown item={item} />
           <IconAction label="Chuyển vào thùng rác" icon={Trash2} danger onClick={() => onTrash(item)} tipAlign="end" />
         </>
       )}
