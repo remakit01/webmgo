@@ -33,6 +33,7 @@
     "db:seed": "prisma db seed",
     "db:seed:news": "tsx prisma/seed-news.ts",
     "db:seed:ai-knowledge": "tsx prisma/seed-ai-knowledge.ts",
+    "db:seed:products": "tsx prisma/seed-products.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

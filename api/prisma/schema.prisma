@@ -46,36 +46,417 @@ enum Role {
   @@map("role")
 }
 
-// ─── Products ────────────────────────────────────────────────────────────────
+// ─── Sản phẩm tấm MgO (docs/catalog-mgo/MODEL_*.md) ─────────────────────────
+// Product (1 dòng tấm = 1 trang web) + ProductTranslation (vi/en, SEO) + ProductTechnicalSpec (1-1: TDS chung, 5 nhóm
+// physical / mechanical / thermalFire / acousticMoisture / chemistrySafety) + ProductVariant (1-N: mỗi độ dày = NGUỒN DUY NHẤT
+// cho kg/tấm, EI, giá, tình trạng hàng) + phần mở rộng 1-1 theo loại (SIP / Sàn / Trang trí) + Chứng chỉ.
+// Số đo lưu dạng khoảng min / max (vd "≥ 25 MPa" -> min 25), không lưu chữ; thiếu dữ liệu = NULL, KHÔNG có giá trị mặc định bịa.
+// Tập giá trị hay mở rộng (bề mặt, màu, loại sàn phủ…) lưu text, kiểm bằng hằng số @remak/shared/contracts/product.
 
+/// Loại dòng sản phẩm — quyết định phần mở rộng nào được dùng
+enum ProductType {
+  STANDARD
+  SIP_PANEL
+  FLOOR
+  DECORATIVE
+  LITECORE
+  CUSTOM
+
+  @@map("product_type")
+}
+
+/// Cách hiển thị giá: có giá cụ thể / liên hệ báo giá (không xuất giá ra Google)
+enum PriceMode {
+  FIXED
+  CONTACT
+
+  @@map("price_mode")
+}
+
+/// Tình trạng hàng — khớp schema.org ItemAvailability
+enum StockStatus {
+  IN_STOCK
+  LIMITED
+  PRE_ORDER
+  BACK_ORDER
+  OUT_OF_STOCK
+  DISCONTINUED
+
+  @@map("stock_status")
+}
+
+enum SaleUnit {
+  SHEET
+  M2
+
+  @@map("sale_unit")
+}
+
+/// Kiểu cạnh tấm
+enum EdgeProfile {
+  SQUARE
+  TONGUE_GROOVE
+  SHIPLAP
+  V_GROOVE
+
+  @@map("edge_profile")
+}
+
+/// Lõi cách nhiệt của panel SIP
+enum SipCoreMaterial {
+  EPS
+  XPS
+  PU
+  PIR
+  PHENOLIC
+
+  @@map("sip_core_material")
+}
+
+/// Công nghệ hoàn thiện bề mặt tấm trang trí FireSafe
+enum DecorativeFinishType {
+  HPL
+  PVC_FILM
+  INTUMESCENT_PAINT
+  PRINT_3D
+
+  @@map("decorative_finish_type")
+}
+
+/// Dòng tấm MgO (= 1 trang sản phẩm)
 model Product {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  name        String
-  description String?
-  isActive    Boolean  @default(true) @map("is_active")
-  sortOrder   Int      @default(0) @map("sort_order")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id            String      @id @default(cuid())
+  productType   ProductType @default(STANDARD) @map("product_type")
+  /// Tên thương mại, vd "Remak® FireOFF MgO" (không dịch)
+  tradeName     String?     @map("trade_name")
+  coverImageKey String?     @map("cover_image_key")
+  coverImageUrl String?     @map("cover_image_url")
+  /// [{ url, key?, width?, height? }] — chú thích ảnh theo ngôn ngữ ở ProductTranslation.galleryAlts
+  gallery       Json        @default("[]")
+  isFeatured    Boolean     @default(false) @map("is_featured")
+  sortOrder     Int         @default(0) @map("sort_order")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt     DateTime?   @map("deleted_at") @db.Timestamptz(3)
 
-  specs ProductSpec[]
+  translations      ProductTranslation[]
+  technicalSpec     ProductTechnicalSpec?
+  variants          ProductVariant[]
+  sipSpec           SipPanelSpec?
+  floorSpec         FloorBoardSpec?
+  decorativeSpec    DecorativeFinishSpec?
+  decorativeOptions DecorativeFinishOption[]
+  certificates      ProductCertificate[]
 
+  // Danh sách web: chưa xoá, theo thứ tự
+  @@index([sortOrder, id], map: "products_live_idx", where: raw("deleted_at IS NULL"))
   @@map("products")
 }
 
-model ProductSpec {
-  id           String  @id @default(cuid())
-  productId    String  @map("product_id")
-  thickness    Float
-  fireRating   String? @map("fire_rating") // EI value (e.g. "EI 60")
-  density      Float?
-  bendStrength Float?  @map("bend_strength")
+model ProductTranslation {
+  productId        String            @map("product_id")
+  locale           ContentLocale
+  status           PublishStatus     @default(DRAFT)
+  publishedAt      DateTime?         @map("published_at") @db.Timestamptz(3)
+  name             String
+  shortName        String?           @map("short_name")
+  slug             String
+  tagline          String?
+  summary          String            @default("")
+  /// RichDoc (@remak/shared/rich-content)
+  description      Json              @default("{\"type\":\"doc\",\"content\":[]}")
+  highlights       String[]          @default([])
+  /// [{ title, desc }] — gồm cả tuyên bố marketing (LiteCore "nhanh gấp 5 lần"…)
+  advantages       Json              @default("[]")
+  /// [{ q, a }]
+  faqs             Json              @default("[]")
+  coverAlt         String            @default("") @map("cover_alt")
+  galleryAlts      String[]          @default([]) @map("gallery_alts")
+  focusKeyword     String?           @map("focus_keyword")
+  seoTitle         String?           @map("seo_title")
+  seoDescription   String?           @map("seo_description")
+  ogImageUrl       String?           @map("og_image_url")
+  noindex          Boolean           @default(false)
+  origin           TranslationOrigin @default(HUMAN)
+  contentUpdatedAt DateTime          @default(now()) @map("content_updated_at") @db.Timestamptz(3)
+  sourceUpdatedAt  DateTime?         @map("source_updated_at") @db.Timestamptz(3)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  // FK + ON DELETE CASCADE: không có index thì xoá 1 sản phẩm phải quét toàn bảng thông số
-  @@index([productId])
-  @@map("product_specs")
+  @@id([productId, locale])
+  @@unique([locale, slug])
+  @@map("product_translations")
+}
+
+/// TDS chung của dòng tấm (1-1). Code gom thành 5 sub-model: xem toSpecView() ở @remak/shared/contracts/product
+model ProductTechnicalSpec {
+  productId String @id @map("product_id")
+
+  // ── physical ──
+  /// Khổ tiêu chuẩn: [{ widthMm, lengthMm }]
+  standardSizes Json         @default("[]") @map("standard_sizes")
+  edgeProfile   EdgeProfile? @map("edge_profile")
+  /// Khoá màu cốt tấm (OFF_WHITE, LIGHT_GREY…)
+  coreColor     String?      @map("core_color")
+  /// Khoá hoàn thiện bề mặt (SMOOTH, SANDED, HPL…)
+  surfaceFinish String?      @map("surface_finish")
+
+  // ── mechanical ──
+  densityMinKgM3      Int?     @map("density_min_kg_m3")
+  densityMaxKgM3      Int?     @map("density_max_kg_m3")
+  /// LiteCore: nhẹ hơn ~70% so với tấm thường
+  densityReductionPct Decimal? @map("density_reduction_pct") @db.Decimal(5, 2)
+  flexuralMinMpa      Decimal? @map("flexural_min_mpa") @db.Decimal(6, 2)
+  flexuralMaxMpa      Decimal? @map("flexural_max_mpa") @db.Decimal(6, 2)
+  /// Cường độ uốn chiều ngang (tối thiểu)
+  flexuralCrossMinMpa Decimal? @map("flexural_cross_min_mpa") @db.Decimal(6, 2)
+  /// Khoá mức bám vít (EXCELLENT, GOOD, STANDARD)
+  screwHoldingRating  String?  @map("screw_holding_rating")
+
+  // ── thermalFire ── (dải EI không lưu ở đây: suy ra từ các độ dày)
+  /// Cấp phản ứng với lửa, vd "A1"
+  reactionToFireClass    String?  @map("reaction_to_fire_class")
+  /// Tiêu chuẩn cấp cháy vật liệu: ASTM E84, EN 13501-1, UL 055…
+  fireClassStandards     String[] @default([]) @map("fire_class_standards")
+  maxTemperatureC        Int?     @map("max_temperature_c")
+  thermalConductivityWmk Decimal? @map("thermal_conductivity_wmk") @db.Decimal(6, 4)
+
+  // ── acousticMoisture ──
+  soundReductionMinDb     Int?     @map("sound_reduction_min_db")
+  soundReductionMaxDb     Int?     @map("sound_reduction_max_db")
+  waterAbsorptionMaxPct   Decimal? @map("water_absorption_max_pct") @db.Decimal(5, 2)
+  thicknessSwellingMaxPct Decimal? @map("thickness_swelling_max_pct") @db.Decimal(5, 3)
+  moldResistant           Boolean? @map("mold_resistant")
+
+  // ── chemistrySafety ──
+  /// Khoá pha tinh thể (PHASE_517…)
+  crystalPhase        String?  @map("crystal_phase")
+  mgoContentMinPct    Decimal? @map("mgo_content_min_pct") @db.Decimal(5, 2)
+  chlorideMaxPct      Decimal? @map("chloride_max_pct") @db.Decimal(5, 3)
+  asbestosFree        Boolean? @map("asbestos_free")
+  formaldehydeMgL     Decimal? @map("formaldehyde_mg_l") @db.Decimal(6, 3)
+  /// Khoá mức VOC (VERY_LOW, LOW…)
+  vocLevel            String?  @map("voc_level")
+  /// LEED, GREEN STAR…
+  greenCertifications String[] @default([]) @map("green_certifications")
+
+  /// Chỉ tiêu mới chưa có cột: [{ key, value, unit? }]
+  extraSpecs Json     @default("[]") @map("extra_specs")
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_technical_specs")
+}
+
+/// Quy cách theo độ dày (1-N) — nguồn duy nhất cho kg/tấm, EI, cường độ uốn theo độ dày, giá, tình trạng hàng
+model ProductVariant {
+  id                   String      @id @default(cuid())
+  productId            String      @map("product_id")
+  sku                  String?     @unique
+  thicknessMm          Decimal     @map("thickness_mm") @db.Decimal(5, 2)
+  /// Khổ tấm — bắt buộc (cùng độ dày có thể có nhiều khổ, vd sàn 2440×1220 và 2700×600; unique cần giá trị khác NULL)
+  widthMm              Int         @map("width_mm")
+  lengthMm             Int         @map("length_mm")
+  weightKg             Decimal?    @map("weight_kg") @db.Decimal(8, 2)
+  /// Ghi đè tỷ trọng của dòng khi độ dày này khác
+  densityKgM3          Int?        @map("density_kg_m3")
+  fireRatingMinMinutes Int?        @map("fire_rating_min_minutes")
+  fireRatingMaxMinutes Int?        @map("fire_rating_max_minutes")
+  /// Nhãn hiển thị đầy đủ, vd "EI 45 – EI 60", "Euroclass A1, EI 30"
+  fireRatingLabel      String?     @map("fire_rating_label")
+  flexuralMinMpa       Decimal?    @map("flexural_min_mpa") @db.Decimal(6, 2)
+  isPopular            Boolean     @default(false) @map("is_popular")
+  isDefault            Boolean     @default(false) @map("is_default")
+  isActive             Boolean     @default(true) @map("is_active")
+  sortOrder            Int         @default(0) @map("sort_order")
+  priceMode            PriceMode   @default(CONTACT) @map("price_mode")
+  /// VND / đơn vị bán, chưa VAT (số nguyên — VND không có phần lẻ)
+  priceVnd             Int?        @map("price_vnd")
+  compareAtPriceVnd    Int?        @map("compare_at_price_vnd")
+  saleUnit             SaleUnit    @default(SHEET) @map("sale_unit")
+  priceValidUntil      DateTime?   @map("price_valid_until") @db.Date
+  stockStatus          StockStatus @default(IN_STOCK) @map("stock_status")
+  leadTimeDays         Int?        @map("lead_time_days")
+  minOrderQty          Int?        @map("min_order_qty")
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product      Product                     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  translations ProductVariantTranslation[]
+  certificates ProductVariantCertificate[]
+
+  @@unique([productId, thicknessMm, widthMm, lengthMm])
+  /// Mỗi dòng tối đa 1 độ dày mặc định
+  @@unique([productId], map: "product_variants_one_default_idx", where: raw("is_default"))
+  @@index([productId, sortOrder, id])
+  /// Lọc "đạt EI ≥ X" trên các độ dày đang bán
+  @@index([fireRatingMaxMinutes], map: "product_variants_fire_idx", where: raw("is_active"))
+  @@map("product_variants")
+}
+
+model ProductVariantTranslation {
+  variantId      String        @map("variant_id")
+  locale         ContentLocale
+  /// Tên quy cách, vd "Tấm 8mm" (bỏ trống = tự sinh từ độ dày)
+  label          String?
+  /// Ứng dụng khuyến nghị, vd "Ống gió hút khói PCCC, vách phòng sạch"
+  recommendedUse String?       @map("recommended_use")
+
+  variant ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, locale])
+  @@map("product_variant_translations")
+}
+
+/// Mở rộng cho panel SIP MgO (productType = SIP_PANEL)
+model SipPanelSpec {
+  productId           String            @id @map("product_id")
+  coreMaterials       SipCoreMaterial[] @default([]) @map("core_materials")
+  coreThicknessMinMm  Int?              @map("core_thickness_min_mm")
+  coreThicknessMaxMm  Int?              @map("core_thickness_max_mm")
+  /// Độ dày tấm MgO ốp 2 mặt, vd [10, 12]
+  facingThicknessesMm Int[]             @default([]) @map("facing_thicknesses_mm")
+  maxWidthMm          Int?              @map("max_width_mm")
+  maxLengthMm         Int?              @map("max_length_mm")
+  /// Khoá khả năng chịu lực (STRUCTURAL, NON_STRUCTURAL…)
+  loadBearing         String?           @map("load_bearing")
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("sip_panel_specs")
+}
+
+/// Mở rộng cho tấm sàn MgO (productType = FLOOR)
+model FloorBoardSpec {
+  productId              String        @id @map("product_id")
+  edgeProfiles           EdgeProfile[] @default([]) @map("edge_profiles")
+  /// Khổ sàn: [{ widthMm, lengthMm }]
+  floorSizes             Json          @default("[]") @map("floor_sizes")
+  /// Khoá vật liệu lót sàn tương thích (WOOD, TILE, CARPET, EPOXY, VINYL…)
+  suitableFloorings      String[]      @default([]) @map("suitable_floorings")
+  moistureResistantFloor Boolean?      @map("moisture_resistant_floor")
+  sandedSurface          Boolean?      @map("sanded_surface")
+  updatedAt              DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("floor_board_specs")
+}
+
+/// Mở rộng cho tấm trang trí FireSafe (productType = DECORATIVE)
+model DecorativeFinishSpec {
+  productId            String   @id @map("product_id")
+  customPrintSupported Boolean  @default(false) @map("custom_print_supported")
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("decorative_finish_specs")
+}
+
+/// Các lớp hoàn thiện có sẵn của tấm trang trí (HPL / PVC / sơn trương nở / in 3D)
+model DecorativeFinishOption {
+  id                String               @id @default(cuid())
+  productId         String               @map("product_id")
+  finishType        DecorativeFinishType @map("finish_type")
+  /// Khoá mức chống trầy (VERY_HIGH, HIGH, STANDARD)
+  scratchResistance String?              @map("scratch_resistance")
+  sortOrder         Int                  @default(0) @map("sort_order")
+
+  product      Product                             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  translations DecorativeFinishOptionTranslation[]
+
+  @@unique([productId, finishType])
+  @@index([productId, sortOrder, id])
+  @@map("decorative_finish_options")
+}
+
+model DecorativeFinishOptionTranslation {
+  optionId      String        @map("option_id")
+  locale        ContentLocale
+  name          String
+  description   String?
+  /// Hoa văn có sẵn, vd ["Vân gỗ sồi", "Vân đá marble"]
+  patterns      String[]      @default([])
+  /// Không gian phù hợp, vd ["Sảnh lễ tân", "Phòng sạch"]
+  suitableAreas String[]      @default([]) @map("suitable_areas")
+
+  option DecorativeFinishOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@id([optionId, locale])
+  @@map("decorative_finish_option_translations")
+}
+
+/// Hồ sơ kiểm định / chứng chỉ (vd "Kiểm định vách EI90 theo QCVN 06:2022", "UL 055")
+model Certificate {
+  id            String    @id @default(cuid())
+  certificateNo String?   @map("certificate_no")
+  /// Đơn vị cấp: IBST, UL, Cục PCCC…
+  issuingBody   String?   @map("issuing_body")
+  /// Tiêu chuẩn thử: QCVN 06:2022/BXD, ASTM E84…
+  testStandard  String?   @map("test_standard")
+  /// Kết quả: "EI 90", "Class A"…
+  result        String?
+  issueDate     DateTime? @map("issue_date") @db.Date
+  /// null = không hết hạn. Trạng thái còn hạn / sắp hết / hết hạn tính từ ngày này (không lưu tay)
+  expiryDate    DateTime? @map("expiry_date") @db.Date
+  fileKey       String?   @map("file_key")
+  fileUrl       String?   @map("file_url")
+  isPublic      Boolean   @default(true) @map("is_public")
+  sortOrder     Int       @default(0) @map("sort_order")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  translations CertificateTranslation[]
+  products     ProductCertificate[]
+  variants     ProductVariantCertificate[]
+
+  /// Cảnh báo chứng chỉ sắp hết hạn
+  @@index([expiryDate], map: "certificates_expiry_idx", where: raw("is_public AND expiry_date IS NOT NULL"))
+  @@map("certificates")
+}
+
+model CertificateTranslation {
+  certificateId String        @map("certificate_id")
+  locale        ContentLocale
+  name          String
+  description   String?
+
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@id([certificateId, locale])
+  @@map("certificate_translations")
+}
+
+/// Chứng chỉ áp cho cả dòng tấm
+model ProductCertificate {
+  productId     String @map("product_id")
+  certificateId String @map("certificate_id")
+  sortOrder     Int    @default(0) @map("sort_order")
+
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  certificate Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@id([productId, certificateId])
+  @@index([certificateId])
+  @@map("product_certificates")
+}
+
+/// Chứng chỉ chỉ áp cho một độ dày (vd tấm 12mm đạt EI 120)
+model ProductVariantCertificate {
+  variantId     String @map("variant_id")
+  certificateId String @map("certificate_id")
+
+  variant     ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  certificate Certificate    @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, certificateId])
+  @@index([certificateId])
+  @@map("product_variant_certificates")
 }
 
 // ─── Banners ─────────────────────────────────────────────────────────────────

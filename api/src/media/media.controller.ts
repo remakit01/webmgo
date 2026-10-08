@@ -23,6 +23,7 @@ import { Roles } from '../common/decorators/roles.decorator.js';
 export const MEDIA_SCOPES: Record<string, { prefix: string; minWidth?: number }> = {
   // Tin tức nhận ảnh mọi kích thước (ảnh minh hoạ, sơ đồ, ảnh chụp màn hình nhỏ)
   news: { prefix: 'news/content' },
+  products: { prefix: 'products/content' },
 };
 export type MediaScope = string;
 

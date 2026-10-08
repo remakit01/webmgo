@@ -1,257 +1,222 @@
 import React from 'react';
+import type { Metadata } from 'next';
+import { notFound, permanentRedirect } from 'next/navigation';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { CheckCircle2, ChevronRight, PhoneCall } from 'lucide-react';
+import { PRODUCT_TYPE_LABEL, formatFireRating } from '@remak/shared/contracts/product';
+import { toPlainText, type RichDoc } from '@remak/shared/rich-content';
 import Link from '@/components/ui/LocaleLink';
-import { notFound } from 'next/navigation';
-import {
-  FileText,
-  PhoneCall,
-  Download,
-  ChevronRight,
-} from 'lucide-react';
-import { PRODUCTS } from '@/data/products';
-import {
-  ProductGallery,
-  ProductQuickInfo,
-  ProductSystemAssemblies,
-  ProductSpecsTable,
-  ProductCard,
-} from '@/components/products';
-import { setRequestLocale } from 'next-intl/server';
-import type { Locale } from '@/i18n/routing';
+import { SetLocaleAlternates } from '@/components/layout/LocaleAlternates';
+import RichContent from '@/components/news/RichContent';
+import CatalogCard, { ProductImage } from '@/components/product-catalog/CatalogCard';
+import SpecSheet from '@/components/product-catalog/SpecSheet';
+import VariantPicker from '@/components/product-catalog/VariantPicker';
+import { AdvantageGrid, CertificateList, DecorativeOptions, FaqList, SectionTitle, VariantTable } from '@/components/product-catalog/ProductDetailSections';
+import { HOTLINE, HOTLINE_TEL, quoteHref } from '@/components/product-catalog/format';
+import { routing, type Locale } from '@/i18n/routing';
+import { getProduct, getProducts } from '@/lib/api';
+import { productPath, productsIndexPath } from '@/lib/product-paths';
+import { indexable, localizedAlternates } from '@/lib/seo';
 
-interface PageProps {
-  params: Promise<{ slug: string; locale: string }>;
+// ISR 60s; CMS lưu sản phẩm -> API revalidate tag "products". Sản phẩm mới dựng lần đầu có người xem.
+export const revalidate = 60;
+
+type Props = PageProps<'/[locale]/products/[slug]'>;
+
+export async function generateStaticParams({ params }: { params: { locale: string } }) {
+  const list = await getProducts(params.locale as Locale);
+  return (list ?? []).map((p) => ({ slug: p.slug }));
 }
 
-export async function generateStaticParams() {
-  return PRODUCTS.map((product) => ({
-    slug: product.slug,
-  }));
+/** Đường dẫn sản phẩm ở mọi ngôn ngữ ĐÃ xuất bản (hreflang + nút đổi ngôn ngữ) */
+function alternatePaths(alternates: Partial<Record<Locale, string>>) {
+  return Object.fromEntries(routing.locales.flatMap((l) => (alternates[l] ? [[l, productPath(l, alternates[l]!)]] : []))) as Partial<Record<Locale, string>>;
 }
 
-export async function generateMetadata({ params }: PageProps) {
-  const { slug } = await params;
-  const product = PRODUCTS.find((p) => p.slug === slug);
-  if (!product) return { title: 'Không tìm thấy sản phẩm - Remak MGO' };
-
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, slug } = (await params) as { locale: Locale; slug: string };
+  const data = await getProduct(locale, slug);
+  if (!data || 'redirect' in data) return {};
+  const { product } = data;
+  const image = product.seo.ogImageUrl ?? product.coverImageUrl ?? undefined;
   return {
-    title: `${product.name} | Chuẩn PCCC QCVN 06:2022 Remak`,
-    description: product.description.slice(0, 160),
+    title: `${product.seo.title} | Remak®`,
+    description: product.seo.description,
+    alternates: localizedAlternates(alternatePaths(product.alternates), locale),
     openGraph: {
-      title: product.name,
-      description: product.tagline,
-      images: [product.image],
+      title: product.seo.title,
+      description: product.seo.description,
+      url: productPath(locale, product.slug),
+      ...(image ? { images: [{ url: image, alt: product.coverAlt || product.name }] } : {}),
     },
+    robots: indexable(!product.seo.noindex),
   };
 }
 
-export default async function ProductDetailPage({ params }: PageProps) {
-  const { slug, locale } = await params;
-  setRequestLocale(locale as Locale);
-  const product = PRODUCTS.find((p) => p.slug === slug);
+export default async function ProductDetailPage({ params }: Props) {
+  const { locale, slug } = (await params) as { locale: Locale; slug: string };
+  setRequestLocale(locale);
 
-  if (!product) {
-    notFound();
-  }
+  const data = await getProduct(locale, slug);
+  if (!data) notFound();
+  // Slug cũ (đổi sau khi đăng) hoặc slug của ngôn ngữ khác -> 301 sang slug hiện tại
+  if ('redirect' in data) permanentRedirect(productPath(locale, data.redirect));
 
-  // Related products
-  const relatedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
+  const { product: p } = data;
+  const t = await getTranslations('Products');
+  const related = ((await getProducts(locale)) ?? []).filter((x) => x.id !== p.id).slice(0, 3);
+  const paths = alternatePaths(p.alternates);
+  const hasDescription = !!toPlainText(p.description as RichDoc).trim();
+  const fire = p.fireRating ? formatFireRating(p.fireRating.min, p.fireRating.max) : null;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
-      
-      {/* 1. BREADCRUMB */}
-      <div className="bg-white border-b border-slate-200">
-        <nav aria-label="Breadcrumb" className="max-w-[1440px] mx-auto px-4 lg:px-8 py-3 text-xs font-semibold text-slate-500 flex items-center gap-2">
-          <Link href="/" className="hover:text-[#5F8A03] transition-colors">Trang chủ</Link>
-          <ChevronRight size={14} className="text-slate-400" />
-          <Link href="/san-pham" className="hover:text-[#5F8A03] transition-colors">Sản phẩm</Link>
-          <ChevronRight size={14} className="text-slate-400" />
-          <span className="text-[#5F8A03] font-bold truncate max-w-xs sm:max-w-md">{product.shortName}</span>
+      <SetLocaleAlternates paths={{ vi: paths.vi ?? productsIndexPath('vi'), en: paths.en ?? productsIndexPath('en') }} />
+
+      <div className="border-b border-slate-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-[1440px] px-4 py-3 text-xs font-semibold text-slate-600 lg:px-8">
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link href="/" className="hover:text-[#4E7202]">
+                {t('home')}
+              </Link>
+            </li>
+            <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
+            <li>
+              <Link href="/san-pham" className="hover:text-[#4E7202]">
+                {t('title')}
+              </Link>
+            </li>
+            <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
+            <li aria-current="page" className="max-w-xs truncate font-bold text-[#3F5E02] sm:max-w-md">
+              {p.shortName || p.name}
+            </li>
+          </ol>
         </nav>
       </div>
 
-      {/* 2. PRODUCT HERO SECTION (MODULAR COMPONENTS) */}
-      <section className="py-10 lg:py-14 bg-white border-b border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
-            
-            {/* LEFT COLUMN: INTERACTIVE SWIPER GALLERY COMPONENT */}
-            <div className="lg:col-span-6">
-              <ProductGallery
-                productName={product.name}
-                images={product.galleryImages}
-                fireRating={product.fireRating}
-                density={product.density}
-                flexuralStrength={product.flexuralStrength}
-                badge={product.badge}
-                categoryLabel={product.categoryLabel}
-                testedStandards={product.testedStandards}
-                autoPlayInterval={4000}
-              />
+      {/* Đầu trang: ảnh + thông tin nhanh + chọn độ dày */}
+      <section className="border-b border-slate-200 bg-white py-10 lg:py-14">
+        <div className="mx-auto grid max-w-[1440px] items-start gap-10 px-4 lg:grid-cols-12 lg:gap-12 lg:px-8">
+          <div className="space-y-3 lg:col-span-6">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
+              <ProductImage url={p.coverImageUrl} alt={p.coverAlt || p.name} sizes="(min-width: 1024px) 50vw, 100vw" priority />
+              {fire && <span className="absolute left-4 top-4 rounded-lg bg-[#F26522] px-3 py-1 text-sm font-extrabold text-white shadow">{fire}</span>}
             </div>
+            {p.gallery.length > 0 && (
+              <ul className="grid grid-cols-4 gap-3">
+                {p.gallery.slice(0, 4).map((g) => (
+                  <li key={g.url} className="aspect-square overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
+                    <ProductImage url={g.url} alt={g.alt} sizes="12vw" />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-            {/* RIGHT COLUMN: QUICK INFO & DYNAMIC THICKNESS SELECTOR */}
-            <div className="lg:col-span-6">
-              <ProductQuickInfo product={product} />
+          <div className="space-y-6 lg:col-span-6">
+            <div className="space-y-3">
+              <p className="text-sm font-bold uppercase tracking-wide text-[#4E7202]">
+                {PRODUCT_TYPE_LABEL[p.productType][locale]}
+                {p.tradeName && <span className="text-slate-500"> · {p.tradeName}</span>}
+              </p>
+              <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900 lg:text-4xl">{p.name}</h1>
+              {p.tagline && <p className="text-lg font-semibold text-slate-700">{p.tagline}</p>}
+              {p.summary && <p className="leading-relaxed text-slate-600">{p.summary}</p>}
             </div>
-
+            {p.highlights.length > 0 && (
+              <ul className="grid gap-2 sm:grid-cols-2" aria-label={t('highlightsTitle')}>
+                {p.highlights.map((h) => (
+                  <li key={h} className="flex items-start gap-2 text-sm font-medium text-slate-800">
+                    <CheckCircle2 size={17} className="mt-0.5 shrink-0 text-[#5F8A03]" aria-hidden="true" /> {h}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <VariantPicker variants={p.variants} slug={p.slug} locale={locale} />
           </div>
         </div>
       </section>
 
-      {/* 3. DETAILED SPECIFICATIONS & SYSTEM ASSEMBLIES */}
-      <section className="py-14 max-w-[1440px] mx-auto px-4 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
-          {/* MAIN CONTENT (8 COLS) */}
-          <div className="lg:col-span-8 space-y-12">
-            
-            {/* CẤU TẠO HỆ THỐNG ĐẠT CHUẨN NGHIỆM THU PCCC */}
-            <ProductSystemAssemblies assemblies={product.systemAssemblies} />
+      {/* Nội dung chi tiết */}
+      <div className="mx-auto max-w-[1100px] space-y-14 px-4 py-14 lg:px-8">
+        {p.variants.length > 0 && (
+          <section aria-labelledby="quy-cach">
+            <SectionTitle id="quy-cach">{t('variantsTitle')}</SectionTitle>
+            <VariantTable variants={p.variants} locale={locale} />
+          </section>
+        )}
 
-            {/* BẢNG THÔNG SỐ KỸ THUẬT CHI TIẾT */}
-            <ProductSpecsTable specsTable={product.specsTable} />
+        {p.spec && (
+          <section aria-labelledby="thong-so">
+            <SectionTitle id="thong-so">{t('specsTitle')}</SectionTitle>
+            <SpecSheet spec={p.spec} variants={p.variants} name={p.name} locale={locale} />
+          </section>
+        )}
 
-            {/* ƯU ĐIỂM VƯỢT TRỘI */}
-            <div>
-              <div className="border-b border-slate-200 pb-3 mb-6">
+        {hasDescription && (
+          <section aria-labelledby="gioi-thieu">
+            <SectionTitle id="gioi-thieu">{t('descriptionTitle')}</SectionTitle>
+            <RichContent doc={p.description as RichDoc} />
+          </section>
+        )}
 
-                <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
-                  Ưu Điểm Vượt Trội Cho Công Trình
-                </h2>
+        {p.advantages.length > 0 && (
+          <section aria-labelledby="uu-diem">
+            <SectionTitle id="uu-diem">{t('advantagesTitle')}</SectionTitle>
+            <AdvantageGrid items={p.advantages} />
+          </section>
+        )}
 
-              </div>
+        {p.decorativeOptions.length > 0 && (
+          <section aria-labelledby="hoan-thien">
+            <SectionTitle id="hoan-thien">{t('decorativeTitle')}</SectionTitle>
+            <DecorativeOptions options={p.decorativeOptions} customPrint={p.spec?.extension?.type === 'DECORATIVE' && p.spec.extension.customPrintSupported} locale={locale} />
+          </section>
+        )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {product.advantages.map((adv, idx) => (
-                  <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-[#7CB305]/40 transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold text-xs mb-3">
-                      0{idx + 1}
-                    </div>
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900">{adv.title}</h3>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">{adv.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+        {p.certificates.length > 0 && (
+          <section aria-labelledby="chung-nhan">
+            <SectionTitle id="chung-nhan">{t('certificatesTitle')}</SectionTitle>
+            <CertificateList items={p.certificates} locale={locale} />
+          </section>
+        )}
 
+        {p.faqs.length > 0 && (
+          <section aria-labelledby="hoi-dap">
+            <SectionTitle id="hoi-dap">{t('faqTitle')}</SectionTitle>
+            <FaqList items={p.faqs} />
+          </section>
+        )}
+
+        <section className="flex flex-col items-start justify-between gap-6 rounded-3xl bg-gradient-to-r from-emerald-900 via-slate-900 to-slate-950 p-8 text-white lg:flex-row lg:items-center lg:p-10">
+          <div className="max-w-2xl">
+            <h2 className="text-2xl font-extrabold">{t('ctaTitle')}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-slate-300">{t('ctaText')}</p>
           </div>
-
-          {/* SIDEBAR (4 COLS) */}
-          <div className="lg:col-span-4 space-y-6">
-            
-            {/* DOWNLOAD TEST DOSSIER WIDGET */}
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-md">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-[#A0D911] mb-3">
-                <FileText size={20} />
-              </div>
-              <h3 className="text-lg font-bold text-white">Hồ Sơ Nghiệm Thu PCCC</h3>
-              <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                Tải về bản sao công chứng kết quả thử nghiệm đốt mẫu lò của Viện IBST và chứng nhận vật liệu không cháy nhóm A1.
-              </p>
-              <div className="mt-5 space-y-2.5">
-                <Link
-                  href="/bao-gia"
-                  className="w-full py-3 px-4 rounded-xl bg-[#F26522] hover:bg-[#D95314] text-white font-bold text-xs sm:text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
-                >
-                  <Download size={16} />
-                  <span>Tải Bộ Hồ Sơ Kiểm Định</span>
-                </Link>
-                <div className="text-[11px] sm:text-xs text-center text-slate-400">
-                  Định dạng PDF • Dung lượng 4.2 MB
-                </div>
-              </div>
-            </div>
-
-            {/* MGO THICKNESS SPECIFICATIONS BOX */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
-              <div className="text-xs font-bold text-[#5F8A03] uppercase tracking-wider mb-1">
-                Quy Cách Sản Phẩm
-              </div>
-              <h3 className="text-base font-bold text-slate-900 mb-4">
-                Các Độ Dày Tiêu Chuẩn Sẵn Kho
-              </h3>
-
-              <div className="space-y-2.5">
-                {product.thicknessList.map((th) => (
-                  <div key={th} className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-8 h-8 rounded-lg bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center font-bold text-xs">
-                        {th}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-slate-800">Tấm MGO 1.22x2.44m</span>
-                    </div>
-                    <Link
-                      href="/bao-gia"
-                      className="text-xs sm:text-sm font-bold text-[#F26522] hover:underline"
-                    >
-                      Báo giá →
-                    </Link>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-slate-100 text-center">
-                <Link
-                  href="/bao-gia"
-                  className="text-xs sm:text-sm font-bold text-[#5F8A03] hover:underline inline-flex items-center gap-1"
-                >
-                  <span>Nhận gia công cắt theo bản vẽ thiết kế</span>
-                  <span>→</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* QUICK CONSULTANT CARD */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs text-center">
-              <div className="w-12 h-12 rounded-full bg-[#F4F9E8] text-[#5F8A03] flex items-center justify-center mx-auto mb-3">
-                <PhoneCall size={20} />
-              </div>
-              <h3 className="text-base font-bold text-slate-900">Tư Vấn Kỹ Thuật 24/7</h3>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-                Kỹ sư PCCC Remak sẵn sàng hỗ trợ bóc tách khối lượng và giải pháp tối ưu cho công trình của bạn.
-              </p>
-              <a
-                href="tel:0902441981"
-                className="mt-4 block py-3 px-4 rounded-xl bg-[#5F8A03] hover:bg-[#7CB305] text-white font-bold text-xs sm:text-sm transition-colors shadow-sm"
-              >
-                Hotline: 0902.441.981
-              </a>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. RELATED PRODUCTS SECTION */}
-      <section className="py-14 bg-white border-t border-slate-200">
-        <div className="max-w-[1440px] mx-auto px-4 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
-            <div>
-
-              <h2 className="text-xl lg:text-2xl font-bold text-slate-900 mt-2">
-                Các Dòng Tấm Chống Cháy Khác
-              </h2>
-
-            </div>
-            <Link 
-              href="/san-pham"
-              className="text-xs sm:text-sm font-bold text-[#5F8A03] hover:underline flex items-center gap-1 self-start sm:self-auto"
-            >
-              <span>Xem tất cả sản phẩm</span>
-              <ChevronRight size={16} />
+          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+            <Link href={quoteHref(p.slug)} className="inline-flex h-12 items-center justify-center rounded-xl bg-[#F26522] px-6 text-sm font-bold text-white hover:bg-[#D95314]">
+              {t('requestQuote')}
             </Link>
+            <a href={HOTLINE_TEL} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-6 text-sm font-bold text-white hover:bg-white/20">
+              <PhoneCall size={16} aria-hidden="true" /> {t('callHotline', { phone: HOTLINE })}
+            </a>
           </div>
+        </section>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedProducts.map((rel) => (
-              <ProductCard key={rel.id} product={rel} />
-            ))}
+      {related.length > 0 && (
+        <section aria-labelledby="san-pham-khac" className="border-t border-slate-200 bg-white py-14">
+          <div className="mx-auto max-w-[1440px] px-4 lg:px-8">
+            <SectionTitle id="san-pham-khac">{t('relatedTitle')}</SectionTitle>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {related.map((r) => (
+                <CatalogCard key={r.id} item={r} locale={locale} />
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
-
+        </section>
+      )}
     </div>
   );
 }
