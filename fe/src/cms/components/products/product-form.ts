@@ -16,8 +16,7 @@ export const fieldId = (path: string) => `pf-${path.replace(/\./g, '-')}`;
 /** ProductCms -> phần form gửi lên API (bỏ thông tin chỉ đọc) */
 export function toProductInput(p: ProductCms): ProductInput {
   return {
-    productType: p.productType,
-    tradeName: p.tradeName,
+    typeId: p.typeId,
     isFeatured: p.isFeatured,
     translations: p.translations,
     technicalSpec: p.technicalSpec,
