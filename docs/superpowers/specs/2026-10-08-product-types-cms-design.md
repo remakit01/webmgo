@@ -19,7 +19,7 @@ Ngày: 2026-10-08 · Nhánh: `feature/mgo-catalog-model-architecture`
 | Đổi slug | Ghi `SlugRedirect` (`entityType = 'product_type'`) → URL cũ chuyển hướng vĩnh viễn. |
 | Đổi mẫu form của loại đang có sản phẩm | Cho phép, CMS cảnh báo trước. Dữ liệu spec cũ của sản phẩm giữ nguyên trong DB, chỉ không hiển thị / không xuất ra web. |
 | Đổi loại của một sản phẩm | Như trên — spec cũ giữ trong DB, ẩn đi. |
-| Migration | Sửa trực tiếp `20261010000000_product_catalog` (nhánh chưa merge). DB local cần `migrate reset` rồi seed lại. |
+| Migration | Migration mới `20261011000000_product_types`, chuyển dữ liệu tại chỗ (tạo 6 loại với id cố định, gán `product_type_id` theo enum cũ, rồi bỏ cột/enum cũ). Không sửa migration đã áp, không cần reset DB hay chạy seed (seed đặt lại mật khẩu admin). |
 
 ## 1. Dữ liệu
 
