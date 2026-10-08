@@ -2,7 +2,7 @@
 // Quy tắc: chỉ ghi số có trong catalogue; không có thì để null (không bịa). Giá: catalogue không có -> "Liên hệ báo giá".
 // Chỉ có bản tiếng Việt; bản tiếng Anh dịch sau trong CMS.
 
-import type { DecorativeFinishType, EdgeProfile, ProductType, SipCoreMaterial } from '@remak/shared/contracts/product';
+import type { DecorativeFinishType, EdgeProfile, SipCoreMaterial } from '@remak/shared/contracts/product';
 
 export interface SeedVariant {
   thicknessMm: number;
@@ -21,12 +21,11 @@ export interface SeedVariant {
 
 export interface SeedProduct {
   key: string;
-  productType: ProductType;
-  tradeName: string;
+  /** id cố định trong migration 20261011000000_product_types */
+  typeId: string;
   isFeatured?: boolean;
   vi: {
     name: string;
-    shortName: string;
     slug: string;
     tagline: string;
     summary: string;
@@ -95,12 +94,10 @@ const BASE_TDS = {
 export const PRODUCTS: SeedProduct[] = [
   {
     key: 'standard',
-    productType: 'STANDARD',
-    tradeName: 'Remak® FireOFF MgO',
+    typeId: 'pt_standard',
     isFeatured: true,
     vi: {
       name: 'Tấm chống cháy Remak® FireOFF MgO',
-      shortName: 'FireOFF MgO tiêu chuẩn',
       slug: 'tam-chong-chay-remak-fireoff-mgo',
       tagline: 'Vật liệu xây dựng xanh thế hệ mới thay thế thạch cao và tấm xi măng',
       summary:
@@ -130,11 +127,9 @@ export const PRODUCTS: SeedProduct[] = [
   },
   {
     key: 'sip',
-    productType: 'SIP_PANEL',
-    tradeName: 'Remak® FireOFF SIP MgO',
+    typeId: 'pt_sip_panel',
     vi: {
       name: 'Panel SIP MgO cách nhiệt chống cháy',
-      shortName: 'Panel SIP MgO',
       slug: 'panel-sip-mgo',
       tagline: 'Hệ panel cách nhiệt tích hợp chịu lực cho tường, mái và sàn',
       summary:
@@ -166,11 +161,9 @@ export const PRODUCTS: SeedProduct[] = [
   },
   {
     key: 'litecore',
-    productType: 'LITECORE',
-    tradeName: 'LiteCore™ MgO Composite Board',
+    typeId: 'pt_litecore',
     vi: {
       name: 'Tấm composite MgO LiteCore™ siêu nhẹ',
-      shortName: 'LiteCore™',
       slug: 'tam-composite-mgo-litecore',
       tagline: 'Nhẹ hơn ~70%, lắp đặt nhanh gấp 5 lần, chống cháy Class A',
       summary:
@@ -204,11 +197,9 @@ export const PRODUCTS: SeedProduct[] = [
   },
   {
     key: 'floor',
-    productType: 'FLOOR',
-    tradeName: 'Remak® FireOFF MgO Floor',
+    typeId: 'pt_floor',
     vi: {
       name: 'Tấm sàn MgO cao cấp bề mặt chà nhám',
-      shortName: 'Tấm sàn MgO',
       slug: 'tam-san-mgo-cha-nham',
       tagline: 'Tấm sàn mật độ cao hèm âm dương, chịu uốn ≥ 25 MPa',
       summary:
@@ -257,11 +248,9 @@ export const PRODUCTS: SeedProduct[] = [
   },
   {
     key: 'decorative',
-    productType: 'DECORATIVE',
-    tradeName: 'Remak® FireSafe Finishes',
+    typeId: 'pt_decorative',
     vi: {
       name: 'Tấm trang trí MgO FireSafe',
-      shortName: 'FireSafe Finishes',
       slug: 'tam-trang-tri-mgo-firesafe',
       tagline: 'Thẩm mỹ cao cấp trên lõi MgO không bắt cháy Class A',
       summary:
@@ -310,11 +299,9 @@ export const PRODUCTS: SeedProduct[] = [
   },
   {
     key: 'custom',
-    productType: 'CUSTOM',
-    tradeName: 'Remak® FireOFF MgO Custom',
+    typeId: 'pt_custom',
     vi: {
       name: 'Tấm MgO gia công tuỳ chỉnh theo dự án',
-      shortName: 'MgO tuỳ chỉnh',
       slug: 'tam-mgo-tuy-chinh',
       tagline: 'Thiết kế khuôn, cắt CNC, hoa văn và độ dày theo bản vẽ dự án',
       summary:

@@ -19,8 +19,7 @@ export async function seedProducts(prisma: PrismaClient) {
     for (const [i, p] of PRODUCTS.entries()) {
       const product = await tx.product.create({
         data: {
-          productType: p.productType,
-          tradeName: p.tradeName,
+          typeId: p.typeId,
           isFeatured: p.isFeatured ?? false,
           sortOrder: i,
           translations: {
@@ -29,7 +28,6 @@ export async function seedProducts(prisma: PrismaClient) {
               status: 'PUBLISHED',
               publishedAt: now,
               name: p.vi.name,
-              shortName: p.vi.shortName,
               slug: p.vi.slug,
               tagline: p.vi.tagline,
               summary: p.vi.summary,
