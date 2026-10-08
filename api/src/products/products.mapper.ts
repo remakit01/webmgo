@@ -19,6 +19,7 @@ import {
   type ProductCms,
   type ProductListItemPublic,
   type ProductTranslationInput,
+  type ProductTypeRef,
   type ProductVariantInput,
   type ProductVariantPublic,
   type SheetSize,
@@ -33,8 +34,12 @@ const num = (d: Prisma.Decimal | null | undefined): number | null => (d == null 
 const asArray = <T>(v: Prisma.JsonValue): T[] => (Array.isArray(v) ? (v as unknown as T[]) : []);
 const dayKey = (d: Date | null) => (d ? toDayKey(d) : null);
 
+/** Loại sản phẩm + bản dịch (tên / slug theo ngôn ngữ) */
+export const productTypeInclude = { include: { translations: true } } satisfies Prisma.ProductTypeDefaultArgs;
+
 /** Một truy vấn đọc đủ dữ liệu trang chi tiết (tránh N+1) */
 export const productDetailInclude = {
+  type: productTypeInclude,
   translations: true,
   technicalSpec: true,
   variants: { where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }], include: { translations: true, certificates: { include: { certificate: { include: { translations: true } } } } } },
@@ -47,6 +52,7 @@ export const productDetailInclude = {
 
 /** Danh sách: bản dịch + các độ dày đang bán (giá, EI, tình trạng) */
 export const productListInclude = {
+  type: productTypeInclude,
   translations: true,
   variants: { where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] },
 } satisfies Prisma.ProductInclude;
@@ -55,6 +61,13 @@ type DetailRow = Prisma.ProductGetPayload<{ include: typeof productDetailInclude
 type ListRow = Prisma.ProductGetPayload<{ include: typeof productListInclude }>;
 type VariantRow = ListRow['variants'][number];
 type TranslationRow = ListRow['translations'][number];
+export type ProductTypeRow = Prisma.ProductTypeGetPayload<typeof productTypeInclude>;
+
+/** Loại theo ngôn ngữ đang xem; chưa có bản dịch thì dùng tiếng Việt */
+export function typeRefOf(t: ProductTypeRow, locale: Locale): ProductTypeRef {
+  const tr = t.translations.find((x) => x.locale === locale) ?? t.translations.find((x) => x.locale === 'vi');
+  return { id: t.id, specProfile: t.specProfile, name: tr?.name ?? '', slug: tr?.slug ?? '' };
+}
 
 const offerOf = (v: VariantRow): VariantOffer => ({
   priceMode: v.priceMode,
@@ -89,10 +102,9 @@ export function toListItemPublic(p: ListRow, tr: TranslationRow, now = new Date(
   const fireMax = maxFireRatingMinutes(specs);
   return {
     id: p.id,
-    productType: p.productType,
+    type: typeRefOf(p.type, tr.locale),
     slug: tr.slug,
     name: tr.name,
-    shortName: tr.shortName,
     tagline: tr.tagline,
     summary: tr.summary,
     badge: null,
@@ -143,7 +155,7 @@ export function toVariantPublic(v: DetailRow['variants'][number], locale: Locale
 }
 
 function extensionOf(p: DetailRow): ProductExtension {
-  if (p.productType === 'SIP_PANEL' && p.sipSpec) {
+  if (p.type.specProfile === 'SIP' && p.sipSpec) {
     const s = p.sipSpec;
     return {
       type: 'SIP',
@@ -156,7 +168,7 @@ function extensionOf(p: DetailRow): ProductExtension {
       loadBearing: s.loadBearing,
     };
   }
-  if (p.productType === 'FLOOR' && p.floorSpec) {
+  if (p.type.specProfile === 'FLOOR' && p.floorSpec) {
     const f = p.floorSpec;
     return {
       type: 'FLOOR',
@@ -167,7 +179,7 @@ function extensionOf(p: DetailRow): ProductExtension {
       sandedSurface: f.sandedSurface,
     };
   }
-  if (p.productType === 'DECORATIVE' && p.decorativeSpec) {
+  if (p.type.specProfile === 'DECORATIVE' && p.decorativeSpec) {
     return { type: 'DECORATIVE', customPrintSupported: p.decorativeSpec.customPrintSupported, finishTypes: p.decorativeOptions.map((o) => o.finishType) };
   }
   return null;
@@ -254,7 +266,6 @@ export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale,
   });
   return {
     ...base,
-    tradeName: p.tradeName,
     description: tr.description,
     highlights: tr.highlights,
     advantages: asArray<{ title: string; desc: string }>(tr.advantages),
@@ -277,8 +288,7 @@ export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale,
 export function toListItemCms(p: ListRow): ProductListItemCms {
   return {
     id: p.id,
-    productType: p.productType,
-    tradeName: p.tradeName,
+    type: (({ id, specProfile, name }) => ({ id, specProfile, name }))(typeRefOf(p.type, 'vi')),
     coverImageUrl: p.coverImageUrl,
     isFeatured: p.isFeatured,
     sortOrder: p.sortOrder,
@@ -295,7 +305,6 @@ export function toListItemCms(p: ListRow): ProductListItemCms {
 const trInput = (t: TranslationRow): ProductTranslationInput => ({
   status: t.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT',
   name: t.name,
-  shortName: t.shortName,
   slug: t.slug,
   tagline: t.tagline,
   summary: t.summary,
@@ -347,16 +356,15 @@ export function toProductCms(p: DetailRow): ProductCms {
     sortOrder: p.sortOrder,
     updatedAt: p.updatedAt.toISOString(),
     published: Object.fromEntries(p.translations.map((t) => [t.locale, { slug: t.slug, status: t.status, publishedAt: t.publishedAt?.toISOString() ?? null }])),
-    productType: p.productType,
-    tradeName: p.tradeName,
+    typeId: p.typeId,
     isFeatured: p.isFeatured,
     translations: { vi: vi ? trInput(vi) : emptyTranslationInput(), en: en ? trInput(en) : null },
-    technicalSpec: s ? { ...techRowOf(s), extraSpecs: asArray<{ key: string; value: string; unit?: string }>(s.extraSpecs) } : emptyProductInput(p.productType).technicalSpec,
+    technicalSpec: s ? { ...techRowOf(s), extraSpecs: asArray<{ key: string; value: string; unit?: string }>(s.extraSpecs) } : emptyProductInput(p.typeId).technicalSpec,
     variants,
     sip: ext?.type === 'SIP' ? (({ type: _t, ...rest }) => rest)(ext) : null,
     floor: ext?.type === 'FLOOR' ? (({ type: _t, ...rest }) => rest)(ext) : null,
     decorative:
-      p.productType === 'DECORATIVE' && p.decorativeSpec
+      p.type.specProfile === 'DECORATIVE' && p.decorativeSpec
         ? {
             customPrintSupported: p.decorativeSpec.customPrintSupported,
             options: p.decorativeOptions.map((o) => ({

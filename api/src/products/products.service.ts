@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { LOCALES, type Locale } from '@remak/shared/locale';
 import { validateRichDoc } from '@remak/shared/rich-content';
-import { productInputErrors, type ProductCms, type ProductInput, type ProductListItemCms } from '@remak/shared/contracts/product';
+import { isReservedProductSlug, productInputErrors, type ProductCms, type ProductInput, type ProductListItemCms } from '@remak/shared/contracts/product';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ContentCacheService } from '../content-cache/content-cache.service.js';
 import { MediaService } from '../storage/media.service.js';
@@ -54,11 +54,11 @@ export class ProductsService {
   // ── Ghi ─────────────────────────────────────────────────────────────────
 
   async create(dto: ProductInputDto): Promise<ProductCms> {
-    this.assertValid(dto);
+    await this.assertValid(dto);
     const last = await this.prisma.product.aggregate({ where: LIVE, _max: { sortOrder: true } });
     const id = await this.prisma.$transaction(async (tx) => {
       const p = await tx.product.create({
-        data: { productType: dto.productType, tradeName: dto.tradeName, isFeatured: dto.isFeatured, sortOrder: (last._max.sortOrder ?? -1) + 1 },
+        data: { typeId: dto.typeId, isFeatured: dto.isFeatured, sortOrder: (last._max.sortOrder ?? -1) + 1 },
       });
       await this.writeAll(tx, p.id, dto, new Map());
       return p.id;
@@ -68,7 +68,7 @@ export class ProductsService {
   }
 
   async update(id: string, dto: ProductInputDto, ifMatch: string | undefined): Promise<ProductCms> {
-    this.assertValid(dto);
+    await this.assertValid(dto);
     const existing = await this.prisma.product.findFirst({ where: { id, ...LIVE }, include: { translations: true } });
     if (!existing) throw new NotFoundException('Không tìm thấy sản phẩm');
     assertVersion(ifMatch, existing.updatedAt);
@@ -76,7 +76,7 @@ export class ProductsService {
       // Khoá lạc quan: chỉ ghi khi chưa ai lưu xen vào
       const { count } = await tx.product.updateMany({
         where: { id, updatedAt: existing.updatedAt, ...LIVE },
-        data: { productType: dto.productType, tradeName: dto.tradeName, isFeatured: dto.isFeatured, updatedAt: new Date() },
+        data: { typeId: dto.typeId, isFeatured: dto.isFeatured, updatedAt: new Date() },
       });
       assertUpdated(count);
       await this.writeAll(tx, id, dto, new Map(existing.translations.map((t) => [t.locale, t])));
@@ -131,13 +131,19 @@ export class ProductsService {
 
   // ── Nội bộ ──────────────────────────────────────────────────────────────
 
-  private assertValid(dto: ProductInput) {
-    const errors = productInputErrors(dto);
+  /** Kiểm form; mẫu form thông số lấy theo loại đã chọn (loại là dữ liệu DB) */
+  private async assertValid(dto: ProductInput) {
+    const type = dto.typeId ? await this.prisma.productType.findUnique({ where: { id: dto.typeId }, select: { specProfile: true } }) : null;
+    if (dto.typeId && !type) throw new BadRequestException('Loại sản phẩm không tồn tại');
+    const errors = productInputErrors(dto, type?.specProfile ?? 'NONE');
     for (const l of LOCALES) {
       const t = dto.translations[l];
       if (!t) continue;
       const r = validateRichDoc(t.description);
       if (!r.ok) errors[`translations.${l}.description`] = r.error;
+      if (t.slug && isReservedProductSlug(l, t.slug)) {
+        errors[`translations.${l}.slug`] = `Đường dẫn "${t.slug}" dành cho trang loại sản phẩm, hãy chọn đường dẫn khác`;
+      }
     }
     if (Object.keys(errors).length) {
       throw new BadRequestException({ message: Object.values(errors)[0], errors });
@@ -167,7 +173,9 @@ export class ProductsService {
         explicit: t.slug,
         fromText: t.name,
         fallback: 'tam-mgo',
-        isTaken: async (s) => (await tx.productTranslation.count({ where: { locale, slug: s, productId: { not: productId } } })) > 0,
+        // Slug sinh từ tên trùng đoạn đường dẫn trang loại (vd tên "Loại") -> coi như đã dùng, thêm hậu tố
+        isTaken: async (s) =>
+          isReservedProductSlug(locale, s) || (await tx.productTranslation.count({ where: { locale, slug: s, productId: { not: productId } } })) > 0,
       });
       // Slug mới chiếm slug cũ của sản phẩm khác -> bỏ redirect đó; slug đã xuất bản đổi -> ghi 301
       await this.slugRedirects.release(PRODUCT_SLUG_ENTITY, locale, slug, tx);
@@ -179,7 +187,6 @@ export class ProductsService {
         // Lần đầu xuất bản mới đặt ngày đăng; về nháp thì giữ ngày cũ (xuất bản lại không đổi)
         publishedAt: t.status === 'PUBLISHED' ? (old?.publishedAt ?? now) : (old?.publishedAt ?? null),
         name: t.name,
-        shortName: t.shortName,
         slug,
         tagline: t.tagline,
         summary: t.summary,

@@ -9,7 +9,7 @@ const noCache = { cacheOrLoad: <T>(_k: string, _t: number, loader: () => Promise
 
 /** Form hợp lệ tối thiểu: tên tiếng Việt + 1 độ dày */
 const validInput = (): ProductInputDto => {
-  const p = emptyProductInput('STANDARD');
+  const p = emptyProductInput('pt_standard');
   p.translations.vi.name = 'Tấm chống cháy';
   p.translations.vi.slug = 'tam-chong-chay-moi';
   p.translations.vi.summary = 'Tóm tắt';
@@ -54,6 +54,7 @@ const setup = (existing: object | null = null) => {
       findMany: vi.fn(async () => []),
       aggregate: vi.fn(async () => ({ _max: { sortOrder: 4 } })),
     },
+    productType: { findUnique: vi.fn(async (a: { where: { id: string } }) => (a.where.id === 'pt_standard' ? { specProfile: 'NONE' } : null)) },
     $transaction: vi.fn(async (fn: (t: typeof tx) => unknown) => fn(tx)),
     $executeRaw: vi.fn(async () => 0),
   };
@@ -74,10 +75,35 @@ describe('ProductsService — ghi', () => {
     expect(prisma.$transaction).not.toHaveBeenCalled();
   });
 
+  it('loại sản phẩm không tồn tại -> 400, không ghi', async () => {
+    const { service, prisma } = setup();
+    const input = { ...validInput(), typeId: 'pt_khong_co' };
+    await expect(service.create(input)).rejects.toThrow('Loại sản phẩm không tồn tại');
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('khối thông số riêng sai mẫu form của loại -> 400 tại ô', async () => {
+    const { service } = setup();
+    const input = { ...validInput(), floor: { edgeProfiles: [], floorSizes: [], suitableFloorings: [], moistureResistantFloor: null, sandedSurface: null } };
+    const err = await service.create(input as ProductInputDto).catch((e: unknown) => e);
+    expect((err as BadRequestException).getResponse()).toMatchObject({ errors: { floor: 'Thông số sàn chỉ dùng cho loại Tấm sàn' } });
+  });
+
+  it('slug trùng đoạn đường dẫn trang loại -> 400 tại ô slug', async () => {
+    const { service, prisma } = setup();
+    const input = validInput();
+    input.translations.vi.slug = 'loai';
+    const err = await service.create(input).catch((e: unknown) => e);
+    expect((err as BadRequestException).getResponse()).toMatchObject({
+      errors: { 'translations.vi.slug': 'Đường dẫn "loai" dành cho trang loại sản phẩm, hãy chọn đường dẫn khác' },
+    });
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
   it('tạo mới: xếp cuối danh sách, ghi bản dịch + độ dày, xoá cache', async () => {
     const { service, tx, cache } = setup();
     await service.create(validInput());
-    expect(tx.product.create).toHaveBeenCalledWith({ data: expect.objectContaining({ sortOrder: 5 }) });
+    expect(tx.product.create).toHaveBeenCalledWith({ data: expect.objectContaining({ sortOrder: 5, typeId: 'pt_standard' }) });
     expect(tx.productTranslation.upsert).toHaveBeenCalledWith(
       expect.objectContaining({ create: expect.objectContaining({ locale: 'vi', slug: 'tam-chong-chay-moi', status: 'PUBLISHED' }) }),
     );
@@ -163,5 +189,56 @@ describe('ProductsPublicService.bySlug', () => {
     const prisma = { product: { findFirst: vi.fn(async () => null) }, productTranslation: { findFirst: vi.fn(async () => null) } };
     const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never);
     await expect(service.bySlug('khong-co', 'vi')).resolves.toBeNull();
+  });
+});
+
+describe('ProductsPublicService.typeBySlug', () => {
+  const typeRow = {
+    id: 'pt_floor',
+    specProfile: 'FLOOR',
+    isActive: true,
+    translations: [{ typeId: 'pt_floor', locale: 'vi', name: 'Tấm sàn MgO', slug: 'tam-san-mgo', description: 'Mô tả', seoTitle: null, seoDescription: null }],
+  };
+
+  it('tìm thấy -> loại + sản phẩm của loại, SEO mặc định từ tên / mô tả', async () => {
+    const prisma = {
+      productType: { findFirst: vi.fn(async () => typeRow) },
+      product: { findMany: vi.fn(async () => []) },
+    };
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    const res = await service.typeBySlug('tam-san-mgo', 'vi');
+    expect(res).toEqual({
+      type: {
+        id: 'pt_floor',
+        specProfile: 'FLOOR',
+        name: 'Tấm sàn MgO',
+        slug: 'tam-san-mgo',
+        description: 'Mô tả',
+        seo: { title: 'Tấm sàn MgO', description: 'Mô tả' },
+        alternates: { vi: 'tam-san-mgo' },
+      },
+      products: [],
+    });
+    expect(prisma.product.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ typeId: 'pt_floor' }) }));
+  });
+
+  it('loại chỉ có bản tiếng Việt, xem ở /en bằng slug tiếng Việt -> null (404)', async () => {
+    const prisma = {
+      productType: { findFirst: vi.fn(async () => null) },
+      productTypeTranslation: { findFirst: vi.fn().mockResolvedValueOnce({ typeId: 'pt_floor' }).mockResolvedValueOnce(null) },
+    };
+    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never);
+    await expect(service.typeBySlug('tam-san-mgo', 'en')).resolves.toBeNull();
+  });
+
+  it('slug cũ -> { redirect: slug hiện tại }', async () => {
+    const prisma = {
+      productType: { findFirst: vi.fn(async () => null) },
+      productTypeTranslation: { findFirst: vi.fn(async () => ({ slug: 'tam-san-moi' })) },
+    };
+    const slugRedirects = { resolve: vi.fn(async () => 'pt_floor') };
+    const service = new ProductsPublicService(prisma as never, noCache as never, slugRedirects as never);
+    await expect(service.typeBySlug('tam-san-mgo', 'vi')).resolves.toEqual({ redirect: 'tam-san-moi' });
+    expect(slugRedirects.resolve).toHaveBeenCalledWith('product_type', 'vi', 'tam-san-mgo');
   });
 });
