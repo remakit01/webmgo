@@ -1,0 +1,143 @@
+'use client';
+
+import React, { type ReactNode } from 'react';
+import {
+  CORE_COLORS,
+  CRYSTAL_PHASES,
+  EDGE_PROFILE_LABEL,
+  EDGE_PROFILES,
+  SCREW_HOLDING_RATINGS,
+  SURFACE_FINISHES,
+  VOC_LEVELS,
+  maxFireRatingMinutes,
+  specKeyLabel,
+  type ProductVariantInput,
+  type TechnicalSpecInput,
+} from '@remak/shared/contracts/product';
+import { BareInput, BareNumber, NumberField, RangeField, RepeatList, Section, SelectField, TagsField, TextField, TriStateField } from './fields';
+import { blankToNull, fieldId } from './product-form';
+
+const keyOptions = (keys: readonly string[]) => keys.map((k) => ({ value: k, label: specKeyLabel(k, 'vi') ?? k }));
+
+function Group({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+  return (
+    <fieldset className="space-y-3 border-t border-slate-200 pt-4 first:border-t-0 first:pt-0">
+      <legend className="float-left w-full">
+        <span className="block text-xs font-bold uppercase tracking-wide text-slate-600">{title}</span>
+        {description && <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-slate-600">{description}</span>}
+      </legend>
+      <div className="clear-both grid grid-cols-3 gap-x-4 gap-y-3">{children}</div>
+    </fieldset>
+  );
+}
+
+/**
+ * Thông số kỹ thuật chung của dòng tấm (TDS), chia 5 nhóm như catalog.
+ * Ô trống = chưa có số liệu -> web ẩn dòng đó (không tự điền số mặc định).
+ */
+export default function ProductSpecSection({
+  spec,
+  variants,
+  onChange,
+  errors,
+}: {
+  spec: TechnicalSpecInput;
+  variants: ProductVariantInput[];
+  onChange: (patch: Partial<TechnicalSpecInput>) => void;
+  errors: Record<string, string>;
+}) {
+  const p = (f: keyof TechnicalSpecInput) => `technicalSpec.${f}`;
+  const maxEi = maxFireRatingMinutes(variants);
+
+  return (
+    <Section id="spec" title="Thông số kỹ thuật" description="Thông số chung của cả dòng tấm. Ô để trống = chưa có số liệu, trang web sẽ không hiện dòng đó.">
+      <Group title="Kích thước & bề mặt">
+        <div className="col-span-3">
+          <RepeatList
+            label="Khổ tiêu chuẩn"
+            itemName="khổ"
+            items={spec.standardSizes}
+            newItem={() => ({ widthMm: 1220, lengthMm: 2440 })}
+            onChange={(standardSizes) => onChange({ standardSizes })}
+            renderItem={(s, setS, i) => (
+              <div className="grid max-w-md grid-cols-2 gap-2">
+                <BareNumber label={`Khổ ${i + 1}: rộng`} unit="mm" value={s.widthMm} onChange={(w) => setS({ ...s, widthMm: w ?? 0 })} />
+                <BareNumber label={`Khổ ${i + 1}: dài`} unit="mm" value={s.lengthMm} onChange={(l) => setS({ ...s, lengthMm: l ?? 0 })} />
+              </div>
+            )}
+          />
+        </div>
+        <SelectField path={p('edgeProfile')} label="Kiểu cạnh" value={spec.edgeProfile} options={EDGE_PROFILES.map((e) => ({ value: e, label: EDGE_PROFILE_LABEL[e].vi }))} onChange={(edgeProfile) => onChange({ edgeProfile })} errors={errors} />
+        <SelectField path={p('coreColor')} label="Màu cốt tấm" value={spec.coreColor} options={keyOptions(CORE_COLORS)} onChange={(coreColor) => onChange({ coreColor })} errors={errors} />
+        <SelectField path={p('surfaceFinish')} label="Bề mặt" value={spec.surfaceFinish} options={keyOptions(SURFACE_FINISHES)} onChange={(surfaceFinish) => onChange({ surfaceFinish })} errors={errors} />
+      </Group>
+
+      <Group title="Cơ lý">
+        <RangeField pathMin={p('densityMinKgM3')} pathMax={p('densityMaxKgM3')} label="Tỷ trọng" unit="kg/m³" min={spec.densityMinKgM3} max={spec.densityMaxKgM3} onChange={(densityMinKgM3, densityMaxKgM3) => onChange({ densityMinKgM3, densityMaxKgM3 })} errors={errors} />
+        <RangeField
+          pathMin={p('flexuralMinMpa')}
+          pathMax={p('flexuralMaxMpa')}
+          label="Cường độ uốn (dọc)"
+          unit="MPa"
+          hint="“≥ 25” thì chỉ nhập ô Từ."
+          min={spec.flexuralMinMpa}
+          max={spec.flexuralMaxMpa}
+          onChange={(flexuralMinMpa, flexuralMaxMpa) => onChange({ flexuralMinMpa, flexuralMaxMpa })}
+          errors={errors}
+        />
+        <div className="space-y-3">
+          <NumberField path={p('flexuralCrossMinMpa')} label="Cường độ uốn (ngang) ≥" unit="MPa" value={spec.flexuralCrossMinMpa} onChange={(flexuralCrossMinMpa) => onChange({ flexuralCrossMinMpa })} errors={errors} />
+        </div>
+        <NumberField path={p('densityReductionPct')} label="Nhẹ hơn tấm tiêu chuẩn" unit="%" hint="Chỉ dùng cho dòng nhẹ (LiteCore™)." value={spec.densityReductionPct} onChange={(densityReductionPct) => onChange({ densityReductionPct })} errors={errors} />
+        <SelectField path={p('screwHoldingRating')} label="Khả năng bám vít" value={spec.screwHoldingRating} options={keyOptions(SCREW_HOLDING_RATINGS)} onChange={(screwHoldingRating) => onChange({ screwHoldingRating })} errors={errors} />
+      </Group>
+
+      <Group title="Nhiệt & chống cháy" description={`Giới hạn chịu lửa EI lấy từ từng độ dày${maxEi ? ` — hiện cao nhất EI ${maxEi}` : ' — chưa có độ dày nào nhập EI'}.`}>
+        <TextField path={p('reactionToFireClass')} label="Cấp phản ứng với lửa" placeholder="vd A1" value={spec.reactionToFireClass ?? ''} onChange={(v) => onChange({ reactionToFireClass: blankToNull(v) })} errors={errors} />
+        <NumberField path={p('maxTemperatureC')} label="Chịu nhiệt tối đa" unit="°C" value={spec.maxTemperatureC} onChange={(maxTemperatureC) => onChange({ maxTemperatureC })} errors={errors} />
+        <NumberField path={p('thermalConductivityWmk')} label="Hệ số dẫn nhiệt" unit="W/(m·K)" value={spec.thermalConductivityWmk} onChange={(thermalConductivityWmk) => onChange({ thermalConductivityWmk })} errors={errors} />
+        <div className="col-span-3">
+          <TagsField id={fieldId(p('fireClassStandards'))} label="Tiêu chuẩn phân loại cháy" placeholder="vd ASTM E84" value={spec.fireClassStandards} onChange={(fireClassStandards) => onChange({ fireClassStandards })} />
+        </div>
+      </Group>
+
+      <Group title="Cách âm & chống ẩm">
+        <RangeField pathMin={p('soundReductionMinDb')} pathMax={p('soundReductionMaxDb')} label="Cách âm" unit="dB" min={spec.soundReductionMinDb} max={spec.soundReductionMaxDb} onChange={(soundReductionMinDb, soundReductionMaxDb) => onChange({ soundReductionMinDb, soundReductionMaxDb })} errors={errors} />
+        <NumberField path={p('waterAbsorptionMaxPct')} label="Hút nước <" unit="%" value={spec.waterAbsorptionMaxPct} onChange={(waterAbsorptionMaxPct) => onChange({ waterAbsorptionMaxPct })} errors={errors} />
+        <NumberField path={p('thicknessSwellingMaxPct')} label="Trương nở chiều dày ≤" unit="%" value={spec.thicknessSwellingMaxPct} onChange={(thicknessSwellingMaxPct) => onChange({ thicknessSwellingMaxPct })} errors={errors} />
+        <TriStateField label="Chống nấm mốc" value={spec.moldResistant} onChange={(moldResistant) => onChange({ moldResistant })} />
+      </Group>
+
+      <Group title="Hoá học & an toàn">
+        <SelectField path={p('crystalPhase')} label="Pha tinh thể" value={spec.crystalPhase} options={keyOptions(CRYSTAL_PHASES)} onChange={(crystalPhase) => onChange({ crystalPhase })} errors={errors} />
+        <NumberField path={p('mgoContentMinPct')} label="Hàm lượng MgO ≥" unit="%" value={spec.mgoContentMinPct} onChange={(mgoContentMinPct) => onChange({ mgoContentMinPct })} errors={errors} />
+        <NumberField path={p('chlorideMaxPct')} label="Clorua tự do ≤" unit="%" hint="≤ 0,02% thì web ghi “không gỉ khung thép”." value={spec.chlorideMaxPct} onChange={(chlorideMaxPct) => onChange({ chlorideMaxPct })} errors={errors} />
+        <NumberField path={p('formaldehydeMgL')} label="Formaldehyde" unit="mg/L" value={spec.formaldehydeMgL} onChange={(formaldehydeMgL) => onChange({ formaldehydeMgL })} errors={errors} />
+        <SelectField path={p('vocLevel')} label="Mức VOC" value={spec.vocLevel} options={keyOptions(VOC_LEVELS)} onChange={(vocLevel) => onChange({ vocLevel })} errors={errors} />
+        <TriStateField label="Không chứa amiăng" value={spec.asbestosFree} onChange={(asbestosFree) => onChange({ asbestosFree })} />
+        <div className="col-span-3">
+          <TagsField id={fieldId(p('greenCertifications'))} label="Chứng nhận công trình xanh" placeholder="vd LEED" value={spec.greenCertifications} onChange={(greenCertifications) => onChange({ greenCertifications })} />
+        </div>
+      </Group>
+
+      <Group title="Chỉ tiêu khác" description="Chỉ tiêu chưa có ô riêng ở trên (vd độ cứng bề mặt). Hiện thêm vào bảng thông số.">
+        <div className="col-span-3">
+          <RepeatList
+            label="Chỉ tiêu"
+            itemName="chỉ tiêu"
+            items={spec.extraSpecs}
+            newItem={() => ({ key: '', value: '', unit: '' })}
+            onChange={(extraSpecs) => onChange({ extraSpecs })}
+            renderItem={(s, setS, i) => (
+              <div className="grid grid-cols-[2fr_2fr_1fr] gap-2">
+                <BareInput label={`Chỉ tiêu ${i + 1}: tên`} placeholder="Tên chỉ tiêu" value={s.key} onChange={(key) => setS({ ...s, key })} />
+                <BareInput label={`Chỉ tiêu ${i + 1}: giá trị`} placeholder="Giá trị" value={s.value} onChange={(value) => setS({ ...s, value })} />
+                <BareInput label={`Chỉ tiêu ${i + 1}: đơn vị`} placeholder="Đơn vị" value={s.unit ?? ''} onChange={(unit) => setS({ ...s, unit })} />
+              </div>
+            )}
+          />
+        </div>
+      </Group>
+    </Section>
+  );
+}

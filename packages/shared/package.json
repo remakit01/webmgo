@@ -85,6 +85,10 @@
     "./contracts/news-stats": {
       "types": "./dist/contracts/news-stats.d.ts",
       "default": "./dist/contracts/news-stats.js"
+    },
+    "./contracts/product": {
+      "types": "./dist/contracts/product.d.ts",
+      "default": "./dist/contracts/product.js"
     }
   },
   "files": [

@@ -10,6 +10,12 @@ import {
   type NewsSitemapEntry,
 } from '@remak/shared/contracts/news';
 import type { PopularNewsItem } from '@remak/shared/contracts/news-stats';
+import {
+  PRODUCTS_REVALIDATE_TAG,
+  type ProductBySlugResponse,
+  type ProductListItemPublic,
+  type ProductSitemapEntry,
+} from '@remak/shared/contracts/product';
 
 export type {
   BannerImageVariant,
@@ -99,4 +105,25 @@ export function getPopularNews(locale: Locale) {
 /** Mọi bài đang hiển thị kèm slug từng ngôn ngữ (sitemap + hreflang) */
 export function getNewsSitemap() {
   return getPublic<NewsSitemapEntry[]>('/news/public/sitemap', NEWS_REVALIDATE_TAG);
+}
+
+// ─── Sản phẩm (tag "products") ───────────────────────────────────────────────
+
+/** Sản phẩm đã xuất bản theo ngôn ngữ, đúng thứ tự CMS */
+export function getProducts(locale: Locale) {
+  return getPublic<ProductListItemPublic[]>(`/products/public?${query({ locale })}`, PRODUCTS_REVALIDATE_TAG);
+}
+
+/** Chi tiết theo slug của ngôn ngữ: { product } | { redirect } (slug cũ / slug ngôn ngữ khác) | null (không có) */
+export function getProduct(locale: Locale, slug: string) {
+  return getPublic<ProductBySlugResponse>(
+    `/products/public/${encodeURIComponent(slug)}?${query({ locale })}`,
+    PRODUCTS_REVALIDATE_TAG,
+    { notFoundAsNull: true },
+  );
+}
+
+/** Mọi sản phẩm đang hiển thị kèm slug từng ngôn ngữ (sitemap + hreflang) */
+export function getProductsSitemap() {
+  return getPublic<ProductSitemapEntry[]>('/products/public/sitemap', PRODUCTS_REVALIDATE_TAG);
 }
