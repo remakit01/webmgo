@@ -7,12 +7,15 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  ArrowDown,
+  ArrowUp,
+  CornerDownLeft,
   Maximize2,
   RotateCcw,
 } from 'lucide-react';
 
 /** Ảnh trong bài: hỗ trợ kéo thả co dãn trực tiếp, chọn kích thước nhanh, chữ ôm quanh ảnh (text wrap), sửa alt và chú thích */
-export default function ImageNodeView({ node, updateAttributes, selected, editor }: ReactNodeViewProps) {
+export default function ImageNodeView({ node, updateAttributes, selected, editor, getPos }: ReactNodeViewProps) {
   const { src, alt, caption, width, height, align = 'center' } = node.attrs as {
     src: string;
     alt: string | null;
@@ -150,6 +153,57 @@ export default function ImageNodeView({ node, updateAttributes, selected, editor
     updateAttributes({ align: newAlign });
   };
 
+  // Di chuyển ảnh lên trên khối liền trước
+  const handleMoveUp = () => {
+    if (!editable) return;
+    const pos = typeof (getPos as unknown) === 'function' ? (getPos as () => number)() : null;
+    if (pos === null) return;
+    const { doc, tr } = editor.state;
+    const $pos = doc.resolve(pos);
+    const index = $pos.index();
+    if (index === 0) return; // Đã ở đầu tài liệu
+
+    const prevNode = $pos.parent.child(index - 1);
+    const prevPos = pos - prevNode.nodeSize;
+    const currentNode = node;
+
+    // Hoán đổi: xoá node hiện tại rồi chèn trước prevPos
+    tr.delete(pos, pos + currentNode.nodeSize);
+    tr.insert(prevPos, currentNode);
+    editor.view.dispatch(tr);
+    editor.commands.focus(prevPos);
+  };
+
+  // Di chuyển ảnh xuống dưới khối liền sau
+  const handleMoveDown = () => {
+    if (!editable) return;
+    const pos = typeof (getPos as unknown) === 'function' ? (getPos as () => number)() : null;
+    if (pos === null) return;
+    const { doc, tr } = editor.state;
+    const $pos = doc.resolve(pos);
+    const index = $pos.index();
+    if (index >= $pos.parent.childCount - 1) return; // Đã ở cuối tài liệu
+
+    const nextNode = $pos.parent.child(index + 1);
+    const nextPos = pos + node.nodeSize + nextNode.nodeSize;
+    const currentNode = node;
+
+    // Hoán đổi: chèn sau nextNode rồi xoá vị trí cũ
+    tr.insert(nextPos, currentNode);
+    tr.delete(pos, pos + currentNode.nodeSize);
+    editor.view.dispatch(tr);
+    editor.commands.focus(pos + nextNode.nodeSize);
+  };
+
+  // Thêm một đoạn văn mới ngay bên dưới ảnh để gõ văn bản
+  const handleInsertParagraphBelow = () => {
+    if (!editable) return;
+    const pos = typeof (getPos as unknown) === 'function' ? (getPos as () => number)() : null;
+    if (pos === null) return;
+    const insertPos = pos + node.nodeSize;
+    editor.chain().focus().insertContentAt(insertPos, { type: 'paragraph' }).run();
+  };
+
   // Chiều rộng hiển thị (ưu tiên lúc đang kéo, rồi tới width lưu, hoặc 100%)
   const displayWidth = resizing ? resizing.currentWidth : (width ?? undefined);
 
@@ -184,14 +238,24 @@ export default function ImageNodeView({ node, updateAttributes, selected, editor
           src={src}
           alt={alt ?? ''}
           style={{ width: '100%', height: 'auto' }}
-          className={`rounded-lg border border-slate-200 block shadow-sm ${
-            resizing ? 'pointer-events-none' : ''
-          }`}
+          className={`rounded-lg border border-slate-200 block shadow-sm transition-all duration-300 ${
+            src?.startsWith('blob:') ? 'blur-xs scale-[0.99] opacity-80' : ''
+          } ${resizing ? 'pointer-events-none' : ''}`}
           draggable={false}
         />
 
+        {/* Overlay trạng thái đang đồng bộ / tải ảnh lên cloud MinIO */}
+        {src?.startsWith('blob:') && (
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg bg-slate-900/35 backdrop-blur-[2px] text-white select-none">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-white/20 shadow-lg text-xs font-bold animate-pulse">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#7CB305] animate-ping" />
+              <span>Đang tải lên...</span>
+            </div>
+          </div>
+        )}
+
         {/* Badge hiển thị kích thước realtime khi đang kéo hoặc khi chọn ảnh */}
-        {(resizing || (selected && width)) && (
+        {(resizing || (selected && width && !src?.startsWith('blob:'))) && (
           <div className="absolute top-2 right-2 bg-slate-900/80 backdrop-blur text-white text-[11px] font-mono font-bold px-2 py-0.5 rounded shadow z-30 pointer-events-none">
             {displayWidth} px
           </div>
@@ -277,11 +341,39 @@ export default function ImageNodeView({ node, updateAttributes, selected, editor
                 type="button"
                 title="Đặt lại chiều rộng mặc định"
                 onClick={() => setPresetPercent(null)}
-                className="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors ml-0.5 border-l border-slate-200 pl-1.5"
+                className="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors ml-0.5 border-l border-slate-200 pl-1.5 cursor-pointer"
               >
                 <RotateCcw size={12} />
               </button>
             )}
+
+            {/* Cụm đổi vị trí (Di chuyển Lên / Xuống) & Thêm dòng chữ dưới ảnh */}
+            <div className="flex items-center gap-0.5 pl-1.5 ml-0.5 border-l border-slate-200">
+              <button
+                type="button"
+                title="Di chuyển ảnh lên trên khối liền trước"
+                onClick={handleMoveUp}
+                className="p-1 rounded text-slate-600 hover:text-[#5F8A03] hover:bg-[#F4F9E8] transition-colors cursor-pointer"
+              >
+                <ArrowUp size={13} />
+              </button>
+              <button
+                type="button"
+                title="Di chuyển ảnh xuống dưới khối liền sau"
+                onClick={handleMoveDown}
+                className="p-1 rounded text-slate-600 hover:text-[#5F8A03] hover:bg-[#F4F9E8] transition-colors cursor-pointer"
+              >
+                <ArrowDown size={13} />
+              </button>
+              <button
+                type="button"
+                title="Thêm một đoạn văn mới bên dưới ảnh để gõ chữ"
+                onClick={handleInsertParagraphBelow}
+                className="p-1 rounded text-slate-600 hover:text-[#5F8A03] hover:bg-[#F4F9E8] transition-colors cursor-pointer flex items-center gap-0.5"
+              >
+                <CornerDownLeft size={13} />
+              </button>
+            </div>
           </div>
         )}
 
@@ -328,6 +420,7 @@ export default function ImageNodeView({ node, updateAttributes, selected, editor
           readOnly={!editable}
           onChange={(e) => updateAttributes({ caption: e.target.value || null })}
           placeholder="Chú thích ảnh (hiển thị dưới ảnh, có thể bỏ trống)"
+          spellCheck={false}
           className="w-full text-center text-xs italic text-slate-600 bg-transparent border-b border-dashed border-slate-200 focus:border-[#5F8A03] focus:outline-none py-1"
         />
         <label className={`flex items-center gap-2 text-[11px] ${missingAlt ? 'text-rose-600' : 'text-slate-500'}`}>
@@ -339,6 +432,7 @@ export default function ImageNodeView({ node, updateAttributes, selected, editor
             onChange={(e) => updateAttributes({ alt: e.target.value })}
             placeholder="Mô tả nội dung ảnh, vd: Tấm MGO bọc ống gió tại công trình"
             aria-invalid={missingAlt}
+            spellCheck={false}
             className="flex-1 bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] text-slate-800 focus:outline-none focus:border-[#5F8A03]"
           />
         </label>

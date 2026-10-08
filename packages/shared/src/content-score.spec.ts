@@ -147,4 +147,32 @@ describe('analyzeContent — bài kém', () => {
     const r = analyzeContent({ ...base, locale: 'en', keyword: 'MgO board', doc: en });
     expect(status(r.aeo, 'aeo-question-headings')).toBe('good');
   });
+
+  it('kiểm tra SEO ảnh: số lượng, alt và keyword trong alt', () => {
+    // Không có ảnh
+    const noImg = analyzeContent({ ...base, doc: { type: 'doc', content: [p('Bài viết không có ảnh')] } });
+    expect(status(noImg.seo, 'seo-image-count')).toBe('warn');
+    expect(status(noImg.seo, 'seo-image-alt')).toBe('warn');
+    expect(status(noImg.seo, 'seo-image-alt-kw')).toBe('warn');
+
+    // Có ảnh nhưng thiếu alt
+    const imgNoAlt: RichDoc = {
+      type: 'doc',
+      content: [{ type: 'image', attrs: { src: 'https://example.com/a.jpg', alt: '' } }],
+    };
+    const rNoAlt = analyzeContent({ ...base, doc: imgNoAlt });
+    expect(status(rNoAlt.seo, 'seo-image-count')).toBe('good');
+    expect(status(rNoAlt.seo, 'seo-image-alt')).toBe('bad');
+    expect(status(rNoAlt.seo, 'seo-image-alt-kw')).toBe('warn');
+
+    // Có ảnh với alt chuẩn chứa từ khóa
+    const imgGood: RichDoc = {
+      type: 'doc',
+      content: [{ type: 'image', attrs: { src: 'https://example.com/a.jpg', alt: 'Tấm MGO chống cháy thực tế bọc ống gió' } }],
+    };
+    const rGood = analyzeContent({ ...base, doc: imgGood });
+    expect(status(rGood.seo, 'seo-image-count')).toBe('good');
+    expect(status(rGood.seo, 'seo-image-alt')).toBe('good');
+    expect(status(rGood.seo, 'seo-image-alt-kw')).toBe('good');
+  });
 });

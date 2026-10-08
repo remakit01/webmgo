@@ -129,6 +129,7 @@ interface DocFacts {
   hasTable: boolean;
   blockquotes: string[];
   hasReferenceSection: boolean;
+  images: { src: string; alt: string; caption?: string }[];
 }
 
 function analyzeDoc(doc: RichDoc): DocFacts {
@@ -145,6 +146,7 @@ function analyzeDoc(doc: RichDoc): DocFacts {
     hasTable: false,
     blockquotes: [],
     hasReferenceSection: false,
+    images: [],
   };
   facts.words = countWords(facts.plain);
 
@@ -184,6 +186,13 @@ function analyzeDoc(doc: RichDoc): DocFacts {
       case 'blockquote':
         facts.blockquotes.push(nodeText(node).trim());
         break;
+      case 'image': {
+        const src = typeof node.attrs?.src === 'string' ? node.attrs.src : '';
+        const alt = typeof node.attrs?.alt === 'string' ? node.attrs.alt.trim() : '';
+        const caption = typeof node.attrs?.caption === 'string' ? node.attrs.caption.trim() : undefined;
+        facts.images.push({ src, alt, caption });
+        break;
+      }
     }
     (node.content ?? []).forEach(visit);
   };
@@ -296,6 +305,21 @@ export function analyzeContent(input: ContentScoreInput): ContentScore {
     h2.length >= 2
       ? check('seo-structure', 'good', `${h2.length} mục H2`)
       : check('seo-structure', 'warn', 'Chia bài thành ít nhất 2 mục H2'),
+    facts.images.length >= 1
+      ? check('seo-image-count', 'good', `Có ${facts.images.length} ảnh minh họa`)
+      : check('seo-image-count', 'warn', 'Thêm ít nhất 1 ảnh minh họa cho bài viết'),
+    facts.images.length === 0
+      ? check('seo-image-alt', 'warn', 'Chưa có ảnh trong bài viết để kiểm tra thẻ alt')
+      : facts.images.filter((img) => !img.alt).length === 0
+        ? check('seo-image-alt', 'good', `Tất cả ${facts.images.length} ảnh đã có mô tả alt`)
+        : check('seo-image-alt', 'bad', `${facts.images.filter((img) => !img.alt).length}/${facts.images.length} ảnh chưa có mô tả (alt)`),
+    !kw
+      ? check('seo-image-alt-kw', 'warn', needKw)
+      : facts.images.length === 0
+        ? check('seo-image-alt-kw', 'warn', 'Thêm ảnh có chứa keyword trong thẻ alt')
+        : facts.images.some((img) => containsKeyword(img.alt, kw))
+          ? check('seo-image-alt-kw', 'good', 'Có ảnh chứa keyword trong thẻ alt')
+          : check('seo-image-alt-kw', 'warn', 'Thẻ alt của ảnh chưa chứa keyword chính'),
   ];
 
   // ── AEO ──
