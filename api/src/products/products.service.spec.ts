@@ -133,6 +133,27 @@ describe('ProductsService — ghi', () => {
     expect(slugRedirects.record).not.toHaveBeenCalled();
   });
 
+  it('loại không có mẫu thông số riêng: lưu sản phẩm KHÔNG xoá khối SIP / sàn / trang trí cũ (giữ trong DB, chỉ ẩn)', async () => {
+    const updatedAt = new Date('2026-10-08T00:00:00Z');
+    const { service, tx } = setup({ id: 'p1', updatedAt, translations: [] });
+    await service.update('p1', validInput(), updatedAt.toISOString());
+    expect(tx.sipPanelSpec.deleteMany).not.toHaveBeenCalled();
+    expect(tx.floorBoardSpec.deleteMany).not.toHaveBeenCalled();
+    expect(tx.decorativeFinishSpec.deleteMany).not.toHaveBeenCalled();
+    expect(tx.decorativeFinishOption.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('loại mẫu SIP: chỉ ghi khối SIP, không đụng khối sàn / trang trí', async () => {
+    const updatedAt = new Date('2026-10-08T00:00:00Z');
+    const { service, tx, prisma } = setup({ id: 'p1', updatedAt, translations: [] });
+    prisma.productType.findUnique.mockResolvedValue({ specProfile: 'SIP' } as never);
+    const sip = { coreMaterials: [], coreThicknessMinMm: null, coreThicknessMaxMm: null, facingThicknessesMm: [], maxWidthMm: null, maxLengthMm: null, loadBearing: null };
+    await service.update('p1', { ...validInput(), sip } as ProductInputDto, updatedAt.toISOString());
+    expect(tx.sipPanelSpec.upsert).toHaveBeenCalledTimes(1);
+    expect(tx.floorBoardSpec.deleteMany).not.toHaveBeenCalled();
+    expect(tx.decorativeFinishOption.deleteMany).not.toHaveBeenCalled();
+  });
+
   it('độ dày: giữ dòng theo id, xoá dòng không còn trong form', async () => {
     const updatedAt = new Date('2026-10-08T00:00:00Z');
     const { service, tx } = setup({ id: 'p1', updatedAt, translations: [] });

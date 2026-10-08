@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Prisma } from '../generated/prisma/client.js';
-import { toDetailPublic, toListItemCms, toListItemPublic } from './products.mapper.js';
+import { toDetailPublic, toListItemCms, toListItemPublic, toProductCms } from './products.mapper.js';
 
 const D = (n: number) => new Prisma.Decimal(n);
 const NOW = new Date('2026-10-08T03:00:00Z');
@@ -197,5 +197,13 @@ describe('products.mapper — CMS', () => {
     expect(c.variantCount).toBe(2);
     expect(c.type).toEqual({ id: 'pt_standard', name: 'Loại pt_standard', specProfile: 'NONE' });
     expect(c.locales).toEqual({ vi: { name: 'Tấm chống cháy', slug: 'tam-chong-chay', status: 'PUBLISHED' }, en: { name: 'Fire board', slug: 'fire-board', status: 'DRAFT' } });
+  });
+
+  it('form sửa: khối không khớp mẫu của loại thì ẩn, nhưng vẫn trả ở storedExtensions để chọn lại loại không mất dữ liệu', () => {
+    const p = product({ technicalSpec: null }); // loại NONE nhưng còn floorSpec cũ trong DB
+    const cms = toProductCms(p);
+    expect(cms.floor).toBeNull();
+    expect(cms.storedExtensions.floor).toMatchObject({ edgeProfiles: ['TONGUE_GROOVE'], sandedSurface: true });
+    expect(cms.storedExtensions.sip).toBeNull();
   });
 });

@@ -1,7 +1,15 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { LOCALES, type Locale } from '@remak/shared/locale';
 import { validateRichDoc } from '@remak/shared/rich-content';
-import { isReservedProductSlug, productInputErrors, type ProductCms, type ProductInput, type ProductListItemCms } from '@remak/shared/contracts/product';
+import {
+  EXTENSION_OF_PROFILE,
+  isReservedProductSlug,
+  productInputErrors,
+  type ProductCms,
+  type ProductInput,
+  type ProductListItemCms,
+  type ProductSpecProfile,
+} from '@remak/shared/contracts/product';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ContentCacheService } from '../content-cache/content-cache.service.js';
 import { MediaService } from '../storage/media.service.js';
@@ -54,13 +62,13 @@ export class ProductsService {
   // ── Ghi ─────────────────────────────────────────────────────────────────
 
   async create(dto: ProductInputDto): Promise<ProductCms> {
-    await this.assertValid(dto);
+    const profile = await this.assertValid(dto);
     const last = await this.prisma.product.aggregate({ where: LIVE, _max: { sortOrder: true } });
     const id = await this.prisma.$transaction(async (tx) => {
       const p = await tx.product.create({
         data: { typeId: dto.typeId, isFeatured: dto.isFeatured, sortOrder: (last._max.sortOrder ?? -1) + 1 },
       });
-      await this.writeAll(tx, p.id, dto, new Map());
+      await this.writeAll(tx, p.id, dto, profile, new Map());
       return p.id;
     });
     await this.cache.invalidate(PRODUCTS_INVALIDATE);
@@ -68,7 +76,7 @@ export class ProductsService {
   }
 
   async update(id: string, dto: ProductInputDto, ifMatch: string | undefined): Promise<ProductCms> {
-    await this.assertValid(dto);
+    const profile = await this.assertValid(dto);
     const existing = await this.prisma.product.findFirst({ where: { id, ...LIVE }, include: { translations: true } });
     if (!existing) throw new NotFoundException('Không tìm thấy sản phẩm');
     assertVersion(ifMatch, existing.updatedAt);
@@ -79,7 +87,7 @@ export class ProductsService {
         data: { typeId: dto.typeId, isFeatured: dto.isFeatured, updatedAt: new Date() },
       });
       assertUpdated(count);
-      await this.writeAll(tx, id, dto, new Map(existing.translations.map((t) => [t.locale, t])));
+      await this.writeAll(tx, id, dto, profile, new Map(existing.translations.map((t) => [t.locale, t])));
     });
     await this.cache.invalidate(PRODUCTS_INVALIDATE);
     return this.get(id);
@@ -132,10 +140,11 @@ export class ProductsService {
   // ── Nội bộ ──────────────────────────────────────────────────────────────
 
   /** Kiểm form; mẫu form thông số lấy theo loại đã chọn (loại là dữ liệu DB) */
-  private async assertValid(dto: ProductInput) {
+  private async assertValid(dto: ProductInput): Promise<ProductSpecProfile> {
     const type = dto.typeId ? await this.prisma.productType.findUnique({ where: { id: dto.typeId }, select: { specProfile: true } }) : null;
     if (dto.typeId && !type) throw new BadRequestException('Loại sản phẩm không tồn tại');
-    const errors = productInputErrors(dto, type?.specProfile ?? 'NONE');
+    const profile = type?.specProfile ?? 'NONE';
+    const errors = productInputErrors(dto, profile);
     for (const l of LOCALES) {
       const t = dto.translations[l];
       if (!t) continue;
@@ -148,15 +157,22 @@ export class ProductsService {
     if (Object.keys(errors).length) {
       throw new BadRequestException({ message: Object.values(errors)[0], errors });
     }
+    return profile;
   }
 
-  private async writeAll(tx: Tx, productId: string, dto: ProductInputDto, oldTr: Map<Locale, { slug: string; status: string; publishedAt: Date | null }>) {
+  private async writeAll(
+    tx: Tx,
+    productId: string,
+    dto: ProductInputDto,
+    profile: ProductSpecProfile,
+    oldTr: Map<Locale, { slug: string; status: string; publishedAt: Date | null }>,
+  ) {
     await this.writeTranslations(tx, productId, dto, oldTr);
     const { extraSpecs, standardSizes, ...spec } = dto.technicalSpec;
     const specData = { ...spec, standardSizes: json(standardSizes), extraSpecs: json(extraSpecs) };
     await tx.productTechnicalSpec.upsert({ where: { productId }, create: { productId, ...specData }, update: specData });
     await this.writeVariants(tx, productId, dto);
-    await this.writeExtensions(tx, productId, dto);
+    await this.writeExtensions(tx, productId, dto, profile);
   }
 
   private async writeTranslations(tx: Tx, productId: string, dto: ProductInputDto, oldTr: Map<Locale, { slug: string; status: string; publishedAt: Date | null }>) {
@@ -257,16 +273,25 @@ export class ProductsService {
     }
   }
 
-  /** Phần mở rộng: chỉ giữ đúng loại của sản phẩm, loại khác xoá */
-  private async writeExtensions(tx: Tx, productId: string, dto: ProductInputDto) {
-    if (dto.sip) await tx.sipPanelSpec.upsert({ where: { productId }, create: { productId, ...dto.sip }, update: dto.sip });
-    else await tx.sipPanelSpec.deleteMany({ where: { productId } });
+  /**
+   * Phần mở rộng: chỉ ghi khối khớp mẫu thông số của loại hiện tại. Khối của mẫu khác GIỮ NGUYÊN trong DB
+   * (web / CMS đã ẩn theo specProfile) — đổi mẫu của loại hay đổi loại rồi đổi lại không mất dữ liệu.
+   */
+  private async writeExtensions(tx: Tx, productId: string, dto: ProductInputDto, profile: ProductSpecProfile) {
+    const ext = EXTENSION_OF_PROFILE[profile];
+    if (ext === 'sip') {
+      if (dto.sip) await tx.sipPanelSpec.upsert({ where: { productId }, create: { productId, ...dto.sip }, update: dto.sip });
+      else await tx.sipPanelSpec.deleteMany({ where: { productId } });
+    }
 
-    if (dto.floor) {
-      const data = { ...dto.floor, floorSizes: json(dto.floor.floorSizes) };
-      await tx.floorBoardSpec.upsert({ where: { productId }, create: { productId, ...data }, update: data });
-    } else await tx.floorBoardSpec.deleteMany({ where: { productId } });
+    if (ext === 'floor') {
+      if (dto.floor) {
+        const data = { ...dto.floor, floorSizes: json(dto.floor.floorSizes) };
+        await tx.floorBoardSpec.upsert({ where: { productId }, create: { productId, ...data }, update: data });
+      } else await tx.floorBoardSpec.deleteMany({ where: { productId } });
+    }
 
+    if (ext !== 'decorative') return;
     await tx.decorativeFinishOption.deleteMany({ where: { productId } });
     if (dto.decorative) {
       await tx.decorativeFinishSpec.upsert({

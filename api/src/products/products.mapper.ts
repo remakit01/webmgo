@@ -1,6 +1,7 @@
 import type { Locale } from '@remak/shared/locale';
 import { toDayKey } from '@remak/shared/date';
 import {
+  EXTENSION_OF_PROFILE,
   defaultVariantLabelOf,
   discountPercent,
   emptyProductInput,
@@ -327,7 +328,8 @@ export function toProductCms(p: DetailRow): ProductCms {
   const vi = p.translations.find((t) => t.locale === 'vi');
   const en = p.translations.find((t) => t.locale === 'en');
   const s = p.technicalSpec;
-  const ext = extensionOf(p);
+  const stored = storedExtensionsOf(p);
+  const ext = EXTENSION_OF_PROFILE[p.type.specProfile];
   const variants: ProductVariantInput[] = p.variants.map((v) => ({
     id: v.id,
     sku: v.sku,
@@ -365,20 +367,50 @@ export function toProductCms(p: DetailRow): ProductCms {
     translations: { vi: vi ? trInput(vi) : emptyTranslationInput(), en: en ? trInput(en) : null },
     technicalSpec: s ? { ...techRowOf(s), extraSpecs: asArray<{ key: string; value: string; unit?: string }>(s.extraSpecs) } : emptyProductInput(p.typeId).technicalSpec,
     variants,
-    sip: ext?.type === 'SIP' ? (({ type: _t, ...rest }) => rest)(ext) : null,
-    floor: ext?.type === 'FLOOR' ? (({ type: _t, ...rest }) => rest)(ext) : null,
-    decorative:
-      p.type.specProfile === 'DECORATIVE' && p.decorativeSpec
-        ? {
-            customPrintSupported: p.decorativeSpec.customPrintSupported,
-            options: p.decorativeOptions.map((o) => ({
-              finishType: o.finishType,
-              scratchResistance: o.scratchResistance,
-              translations: Object.fromEntries(
-                o.translations.map((t) => [t.locale, { name: t.name, description: t.description, patterns: t.patterns, suitableAreas: t.suitableAreas }]),
-              ),
-            })),
-          }
-        : null,
+    // Chỉ khối khớp mẫu của loại hiện tại vào form; khối khác giữ ở storedExtensions (đang ẩn)
+    sip: ext === 'sip' ? stored.sip : null,
+    floor: ext === 'floor' ? stored.floor : null,
+    decorative: ext === 'decorative' ? stored.decorative : null,
+    storedExtensions: stored,
+  };
+}
+
+/** Mọi khối thông số riêng đang lưu trong DB, không lọc theo mẫu của loại */
+function storedExtensionsOf(p: DetailRow): Pick<ProductCms, 'sip' | 'floor' | 'decorative'> {
+  const s = p.sipSpec;
+  const f = p.floorSpec;
+  return {
+    sip: s
+      ? {
+          coreMaterials: s.coreMaterials,
+          coreThicknessMinMm: s.coreThicknessMinMm,
+          coreThicknessMaxMm: s.coreThicknessMaxMm,
+          facingThicknessesMm: s.facingThicknessesMm,
+          maxWidthMm: s.maxWidthMm,
+          maxLengthMm: s.maxLengthMm,
+          loadBearing: s.loadBearing,
+        }
+      : null,
+    floor: f
+      ? {
+          edgeProfiles: f.edgeProfiles,
+          floorSizes: asArray<SheetSize>(f.floorSizes),
+          suitableFloorings: f.suitableFloorings,
+          moistureResistantFloor: f.moistureResistantFloor,
+          sandedSurface: f.sandedSurface,
+        }
+      : null,
+    decorative: p.decorativeSpec
+      ? {
+          customPrintSupported: p.decorativeSpec.customPrintSupported,
+          options: p.decorativeOptions.map((o) => ({
+            finishType: o.finishType,
+            scratchResistance: o.scratchResistance,
+            translations: Object.fromEntries(
+              o.translations.map((t) => [t.locale, { name: t.name, description: t.description, patterns: t.patterns, suitableAreas: t.suitableAreas }]),
+            ),
+          })),
+        }
+      : null,
   };
 }

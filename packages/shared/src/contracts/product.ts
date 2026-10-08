@@ -736,6 +736,11 @@ export interface ProductCms extends ProductInput {
   sortOrder: number;
   /** slug đang dùng + ngày đăng theo ngôn ngữ */
   published: Partial<Record<Locale, { slug: string; status: string; publishedAt: string | null }>>;
+  /**
+   * Mọi khối thông số riêng đang lưu trong DB, kể cả khối không khớp mẫu của loại hiện tại (đang ẩn).
+   * CMS dùng khi đổi sang loại có mẫu đó để hiện lại dữ liệu cũ thay vì form trống (tránh ghi đè).
+   */
+  storedExtensions: Pick<ProductInput, 'sip' | 'floor' | 'decorative'>;
   updatedAt: string;
 }
 

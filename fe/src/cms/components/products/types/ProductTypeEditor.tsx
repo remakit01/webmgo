@@ -206,8 +206,8 @@ export default function ProductTypeEditor({
             {profileChanged && (
               <p role="status" className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
-                Loại đang có {productCount} sản phẩm — đổi mẫu thông số sẽ ẩn khối thông số riêng hiện có của các sản phẩm này, và khối đó bị
-                xoá khi lưu lại từng sản phẩm.
+                Loại đang có {productCount} sản phẩm — đổi mẫu thông số sẽ ẩn khối thông số riêng hiện có của các sản phẩm này (vẫn giữ
+                trong hệ thống, hiện lại khi đổi về mẫu cũ).
               </p>
             )}
           </div>

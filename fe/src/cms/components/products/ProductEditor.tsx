@@ -61,8 +61,10 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   const bannerRef = useRef<HTMLDivElement>(null);
   // Loại sản phẩm quản lý ở màn “Loại Sản Phẩm”; mẫu form thông số riêng đi theo loại đã chọn
   const [types, setTypes] = useState<ProductTypeCms[] | null>(null);
+  const [typesError, setTypesError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadTypes = useCallback(() => {
+    setTypesError(null);
     productsApi
       .types()
       .then((list) => {
@@ -75,8 +77,13 @@ export default function ProductEditor({ productId }: { productId?: string }) {
         setInitial(withType);
         setForm(withType);
       })
-      .catch((err: unknown) => showToast(err instanceof Error ? err.message : 'Không tải được loại sản phẩm', 'error'));
-  }, [productId, showToast]);
+      .catch((err: unknown) => setTypesError(err instanceof Error ? err.message : 'Không tải được loại sản phẩm'));
+  }, [productId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- tải danh sách loại khi mở trang
+    loadTypes();
+  }, [loadTypes]);
 
   const typeOf = (id: string) => types?.find((t) => t.id === id);
   const profileOf = (id: string): ProductSpecProfile => typeOf(id)?.specProfile ?? 'NONE';
@@ -141,12 +148,19 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   const changeType = (typeId: string) => {
     const next = profileOf(typeId);
     const same = EXTENSION_OF_PROFILE[profile] === EXTENSION_OF_PROFILE[next];
-    const doIt = () => setForm((f) => ({ ...f, typeId, ...(same ? {} : emptyExtensionFor(next)) }));
+    // Khối của mẫu mới đã có trong DB (đang ẩn) -> hiện lại dữ liệu cũ thay vì form trống, lưu không ghi đè
+    const stored = cms?.storedExtensions;
+    const restored = (ext: Pick<ProductInput, 'sip' | 'floor' | 'decorative'>) => ({
+      sip: ext.sip && stored?.sip ? stored.sip : ext.sip,
+      floor: ext.floor && stored?.floor ? stored.floor : ext.floor,
+      decorative: ext.decorative && stored?.decorative ? stored.decorative : ext.decorative,
+    });
+    const doIt = () => setForm((f) => ({ ...f, typeId, ...(same ? {} : restored(emptyExtensionFor(next))) }));
     const hasExt = !!(form.sip || form.floor || form.decorative);
     if (hasExt && !same) {
       confirm({
         title: 'Đổi loại sản phẩm?',
-        description: `Thông số riêng của “${typeOf(form.typeId)?.translations.vi?.name ?? 'loại hiện tại'}” sẽ bị bỏ khi lưu.`,
+        description: `Thông số riêng của “${typeOf(form.typeId)?.translations.vi?.name ?? 'loại hiện tại'}” sẽ được ẩn đi (vẫn giữ trong hệ thống, hiện lại khi chọn loại có cùng mẫu thông số).`,
         confirmText: 'Đổi loại',
         variant: 'warning',
         onConfirm: doIt,
@@ -177,6 +191,8 @@ export default function ProductEditor({ productId }: { productId?: string }) {
 
   // ── Lưu ────────────────────────────────────────────────────────────────
   const save = async () => {
+    // Mẫu thông số đi theo loại: chưa có danh sách loại thì không kiểm / lưu được đúng
+    if (!types) return;
     const found = productInputErrors(form, profile);
     setShowErrors(true);
     const first = firstErrorKey(found);
@@ -291,7 +307,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
           <button
             type="button"
             onClick={() => void save()}
-            disabled={saving || (!dirty && !!cms)}
+            disabled={saving || !types || (!dirty && !!cms)}
             aria-keyshortcuts="Control+S"
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4E7202] px-4 text-sm font-semibold text-white hover:bg-[#3F5E02] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
           >
@@ -303,6 +319,21 @@ export default function ProductEditor({ productId }: { productId?: string }) {
 
       <AdminPageBody className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-6">
         <div className="min-w-0 space-y-6">
+          {typesError && (
+            <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <div className="flex-1 space-y-2">
+                <p>Không tải được danh sách loại sản phẩm ({typesError}) — chưa lưu được sản phẩm.</p>
+                <button
+                  type="button"
+                  onClick={loadTypes}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 text-xs font-semibold text-rose-800 hover:bg-rose-100 cursor-pointer"
+                >
+                  <RefreshCw size={13} aria-hidden="true" /> Thử lại
+                </button>
+              </div>
+            </div>
+          )}
           {banner && (
             <div ref={bannerRef} tabIndex={-1} role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 focus:outline-none">
               <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
