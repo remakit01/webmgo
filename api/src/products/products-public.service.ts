@@ -112,12 +112,23 @@ export class ProductsPublicService {
           orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
           include: productListInclude,
         });
+        // Chưa có sản phẩm hiện ở ngôn ngữ này -> 404, không để Google index trang rỗng
+        if (!rows.length) return null;
+        // hreflang: chỉ ngôn ngữ có bản dịch loại VÀ có sản phẩm đang hiện (ngôn ngữ kia có trang thật)
+        const alternates: Partial<Record<Locale, string>> = { [locale]: tr.slug };
+        for (const x of t.translations) {
+          if (x.locale === locale) continue;
+          const live = await this.prisma.product.count({
+            where: { deletedAt: null, typeId: t.id, translations: { some: visibleTranslation(x.locale, now) } },
+          });
+          if (live) alternates[x.locale] = x.slug;
+        }
         return {
           type: {
             ...typeRefOf(t, locale),
             description: tr.description,
             seo: { title: tr.seoTitle || tr.name, description: tr.seoDescription || tr.description || '' },
-            alternates: Object.fromEntries(t.translations.map((x) => [x.locale, x.slug])),
+            alternates,
           },
           products: rows.map((p) => toListItemPublic(p, p.translations.find((x) => x.locale === locale)!, now)),
         };

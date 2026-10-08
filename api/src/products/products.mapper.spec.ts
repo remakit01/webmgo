@@ -139,6 +139,13 @@ describe('products.mapper — danh sách public', () => {
     const viOnly = product({ type: productType('pt_custom', 'NONE', false) });
     expect(toListItemPublic(viOnly, tr('en') as never, NOW).type.name).toBe('Loại pt_custom');
   });
+
+  it('loại không có trang ở ngôn ngữ đang xem (chưa dịch / đang ẩn) -> slug rỗng, web không đặt link', () => {
+    const viOnly = product({ type: productType('pt_custom', 'NONE', false) });
+    expect(toListItemPublic(viOnly, tr('en') as never, NOW).type.slug).toBe('');
+    const hidden = product({ type: { ...productType('pt_custom', 'NONE'), isActive: false } });
+    expect(toListItemPublic(hidden, tr('vi') as never, NOW).type.slug).toBe('');
+  });
 });
 
 describe('products.mapper — chi tiết public', () => {

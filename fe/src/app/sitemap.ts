@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { PRODUCTS } from '@/data/products';
 import { routing } from '@/i18n/routing';
-import { getNewsCategories, getNewsSitemap } from '@/lib/api';
+import { getNewsCategories, getNewsSitemap, getProductTypesSitemap } from '@/lib/api';
 import { newsCategoryPath, newsPostPath } from '@/lib/news-paths';
+import { productTypePath } from '@/lib/product-paths';
 
 // Sitemap làm mới cùng nhịp ISR để bài mới xuất hiện sớm
 export const revalidate = 3600;
@@ -113,5 +114,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ? [{ url: `${baseUrl}/en/news`, lastModified: currentDate, changeFrequency: 'weekly', priority: 0.7, alternates: { languages: { vi: `${baseUrl}/tin-tuc`, en: `${baseUrl}/en/news` } } }]
     : [];
 
-  return [...staticRoutes, ...productRoutes, ...newsIndexEn, ...categoryRoutes, ...newsRoutes];
+  // Trang loại sản phẩm: mỗi ngôn ngữ có bản dịch một URL, kèm hreflang
+  const productTypeRoutes: MetadataRoute.Sitemap = ((await getProductTypesSitemap()) ?? []).flatMap((entry) => {
+    const languages = Object.fromEntries(
+      Object.entries(entry.slugs).map(([l, slug]) => [l, `${baseUrl}${productTypePath(l as (typeof routing.locales)[number], slug!)}`]),
+    );
+    return Object.values(languages).map((url) => ({
+      url,
+      lastModified: currentDate,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+      ...(Object.keys(languages).length > 1 ? { alternates: { languages } } : {}),
+    }));
+  });
+
+  return [...staticRoutes, ...productRoutes, ...productTypeRoutes, ...newsIndexEn, ...categoryRoutes, ...newsRoutes];
 }

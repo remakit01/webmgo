@@ -489,6 +489,7 @@ export interface ProductTypeRef {
   id: string;
   specProfile: ProductSpecProfile;
   name: string;
+  /** rỗng = loại không có trang ở ngôn ngữ này (chưa dịch / đang ẩn) — không đặt link */
   slug: string;
 }
 

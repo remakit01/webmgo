@@ -63,10 +63,14 @@ type VariantRow = ListRow['variants'][number];
 type TranslationRow = ListRow['translations'][number];
 export type ProductTypeRow = Prisma.ProductTypeGetPayload<typeof productTypeInclude>;
 
-/** Loại theo ngôn ngữ đang xem; chưa có bản dịch thì dùng tiếng Việt */
+/**
+ * Loại theo ngôn ngữ đang xem; chưa có bản dịch thì tên dùng tiếng Việt.
+ * slug rỗng = loại không có trang ở ngôn ngữ này (chưa dịch / đang ẩn) -> web không đặt link.
+ */
 export function typeRefOf(t: ProductTypeRow, locale: Locale): ProductTypeRef {
-  const tr = t.translations.find((x) => x.locale === locale) ?? t.translations.find((x) => x.locale === 'vi');
-  return { id: t.id, specProfile: t.specProfile, name: tr?.name ?? '', slug: tr?.slug ?? '' };
+  const own = t.translations.find((x) => x.locale === locale);
+  const tr = own ?? t.translations.find((x) => x.locale === 'vi');
+  return { id: t.id, specProfile: t.specProfile, name: tr?.name ?? '', slug: own && t.isActive ? own.slug : '' };
 }
 
 const offerOf = (v: VariantRow): VariantOffer => ({

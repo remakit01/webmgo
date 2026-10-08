@@ -15,6 +15,9 @@ import {
   type ProductBySlugResponse,
   type ProductListItemPublic,
   type ProductSitemapEntry,
+  type ProductTypeBySlugResponse,
+  type ProductTypeRef,
+  type ProductTypeSitemapEntry,
 } from '@remak/shared/contracts/product';
 
 export type {
@@ -126,4 +129,23 @@ export function getProduct(locale: Locale, slug: string) {
 /** Mọi sản phẩm đang hiển thị kèm slug từng ngôn ngữ (sitemap + hreflang) */
 export function getProductsSitemap() {
   return getPublic<ProductSitemapEntry[]>('/products/public/sitemap', PRODUCTS_REVALIDATE_TAG);
+}
+
+/** Loại sản phẩm đang hiện ở ngôn ngữ này (nút lọc, trang loại), đúng thứ tự CMS */
+export function getProductTypes(locale: Locale) {
+  return getPublic<ProductTypeRef[]>(`/products/public/types?${query({ locale })}`, PRODUCTS_REVALIDATE_TAG);
+}
+
+/** Trang loại theo slug của ngôn ngữ: { type, products } | { redirect } | null (không có) */
+export function getProductType(locale: Locale, slug: string) {
+  return getPublic<ProductTypeBySlugResponse>(
+    `/products/public/types/${encodeURIComponent(slug)}?${query({ locale })}`,
+    PRODUCTS_REVALIDATE_TAG,
+    { notFoundAsNull: true },
+  );
+}
+
+/** Trang loại kèm slug từng ngôn ngữ (sitemap) */
+export function getProductTypesSitemap() {
+  return getPublic<ProductTypeSitemapEntry[]>('/products/public/types/sitemap', PRODUCTS_REVALIDATE_TAG);
 }

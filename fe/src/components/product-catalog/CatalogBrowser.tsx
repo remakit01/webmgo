@@ -3,9 +3,10 @@
 import React, { useId, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Filter, Search, X } from 'lucide-react';
-import { PRODUCT_TYPE_LABEL, PRODUCT_TYPES, STOCK_STATUS_LABEL, formatFireRating, type ProductListItemPublic, type ProductType } from '@remak/shared/contracts/product';
+import { STOCK_STATUS_LABEL, formatFireRating, type ProductListItemPublic, type ProductTypeRef } from '@remak/shared/contracts/product';
 import Link from '@/components/ui/LocaleLink';
 import type { Locale } from '@/i18n/routing';
+import { productTypePath } from '@/lib/product-paths';
 import CatalogCard, { PriceLine } from './CatalogCard';
 import { formatMm } from './format';
 
@@ -20,18 +21,20 @@ const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/
 /**
  * Danh mục sản phẩm: lọc theo loại / độ dày / mức chịu lửa, tìm kiếm, sắp xếp và so sánh tối đa 3 sản phẩm.
  * Dữ liệu đến từ API (server component truyền xuống) — toàn bộ lọc chạy trên trình duyệt, danh mục nhỏ.
+ * `types`: loại sản phẩm theo thứ tự CMS (rỗng = không hiện nút lọc theo loại, vd trên trang loại).
  */
-export default function CatalogBrowser({ items, locale }: { items: ProductListItemPublic[]; locale: Locale }) {
+export default function CatalogBrowser({ items, types: allTypes = [], locale }: { items: ProductListItemPublic[]; types?: ProductTypeRef[]; locale: Locale }) {
   const t = useTranslations('Products');
   const ids = useId();
-  const [type, setType] = useState<ProductType | 'all'>('all');
+  const [type, setType] = useState<string>('all');
   const [thickness, setThickness] = useState<number | null>(null);
   const [minFire, setMinFire] = useState<number | null>(null);
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<Sort>('default');
   const [compare, setCompare] = useState<string[]>([]);
 
-  const types = PRODUCT_TYPES.filter((pt) => items.some((i) => i.productType === pt));
+  const types = allTypes.filter((pt) => items.some((i) => i.type.id === pt.id));
+  const selectedType = types.find((pt) => pt.id === type);
   const thicknesses = useMemo(() => [...new Set(items.flatMap((i) => i.thicknessesMm))].sort((a, b) => a - b), [items]);
   const fireLevels = useMemo(() => [...new Set(items.flatMap((i) => (i.fireRating?.max ? [i.fireRating.max] : [])))].sort((a, b) => a - b), [items]);
 
@@ -42,11 +45,11 @@ export default function CatalogBrowser({ items, locale }: { items: ProductListIt
     const norm = accented ? (s: string) => s.toLowerCase() : fold;
     const words = norm(q).split(/\s+/).filter(Boolean);
     const list = items.filter((i) => {
-      if (type !== 'all' && i.productType !== type) return false;
+      if (type !== 'all' && i.type.id !== type) return false;
       if (thickness !== null && !i.thicknessesMm.includes(thickness)) return false;
       if (minFire !== null && (i.fireRating?.max ?? 0) < minFire) return false;
       if (!words.length) return true;
-      const text = norm([i.name, i.shortName, i.tagline, i.summary, ...i.thicknessesMm.map((mm) => `${mm}mm`)].filter(Boolean).join(' '));
+      const text = norm([i.name, i.tagline, i.summary, ...i.thicknessesMm.map((mm) => `${mm}mm`)].filter(Boolean).join(' '));
       return words.every((w) => text.includes(w));
     });
     // Không có giá công khai -> cuối danh sách khi sắp theo giá
@@ -77,20 +80,20 @@ export default function CatalogBrowser({ items, locale }: { items: ProductListIt
       <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5">
         {types.length > 1 && (
           <div role="group" aria-label={t('compareType')} className="flex gap-2 overflow-x-auto pb-1">
-            {(['all', ...types] as const).map((pt) => {
-              const count = pt === 'all' ? items.length : items.filter((i) => i.productType === pt).length;
-              const on = type === pt;
+            {[{ id: 'all', name: t('all') }, ...types].map((pt) => {
+              const count = pt.id === 'all' ? items.length : items.filter((i) => i.type.id === pt.id).length;
+              const on = type === pt.id;
               return (
                 <button
-                  key={pt}
+                  key={pt.id}
                   type="button"
                   aria-pressed={on}
-                  onClick={() => setType(pt)}
+                  onClick={() => setType(pt.id)}
                   className={`inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border px-4 text-sm font-bold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5F8A03] ${
                     on ? 'border-[#4E7202] bg-[#4E7202] text-white' : 'border-slate-300 bg-white text-slate-700 hover:border-[#7CB305] hover:text-[#3F5E02]'
                   }`}
                 >
-                  {pt === 'all' ? t('all') : PRODUCT_TYPE_LABEL[pt][locale]}
+                  {pt.name}
                   <span className={`text-xs tabular-nums ${on ? 'text-white/80' : 'text-slate-500'}`}>{count}</span>
                 </button>
               );
@@ -155,6 +158,14 @@ export default function CatalogBrowser({ items, locale }: { items: ProductListIt
         <div className="flex items-center justify-between gap-3 text-sm">
           <p className="font-semibold text-slate-700" aria-live="polite">
             {t('results', { count: filtered.length })}
+            {selectedType && (
+              <>
+                {' · '}
+                <Link href={productTypePath('vi', selectedType.slug)} className="text-[#4E7202] underline-offset-2 hover:underline">
+                  {t('viewTypePage', { name: selectedType.name })}
+                </Link>
+              </>
+            )}
           </p>
           {filtering && (
             <button type="button" onClick={reset} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer">
@@ -211,15 +222,15 @@ export default function CatalogBrowser({ items, locale }: { items: ProductListIt
                     <td className="w-36" />
                     {compared.map((i) => (
                       <th key={i.id} scope="col" className="px-3 py-2 align-top font-extrabold text-slate-900">
-                        <Link href={`/san-pham/${i.slug}`} className="hover:text-[#4E7202] hover:underline">
-                          {i.shortName || i.name}
+                        <Link href={`/san-pham/${i.slug}`} className="line-clamp-2 hover:text-[#4E7202] hover:underline">
+                          {i.name}
                         </Link>
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  <CompareRow label={t('compareType')} cells={compared.map((i) => PRODUCT_TYPE_LABEL[i.productType][locale])} />
+                  <CompareRow label={t('compareType')} cells={compared.map((i) => i.type.name)} />
                   <CompareRow label={t('thickness')} cells={compared.map((i) => i.thicknessesMm.map((mm) => formatMm(mm, locale)).join(', ') || '—')} />
                   <CompareRow label={t('fireRating')} cells={compared.map((i) => (i.fireRating && formatFireRating(i.fireRating.min, i.fireRating.max)) || t('notTested'))} />
                   <CompareRow label={t('comparePrice')} cells={compared.map((i) => <PriceLine key={i.id} item={i} locale={locale} />)} />

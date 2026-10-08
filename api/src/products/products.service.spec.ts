@@ -199,11 +199,47 @@ describe('ProductsPublicService.typeBySlug', () => {
     isActive: true,
     translations: [{ typeId: 'pt_floor', locale: 'vi', name: 'Tấm sàn MgO', slug: 'tam-san-mgo', description: 'Mô tả', seoTitle: null, seoDescription: null }],
   };
+  /** Sản phẩm tối thiểu cho toListItemPublic */
+  const listRow = {
+    id: 'p1',
+    coverImageUrl: null,
+    isFeatured: false,
+    type: typeRow,
+    variants: [],
+    translations: [{ locale: 'vi', status: 'PUBLISHED', publishedAt: null, name: 'Tấm sàn', slug: 'tam-san', tagline: null, summary: '', coverAlt: '' }],
+  };
+
+  it('loại chưa có sản phẩm hiện ở ngôn ngữ này -> null (404), không dựng trang rỗng', async () => {
+    const prisma = {
+      productType: { findFirst: vi.fn(async () => typeRow) },
+      product: { findMany: vi.fn(async () => []) },
+    };
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    await expect(service.typeBySlug('tam-san-mgo', 'vi')).resolves.toBeNull();
+  });
+
+  it('hreflang chỉ gồm ngôn ngữ có bản dịch VÀ có sản phẩm đang hiện', async () => {
+    const withEn = {
+      ...typeRow,
+      translations: [...typeRow.translations, { typeId: 'pt_floor', locale: 'en', name: 'MgO floor board', slug: 'mgo-floor-board', description: null, seoTitle: null, seoDescription: null }],
+    };
+    const prisma = {
+      productType: { findFirst: vi.fn(async () => withEn) },
+      product: {
+        findMany: vi.fn(async () => [listRow]),
+        // chỉ tiếng Việt có sản phẩm xuất bản
+        count: vi.fn(async (a: { where: { translations: { some: { locale: string } } } }) => (a.where.translations.some.locale === 'vi' ? 1 : 0)),
+      },
+    };
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    const res = await service.typeBySlug('tam-san-mgo', 'vi');
+    expect(res && 'type' in res && res.type.alternates).toEqual({ vi: 'tam-san-mgo' });
+  });
 
   it('tìm thấy -> loại + sản phẩm của loại, SEO mặc định từ tên / mô tả', async () => {
     const prisma = {
       productType: { findFirst: vi.fn(async () => typeRow) },
-      product: { findMany: vi.fn(async () => []) },
+      product: { findMany: vi.fn(async () => [listRow]), count: vi.fn(async () => 1) },
     };
     const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
     const res = await service.typeBySlug('tam-san-mgo', 'vi');
@@ -217,7 +253,7 @@ describe('ProductsPublicService.typeBySlug', () => {
         seo: { title: 'Tấm sàn MgO', description: 'Mô tả' },
         alternates: { vi: 'tam-san-mgo' },
       },
-      products: [],
+      products: [expect.objectContaining({ id: 'p1', name: 'Tấm sàn' })],
     });
     expect(prisma.product.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ typeId: 'pt_floor' }) }));
   });

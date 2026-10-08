@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { CheckCircle2, ChevronRight, PhoneCall } from 'lucide-react';
-import { PRODUCT_TYPE_LABEL, formatFireRating } from '@remak/shared/contracts/product';
+import { formatFireRating } from '@remak/shared/contracts/product';
 import { toPlainText, type RichDoc } from '@remak/shared/rich-content';
 import Link from '@/components/ui/LocaleLink';
 import { SetLocaleAlternates } from '@/components/layout/LocaleAlternates';
@@ -15,7 +15,7 @@ import { AdvantageGrid, CertificateList, DecorativeOptions, FaqList, SectionTitl
 import { HOTLINE, HOTLINE_TEL, quoteHref } from '@/components/product-catalog/format';
 import { routing, type Locale } from '@/i18n/routing';
 import { getProduct, getProducts } from '@/lib/api';
-import { productPath, productsIndexPath } from '@/lib/product-paths';
+import { productPath, productTypePath, productsIndexPath } from '@/lib/product-paths';
 import { indexable, localizedAlternates } from '@/lib/seo';
 
 // ISR 60s; CMS lưu sản phẩm -> API revalidate tag "products". Sản phẩm mới dựng lần đầu có người xem.
@@ -89,7 +89,7 @@ export default async function ProductDetailPage({ params }: Props) {
             </li>
             <ChevronRight size={14} className="text-slate-400" aria-hidden="true" />
             <li aria-current="page" className="max-w-xs truncate font-bold text-[#3F5E02] sm:max-w-md">
-              {p.shortName || p.name}
+              {p.name}
             </li>
           </ol>
         </nav>
@@ -117,8 +117,13 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="space-y-6 lg:col-span-6">
             <div className="space-y-3">
               <p className="text-sm font-bold uppercase tracking-wide text-[#4E7202]">
-                {PRODUCT_TYPE_LABEL[p.productType][locale]}
-                {p.tradeName && <span className="text-slate-500"> · {p.tradeName}</span>}
+                {p.type.slug ? (
+                  <Link href={productTypePath('vi', p.type.slug)} className="underline-offset-2 hover:underline">
+                    {p.type.name}
+                  </Link>
+                ) : (
+                  p.type.name
+                )}
               </p>
               <h1 className="text-3xl font-black leading-tight tracking-tight text-slate-900 lg:text-4xl">{p.name}</h1>
               {p.tagline && <p className="text-lg font-semibold text-slate-700">{p.tagline}</p>}
