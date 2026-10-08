@@ -341,7 +341,7 @@ model ProductVariantTranslation {
   @@map("product_variant_translations")
 }
 
-/// Mở rộng cho panel SIP MgO (productType = SIP_PANEL)
+/// Mở rộng cho panel SIP MgO (loại có mẫu thông số SIP)
 model SipPanelSpec {
   productId           String            @id @map("product_id")
   coreMaterials       SipCoreMaterial[] @default([]) @map("core_materials")
@@ -360,7 +360,7 @@ model SipPanelSpec {
   @@map("sip_panel_specs")
 }
 
-/// Mở rộng cho tấm sàn MgO (productType = FLOOR)
+/// Mở rộng cho tấm sàn MgO (loại có mẫu thông số FLOOR)
 model FloorBoardSpec {
   productId              String        @id @map("product_id")
   edgeProfiles           EdgeProfile[] @default([]) @map("edge_profiles")
@@ -377,7 +377,7 @@ model FloorBoardSpec {
   @@map("floor_board_specs")
 }
 
-/// Mở rộng cho tấm trang trí FireSafe (productType = DECORATIVE)
+/// Mở rộng cho tấm trang trí FireSafe (loại có mẫu thông số DECORATIVE)
 model DecorativeFinishSpec {
   productId            String   @id @map("product_id")
   customPrintSupported Boolean  @default(false) @map("custom_print_supported")
