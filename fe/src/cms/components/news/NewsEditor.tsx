@@ -759,7 +759,7 @@ export default function NewsEditor({ postId, initialTab = 'vi' }: { postId?: str
             )}
 
             {/* KHỐI SOẠN THẢO BÀI VIẾT TẬP TRUNG */}
-            <div className="bg-white rounded-xl border border-slate-300 shadow-xs overflow-hidden">
+            <div className="bg-white rounded-xl border border-slate-300 shadow-xs">
               {/* Tiêu đề & Permalink & Sapo */}
               <div className="p-5 sm:p-7 space-y-4">
                 {/* 1. Tiêu đề */}
@@ -781,6 +781,7 @@ export default function NewsEditor({ postId, initialTab = 'vi' }: { postId?: str
                     onChange={(e) => setDraft({ title: e.target.value.replace(/\n/g, ' ') })}
                     placeholder={tab === 'vi' ? 'Nhập tiêu đề bài viết cuốn hút (nên từ 60–100 ký tự)…' : 'English article title…'}
                     aria-invalid={!!tabErrors.title}
+                    spellCheck={false}
                     className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 hover:border-slate-400 text-lg sm:text-xl font-bold text-slate-900 bg-white placeholder:text-slate-300 focus:outline-none focus:border-[#5F8A03] focus:ring-1 focus:ring-[#5F8A03] transition-colors leading-snug resize-none"
                   />
                   {tabErrors.title && (
@@ -822,6 +823,7 @@ export default function NewsEditor({ postId, initialTab = 'vi' }: { postId?: str
                     onChange={(e) => setDraft({ sapo: e.target.value })}
                     placeholder="Tóm tắt 1–3 câu nội dung chính, xuất hiện ở đầu bài và làm mô tả khi chia sẻ link mạng xã hội…"
                     aria-invalid={!!tabErrors.sapo}
+                    spellCheck={false}
                     className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 hover:border-slate-400 text-xs sm:text-sm font-semibold text-slate-700 bg-white placeholder:text-slate-400 focus:outline-none focus:border-[#5F8A03] focus:ring-1 focus:ring-[#5F8A03] transition-colors leading-relaxed resize-none"
                   />
                   {tabErrors.sapo && (
