@@ -20,6 +20,8 @@ export const routing = defineRouting({
   pathnames: {
     '/': '/',
     '/products': { vi: '/san-pham', en: '/products' },
+    // Trang loại sản phẩm: slug loại theo ngôn ngữ (vd /san-pham/loai/tam-san-mgo ⇄ /en/products/type/mgo-floor-board)
+    '/products/type/[slug]': { vi: '/san-pham/loai/[slug]', en: '/products/type/[slug]' },
     '/products/[slug]': { vi: '/san-pham/[slug]', en: '/products/[slug]' },
     '/applications': { vi: '/giai-phap-ung-dung', en: '/applications' },
     '/applications/[slug]': { vi: '/giai-phap-ung-dung/[slug]', en: '/applications/[slug]' },

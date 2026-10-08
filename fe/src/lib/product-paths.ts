@@ -5,3 +5,5 @@ import type { Locale } from '@/i18n/routing';
 
 export const productsIndexPath = (locale: Locale) => toLocalePath('/san-pham', locale);
 export const productPath = (locale: Locale, slug: string) => toLocalePath(`/san-pham/${slug}`, locale);
+/** Trang loại: /san-pham/loai/<slug-vi> ⇄ /en/products/type/<slug-en> */
+export const productTypePath = (locale: Locale, slug: string) => toLocalePath(`/san-pham/loai/${slug}`, locale);

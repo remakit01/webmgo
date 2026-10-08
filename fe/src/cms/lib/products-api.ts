@@ -2,7 +2,7 @@
 
 // Gọi API Sản phẩm từ CMS (danh sách, form sửa, ảnh đại diện, thứ tự).
 
-import type { ProductCms, ProductInput, ProductListItemCms } from '@remak/shared/contracts/product';
+import type { ProductCms, ProductInput, ProductListItemCms, ProductTypeCms, ProductTypeInput } from '@remak/shared/contracts/product';
 import { apiFetch, ifMatch } from './api-client';
 
 const json = (body: unknown) => JSON.stringify(body);
@@ -15,6 +15,14 @@ export const productsApi = {
     apiFetch<ProductCms>(`/products/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),
   remove: (id: string) => apiFetch<{ success: boolean }>(`/products/${id}`, { method: 'DELETE' }),
   reorder: (ids: string[]) => apiFetch<ProductListItemCms[]>('/products/order', { method: 'PUT', body: json({ ids }) }),
+
+  // ── Loại sản phẩm ──
+  types: () => apiFetch<ProductTypeCms[]>('/products/types'),
+  createType: (body: ProductTypeInput) => apiFetch<ProductTypeCms>('/products/types', { method: 'POST', body: json(body) }),
+  updateType: (id: string, body: ProductTypeInput, version: string) =>
+    apiFetch<ProductTypeCms>(`/products/types/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),
+  removeType: (id: string) => apiFetch<{ success: boolean }>(`/products/types/${id}`, { method: 'DELETE' }),
+  reorderTypes: (ids: string[]) => apiFetch<ProductTypeCms[]>('/products/types/order', { method: 'PUT', body: json({ ids }) }),
   updateCover: (id: string, file: File, version: string) => {
     const form = new FormData();
     form.append('image', file);
