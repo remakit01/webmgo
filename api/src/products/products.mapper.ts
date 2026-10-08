@@ -1,6 +1,7 @@
 import type { Locale } from '@remak/shared/locale';
 import { toDayKey } from '@remak/shared/date';
 import {
+  EXTENSION_OF_PROFILE,
   defaultVariantLabelOf,
   discountPercent,
   emptyProductInput,
@@ -19,6 +20,7 @@ import {
   type ProductCms,
   type ProductListItemPublic,
   type ProductTranslationInput,
+  type ProductTypeRef,
   type ProductVariantInput,
   type ProductVariantPublic,
   type SheetSize,
@@ -33,8 +35,12 @@ const num = (d: Prisma.Decimal | null | undefined): number | null => (d == null 
 const asArray = <T>(v: Prisma.JsonValue): T[] => (Array.isArray(v) ? (v as unknown as T[]) : []);
 const dayKey = (d: Date | null) => (d ? toDayKey(d) : null);
 
+/** Loại sản phẩm + bản dịch (tên / slug theo ngôn ngữ) */
+export const productTypeInclude = { include: { translations: true } } satisfies Prisma.ProductTypeDefaultArgs;
+
 /** Một truy vấn đọc đủ dữ liệu trang chi tiết (tránh N+1) */
 export const productDetailInclude = {
+  type: productTypeInclude,
   translations: true,
   technicalSpec: true,
   variants: { where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }], include: { translations: true, certificates: { include: { certificate: { include: { translations: true } } } } } },
@@ -47,6 +53,7 @@ export const productDetailInclude = {
 
 /** Danh sách: bản dịch + các độ dày đang bán (giá, EI, tình trạng) */
 export const productListInclude = {
+  type: productTypeInclude,
   translations: true,
   variants: { where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }] },
 } satisfies Prisma.ProductInclude;
@@ -55,6 +62,17 @@ type DetailRow = Prisma.ProductGetPayload<{ include: typeof productDetailInclude
 type ListRow = Prisma.ProductGetPayload<{ include: typeof productListInclude }>;
 type VariantRow = ListRow['variants'][number];
 type TranslationRow = ListRow['translations'][number];
+export type ProductTypeRow = Prisma.ProductTypeGetPayload<typeof productTypeInclude>;
+
+/**
+ * Loại theo ngôn ngữ đang xem; chưa có bản dịch thì tên dùng tiếng Việt.
+ * slug rỗng = loại không có trang ở ngôn ngữ này (chưa dịch / đang ẩn) -> web không đặt link.
+ */
+export function typeRefOf(t: ProductTypeRow, locale: Locale): ProductTypeRef {
+  const own = t.translations.find((x) => x.locale === locale);
+  const tr = own ?? t.translations.find((x) => x.locale === 'vi');
+  return { id: t.id, specProfile: t.specProfile, name: tr?.name ?? '', slug: own && t.isActive ? own.slug : '' };
+}
 
 const offerOf = (v: VariantRow): VariantOffer => ({
   priceMode: v.priceMode,
@@ -89,10 +107,9 @@ export function toListItemPublic(p: ListRow, tr: TranslationRow, now = new Date(
   const fireMax = maxFireRatingMinutes(specs);
   return {
     id: p.id,
-    productType: p.productType,
+    type: typeRefOf(p.type, tr.locale),
     slug: tr.slug,
     name: tr.name,
-    shortName: tr.shortName,
     tagline: tr.tagline,
     summary: tr.summary,
     badge: null,
@@ -143,7 +160,7 @@ export function toVariantPublic(v: DetailRow['variants'][number], locale: Locale
 }
 
 function extensionOf(p: DetailRow): ProductExtension {
-  if (p.productType === 'SIP_PANEL' && p.sipSpec) {
+  if (p.type.specProfile === 'SIP' && p.sipSpec) {
     const s = p.sipSpec;
     return {
       type: 'SIP',
@@ -156,7 +173,7 @@ function extensionOf(p: DetailRow): ProductExtension {
       loadBearing: s.loadBearing,
     };
   }
-  if (p.productType === 'FLOOR' && p.floorSpec) {
+  if (p.type.specProfile === 'FLOOR' && p.floorSpec) {
     const f = p.floorSpec;
     return {
       type: 'FLOOR',
@@ -167,7 +184,7 @@ function extensionOf(p: DetailRow): ProductExtension {
       sandedSurface: f.sandedSurface,
     };
   }
-  if (p.productType === 'DECORATIVE' && p.decorativeSpec) {
+  if (p.type.specProfile === 'DECORATIVE' && p.decorativeSpec) {
     return { type: 'DECORATIVE', customPrintSupported: p.decorativeSpec.customPrintSupported, finishTypes: p.decorativeOptions.map((o) => o.finishType) };
   }
   return null;
@@ -254,7 +271,6 @@ export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale,
   });
   return {
     ...base,
-    tradeName: p.tradeName,
     description: tr.description,
     highlights: tr.highlights,
     advantages: asArray<{ title: string; desc: string }>(tr.advantages),
@@ -277,8 +293,7 @@ export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale,
 export function toListItemCms(p: ListRow): ProductListItemCms {
   return {
     id: p.id,
-    productType: p.productType,
-    tradeName: p.tradeName,
+    type: (({ id, specProfile, name }) => ({ id, specProfile, name }))(typeRefOf(p.type, 'vi')),
     coverImageUrl: p.coverImageUrl,
     isFeatured: p.isFeatured,
     sortOrder: p.sortOrder,
@@ -295,7 +310,6 @@ export function toListItemCms(p: ListRow): ProductListItemCms {
 const trInput = (t: TranslationRow): ProductTranslationInput => ({
   status: t.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT',
   name: t.name,
-  shortName: t.shortName,
   slug: t.slug,
   tagline: t.tagline,
   summary: t.summary,
@@ -314,7 +328,8 @@ export function toProductCms(p: DetailRow): ProductCms {
   const vi = p.translations.find((t) => t.locale === 'vi');
   const en = p.translations.find((t) => t.locale === 'en');
   const s = p.technicalSpec;
-  const ext = extensionOf(p);
+  const stored = storedExtensionsOf(p);
+  const ext = EXTENSION_OF_PROFILE[p.type.specProfile];
   const variants: ProductVariantInput[] = p.variants.map((v) => ({
     id: v.id,
     sku: v.sku,
@@ -347,26 +362,55 @@ export function toProductCms(p: DetailRow): ProductCms {
     sortOrder: p.sortOrder,
     updatedAt: p.updatedAt.toISOString(),
     published: Object.fromEntries(p.translations.map((t) => [t.locale, { slug: t.slug, status: t.status, publishedAt: t.publishedAt?.toISOString() ?? null }])),
-    productType: p.productType,
-    tradeName: p.tradeName,
+    typeId: p.typeId,
     isFeatured: p.isFeatured,
     translations: { vi: vi ? trInput(vi) : emptyTranslationInput(), en: en ? trInput(en) : null },
-    technicalSpec: s ? { ...techRowOf(s), extraSpecs: asArray<{ key: string; value: string; unit?: string }>(s.extraSpecs) } : emptyProductInput(p.productType).technicalSpec,
+    technicalSpec: s ? { ...techRowOf(s), extraSpecs: asArray<{ key: string; value: string; unit?: string }>(s.extraSpecs) } : emptyProductInput(p.typeId).technicalSpec,
     variants,
-    sip: ext?.type === 'SIP' ? (({ type: _t, ...rest }) => rest)(ext) : null,
-    floor: ext?.type === 'FLOOR' ? (({ type: _t, ...rest }) => rest)(ext) : null,
-    decorative:
-      p.productType === 'DECORATIVE' && p.decorativeSpec
-        ? {
-            customPrintSupported: p.decorativeSpec.customPrintSupported,
-            options: p.decorativeOptions.map((o) => ({
-              finishType: o.finishType,
-              scratchResistance: o.scratchResistance,
-              translations: Object.fromEntries(
-                o.translations.map((t) => [t.locale, { name: t.name, description: t.description, patterns: t.patterns, suitableAreas: t.suitableAreas }]),
-              ),
-            })),
-          }
-        : null,
+    // Chỉ khối khớp mẫu của loại hiện tại vào form; khối khác giữ ở storedExtensions (đang ẩn)
+    sip: ext === 'sip' ? stored.sip : null,
+    floor: ext === 'floor' ? stored.floor : null,
+    decorative: ext === 'decorative' ? stored.decorative : null,
+    storedExtensions: stored,
+  };
+}
+
+/** Mọi khối thông số riêng đang lưu trong DB, không lọc theo mẫu của loại */
+function storedExtensionsOf(p: DetailRow): Pick<ProductCms, 'sip' | 'floor' | 'decorative'> {
+  const s = p.sipSpec;
+  const f = p.floorSpec;
+  return {
+    sip: s
+      ? {
+          coreMaterials: s.coreMaterials,
+          coreThicknessMinMm: s.coreThicknessMinMm,
+          coreThicknessMaxMm: s.coreThicknessMaxMm,
+          facingThicknessesMm: s.facingThicknessesMm,
+          maxWidthMm: s.maxWidthMm,
+          maxLengthMm: s.maxLengthMm,
+          loadBearing: s.loadBearing,
+        }
+      : null,
+    floor: f
+      ? {
+          edgeProfiles: f.edgeProfiles,
+          floorSizes: asArray<SheetSize>(f.floorSizes),
+          suitableFloorings: f.suitableFloorings,
+          moistureResistantFloor: f.moistureResistantFloor,
+          sandedSurface: f.sandedSurface,
+        }
+      : null,
+    decorative: p.decorativeSpec
+      ? {
+          customPrintSupported: p.decorativeSpec.customPrintSupported,
+          options: p.decorativeOptions.map((o) => ({
+            finishType: o.finishType,
+            scratchResistance: o.scratchResistance,
+            translations: Object.fromEntries(
+              o.translations.map((t) => [t.locale, { name: t.name, description: t.description, patterns: t.patterns, suitableAreas: t.suitableAreas }]),
+            ),
+          })),
+        }
+      : null,
   };
 }

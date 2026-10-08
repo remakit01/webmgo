@@ -53,16 +53,46 @@ enum Role {
 // Số đo lưu dạng khoảng min / max (vd "≥ 25 MPa" -> min 25), không lưu chữ; thiếu dữ liệu = NULL, KHÔNG có giá trị mặc định bịa.
 // Tập giá trị hay mở rộng (bề mặt, màu, loại sàn phủ…) lưu text, kiểm bằng hằng số @remak/shared/contracts/product.
 
-/// Loại dòng sản phẩm — quyết định phần mở rộng nào được dùng
-enum ProductType {
-  STANDARD
-  SIP_PANEL
+/// Mẫu form thông số riêng của Loại sản phẩm — quyết định phần mở rộng nào được dùng (cố định vì mỗi mẫu có bảng riêng)
+enum ProductSpecProfile {
+  NONE
+  SIP
   FLOOR
   DECORATIVE
-  LITECORE
-  CUSTOM
 
-  @@map("product_type")
+  @@map("product_spec_profile")
+}
+
+/// Loại sản phẩm — quản lý trong CMS (thêm / sửa / xoá / sắp thứ tự), mỗi loại có trang riêng trên web
+model ProductType {
+  id          String             @id @default(cuid())
+  specProfile ProductSpecProfile @default(NONE) @map("spec_profile")
+  sortOrder   Int                @default(0) @map("sort_order")
+  isActive    Boolean            @default(true) @map("is_active")
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  translations ProductTypeTranslation[]
+  products     Product[]
+
+  @@map("product_types")
+}
+
+model ProductTypeTranslation {
+  typeId         String        @map("type_id")
+  locale         ContentLocale
+  name           String
+  slug           String
+  description    String?
+  seoTitle       String?       @map("seo_title")
+  seoDescription String?       @map("seo_description")
+
+  type ProductType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+
+  // PK bắt đầu bằng type_id nên đã phủ index cho FK
+  @@id([typeId, locale])
+  @@unique([locale, slug])
+  @@map("product_type_translations")
 }
 
 /// Cách hiển thị giá: có giá cụ thể / liên hệ báo giá (không xuất giá ra Google)
@@ -126,9 +156,8 @@ enum DecorativeFinishType {
 /// Dòng tấm MgO (= 1 trang sản phẩm)
 model Product {
   id            String      @id @default(cuid())
-  productType   ProductType @default(STANDARD) @map("product_type")
-  /// Tên thương mại, vd "Remak® FireOFF MgO" (không dịch)
-  tradeName     String?     @map("trade_name")
+  /// Loại không xoá được khi còn sản phẩm (kể cả trong thùng rác)
+  typeId        String      @map("product_type_id")
   coverImageKey String?     @map("cover_image_key")
   coverImageUrl String?     @map("cover_image_url")
   /// [{ url, key?, width?, height? }] — chú thích ảnh theo ngôn ngữ ở ProductTranslation.galleryAlts
@@ -139,6 +168,7 @@ model Product {
   updatedAt     DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt     DateTime?   @map("deleted_at") @db.Timestamptz(3)
 
+  type              ProductType @relation(fields: [typeId], references: [id], onDelete: Restrict)
   translations      ProductTranslation[]
   technicalSpec     ProductTechnicalSpec?
   variants          ProductVariant[]
@@ -150,6 +180,7 @@ model Product {
 
   // Danh sách web: chưa xoá, theo thứ tự
   @@index([sortOrder, id], map: "products_live_idx", where: raw("deleted_at IS NULL"))
+  @@index([typeId])
   @@map("products")
 }
 
@@ -159,7 +190,6 @@ model ProductTranslation {
   status           PublishStatus     @default(DRAFT)
   publishedAt      DateTime?         @map("published_at") @db.Timestamptz(3)
   name             String
-  shortName        String?           @map("short_name")
   slug             String
   tagline          String?
   summary          String            @default("")
@@ -311,7 +341,7 @@ model ProductVariantTranslation {
   @@map("product_variant_translations")
 }
 
-/// Mở rộng cho panel SIP MgO (productType = SIP_PANEL)
+/// Mở rộng cho panel SIP MgO (loại có mẫu thông số SIP)
 model SipPanelSpec {
   productId           String            @id @map("product_id")
   coreMaterials       SipCoreMaterial[] @default([]) @map("core_materials")
@@ -330,7 +360,7 @@ model SipPanelSpec {
   @@map("sip_panel_specs")
 }
 
-/// Mở rộng cho tấm sàn MgO (productType = FLOOR)
+/// Mở rộng cho tấm sàn MgO (loại có mẫu thông số FLOOR)
 model FloorBoardSpec {
   productId              String        @id @map("product_id")
   edgeProfiles           EdgeProfile[] @default([]) @map("edge_profiles")
@@ -347,7 +377,7 @@ model FloorBoardSpec {
   @@map("floor_board_specs")
 }
 
-/// Mở rộng cho tấm trang trí FireSafe (productType = DECORATIVE)
+/// Mở rộng cho tấm trang trí FireSafe (loại có mẫu thông số DECORATIVE)
 model DecorativeFinishSpec {
   productId            String   @id @map("product_id")
   customPrintSupported Boolean  @default(false) @map("custom_print_supported")

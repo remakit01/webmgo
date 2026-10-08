@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import type { Prisma } from '../generated/prisma/client.js';
 
 /** Loại nội dung dùng bảng slug_redirects — thêm giá trị khi module mới cần slug lịch sử */
-export type SlugEntityType = 'news_post' | 'news_category' | 'product';
+export type SlugEntityType = 'news_post' | 'news_category' | 'product' | 'product_type';
 
 type Db = PrismaService | Prisma.TransactionClient;
 

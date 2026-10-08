@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Prisma } from '../generated/prisma/client.js';
-import { toDetailPublic, toListItemCms, toListItemPublic } from './products.mapper.js';
+import { toDetailPublic, toListItemCms, toListItemPublic, toProductCms } from './products.mapper.js';
 
 const D = (n: number) => new Prisma.Decimal(n);
 const NOW = new Date('2026-10-08T03:00:00Z');
@@ -11,7 +11,6 @@ const tr = (locale: 'vi' | 'en', over: Record<string, unknown> = {}) => ({
   status: 'PUBLISHED',
   publishedAt: new Date('2026-10-01T00:00:00Z'),
   name: locale === 'vi' ? 'Tấm chống cháy' : 'Fire board',
-  shortName: null,
   slug: locale === 'vi' ? 'tam-chong-chay' : 'fire-board',
   tagline: null,
   summary: 'Tóm tắt',
@@ -83,11 +82,24 @@ const cert = (id: string, expiry: string | null, isPublic = true) => ({
   translations: [{ certificateId: id, locale: 'vi', name: `Chứng chỉ ${id}`, description: null }],
 });
 
+const productType = (id: string, specProfile: string, en = true) => ({
+  id,
+  specProfile,
+  sortOrder: 0,
+  isActive: true,
+  createdAt: NOW,
+  updatedAt: NOW,
+  translations: [
+    { typeId: id, locale: 'vi', name: `Loại ${id}`, slug: `loai-${id}`, description: null, seoTitle: null, seoDescription: null },
+    ...(en ? [{ typeId: id, locale: 'en', name: `Type ${id}`, slug: `type-${id}`, description: null, seoTitle: null, seoDescription: null }] : []),
+  ],
+});
+
 function product(over: Record<string, unknown> = {}) {
   return {
     id: 'p1',
-    productType: 'STANDARD',
-    tradeName: 'Remak® FireOFF MgO',
+    typeId: 'pt_standard',
+    type: productType('pt_standard', 'NONE'),
     coverImageKey: null,
     coverImageUrl: null,
     gallery: [],
@@ -119,6 +131,20 @@ describe('products.mapper — danh sách public', () => {
     expect(item.fireRating).toEqual({ min: 45, max: 150 });
     expect(item.priceRange).toEqual({ low: 295_000, high: 295_000, count: 1 });
     expect(item.alternates).toEqual({ vi: 'tam-chong-chay' }); // bản EN còn nháp -> không có
+  });
+
+  it('loại sản phẩm theo ngôn ngữ đang xem; thiếu bản dịch thì dùng tiếng Việt', () => {
+    const p = product();
+    expect(toListItemPublic(p, tr('en') as never, NOW).type).toEqual({ id: 'pt_standard', specProfile: 'NONE', name: 'Type pt_standard', slug: 'type-pt_standard' });
+    const viOnly = product({ type: productType('pt_custom', 'NONE', false) });
+    expect(toListItemPublic(viOnly, tr('en') as never, NOW).type.name).toBe('Loại pt_custom');
+  });
+
+  it('loại không có trang ở ngôn ngữ đang xem (chưa dịch / đang ẩn) -> slug rỗng, web không đặt link', () => {
+    const viOnly = product({ type: productType('pt_custom', 'NONE', false) });
+    expect(toListItemPublic(viOnly, tr('en') as never, NOW).type.slug).toBe('');
+    const hidden = product({ type: { ...productType('pt_custom', 'NONE'), isActive: false } });
+    expect(toListItemPublic(hidden, tr('vi') as never, NOW).type.slug).toBe('');
   });
 });
 
@@ -153,7 +179,7 @@ describe('products.mapper — chi tiết public', () => {
   });
 
   it('phần mở rộng theo đúng loại; SEO lấy mặc định từ tên / tóm tắt', () => {
-    const floor = product({ productType: 'FLOOR', technicalSpec: { productId: 'p1', standardSizes: [], edgeProfile: null, coreColor: null, surfaceFinish: null, densityMinKgM3: 1200, densityMaxKgM3: 1250, densityReductionPct: null, flexuralMinMpa: D(25), flexuralMaxMpa: null, flexuralCrossMinMpa: null, screwHoldingRating: null, reactionToFireClass: 'A1', fireClassStandards: [], maxTemperatureC: null, thermalConductivityWmk: null, soundReductionMinDb: null, soundReductionMaxDb: null, waterAbsorptionMaxPct: null, thicknessSwellingMaxPct: null, moldResistant: null, crystalPhase: null, mgoContentMinPct: null, chlorideMaxPct: null, asbestosFree: true, formaldehydeMgL: null, vocLevel: null, greenCertifications: [], extraSpecs: [], updatedAt: NOW } });
+    const floor = product({ typeId: 'pt_floor', type: productType('pt_floor', 'FLOOR'), technicalSpec: { productId: 'p1', standardSizes: [], edgeProfile: null, coreColor: null, surfaceFinish: null, densityMinKgM3: 1200, densityMaxKgM3: 1250, densityReductionPct: null, flexuralMinMpa: D(25), flexuralMaxMpa: null, flexuralCrossMinMpa: null, screwHoldingRating: null, reactionToFireClass: 'A1', fireClassStandards: [], maxTemperatureC: null, thermalConductivityWmk: null, soundReductionMinDb: null, soundReductionMaxDb: null, waterAbsorptionMaxPct: null, thicknessSwellingMaxPct: null, moldResistant: null, crystalPhase: null, mgoContentMinPct: null, chlorideMaxPct: null, asbestosFree: true, formaldehydeMgL: null, vocLevel: null, greenCertifications: [], extraSpecs: [], updatedAt: NOW } });
     const d = toDetailPublic(floor, (floor as { translations: unknown[] }).translations[0] as never, 'vi', NOW);
     expect(d.spec?.extension).toMatchObject({ type: 'FLOOR', edgeProfiles: ['TONGUE_GROOVE'] });
     expect(d.spec?.mechanical.flexuralMinMpa).toBe(25);
@@ -169,6 +195,15 @@ describe('products.mapper — CMS', () => {
   it('trạng thái từng ngôn ngữ + số quy cách', () => {
     const c = toListItemCms(product());
     expect(c.variantCount).toBe(2);
+    expect(c.type).toEqual({ id: 'pt_standard', name: 'Loại pt_standard', specProfile: 'NONE' });
     expect(c.locales).toEqual({ vi: { name: 'Tấm chống cháy', slug: 'tam-chong-chay', status: 'PUBLISHED' }, en: { name: 'Fire board', slug: 'fire-board', status: 'DRAFT' } });
+  });
+
+  it('form sửa: khối không khớp mẫu của loại thì ẩn, nhưng vẫn trả ở storedExtensions để chọn lại loại không mất dữ liệu', () => {
+    const p = product({ technicalSpec: null }); // loại NONE nhưng còn floorSpec cũ trong DB
+    const cms = toProductCms(p);
+    expect(cms.floor).toBeNull();
+    expect(cms.storedExtensions.floor).toMatchObject({ edgeProfiles: ['TONGUE_GROOVE'], sandedSurface: true });
+    expect(cms.storedExtensions.sip).toBeNull();
   });
 });

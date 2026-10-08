@@ -7,6 +7,7 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsNotEmpty,
   IsInt,
   IsNumber,
   IsObject,
@@ -27,7 +28,6 @@ import {
   PRICE_MODES,
   PRODUCT_LIMITS as L,
   PRODUCT_PUBLISH_STATUSES,
-  PRODUCT_TYPES,
   SALE_UNITS,
   SCRATCH_RESISTANCES,
   SCREW_HOLDING_RATINGS,
@@ -40,7 +40,6 @@ import {
   type EdgeProfile,
   type PriceMode,
   type ProductPublishStatus,
-  type ProductType,
   type SaleUnit,
   type SipCoreMaterial,
   type StockStatus,
@@ -75,7 +74,6 @@ class ExtraSpecDto {
 export class ProductTranslationDto {
   @IsIn(PRODUCT_PUBLISH_STATUSES) status!: ProductPublishStatus;
   @Transform(trim) @IsString() @MaxLength(L.name) name!: string;
-  @IsOptional() @Transform(blankNull) @IsString() @MaxLength(L.shortName) shortName!: string | null;
   @ApiPropertyOptional({ description: 'Bỏ trống = tự sinh từ tên' })
   @IsOptional()
   @Transform(blankNull)
@@ -226,8 +224,7 @@ class DecorativeSpecDto {
 
 /** Body tạo / sửa sản phẩm — cùng hình dạng ProductInput (@remak/shared/contracts/product) */
 export class ProductInputDto {
-  @IsIn(PRODUCT_TYPES) productType!: ProductType;
-  @IsOptional() @Transform(blankNull) @IsString() @MaxLength(L.tradeName) tradeName!: string | null;
+  @IsString() @IsNotEmpty({ message: 'Chọn loại sản phẩm' }) typeId!: string;
   @IsBoolean() isFeatured!: boolean;
   @ValidateNested() @Type(() => ProductTranslationsDto) translations!: ProductTranslationsDto;
   @ValidateNested() @Type(() => TechnicalSpecDto) technicalSpec!: TechnicalSpecDto;

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ArrowDown, ArrowUp, Boxes, EyeOff, ImageOff, Pencil, Plus, Star, Trash2 } from 'lucide-react';
-import { PRODUCT_TYPE_LABEL, STOCK_STATUS_LABEL, type ProductListItemCms } from '@remak/shared/contracts/product';
+import { STOCK_STATUS_LABEL, type ProductListItemCms } from '@remak/shared/contracts/product';
 import IconAction from '@/cms/components/shared/IconAction';
 import Skeleton from '@/cms/components/ui/Skeleton';
 import { productPath } from '@/lib/product-paths';
@@ -125,8 +125,7 @@ export default function ProductTable({
                             </span>
                           )}
                           <p className="mt-0.5 text-xs text-slate-600">
-                            {PRODUCT_TYPE_LABEL[p.productType].vi}
-                            {p.tradeName && ` · ${p.tradeName}`}
+                            {p.type.name}
                           </p>
                           <div className="mt-1.5 flex flex-wrap gap-1.5 text-xs">
                             {(['vi', 'en'] as const).map((l) => {

@@ -33,6 +33,14 @@ const NEWS_SUBMENU = [
   { id: 'news-taxonomy', name: 'Tag & Tác Giả', href: '/admin/news/taxonomy' },
 ];
 
+/**
+ * Danh sách menu con Sản Phẩm + xử lý chi tiết con (/new, /[id])
+ */
+const PRODUCTS_SUBMENU = [
+  { id: 'products-list', name: 'Sản Phẩm', href: '/admin/products' },
+  { id: 'product-types', name: 'Loại Sản Phẩm', href: '/admin/products/types' },
+];
+
 interface SubmenuItem {
   id: string;
   name: string;
@@ -51,7 +59,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard', name: 'Tổng Quan', href: '/admin' },
   { id: 'homepage', name: 'Trang Chủ', href: '/admin/homepage', hasSubmenu: true, submenuItems: HOMEPAGE_SUBMENU },
   { id: 'news', name: 'Tin Tức', href: '/admin/news', hasSubmenu: true, submenuItems: NEWS_SUBMENU },
-  { id: 'products', name: 'Sản Phẩm MGO', href: '/admin/products' },
+  { id: 'products', name: 'Sản Phẩm MGO', href: '/admin/products', hasSubmenu: true, submenuItems: PRODUCTS_SUBMENU },
   { id: 'applications', name: 'Giải Pháp Thi Công', href: '/admin/applications' },
   { id: 'comparisons', name: 'So Sánh Vật Liệu', href: '/admin/comparisons' },
   { id: 'sample-requests', name: 'Yêu Cầu Mẫu Thử', href: '/admin/sample-requests' },
@@ -64,6 +72,7 @@ const ALL_HREFS = [
   ...NAV_ITEMS.map((i) => i.href),
   ...HOMEPAGE_SUBMENU.map((i) => i.href),
   ...NEWS_SUBMENU.map((i) => i.href),
+  ...PRODUCTS_SUBMENU.map((i) => i.href),
 ];
 
 /**
@@ -82,6 +91,12 @@ function getSubmenuDetailStatus(sub: SubmenuItem, pathname: string): { isDetail:
       !pathname.startsWith('/admin/news/taxonomy/')
     ) {
       return { isDetail: true, label: 'Soạn bài' };
+    }
+  }
+  if (sub.href === '/admin/products') {
+    if (pathname === '/admin/products/new') return { isDetail: true, label: 'Tạo mới' };
+    if (pathname.startsWith('/admin/products/') && pathname !== '/admin/products/types' && !pathname.startsWith('/admin/products/types/')) {
+      return { isDetail: true, label: 'Sửa sản phẩm' };
     }
   }
   return null;
@@ -117,6 +132,7 @@ export default function AdminSidebar() {
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
     homepage: isHomepageRoute,
     news: isNewsRoute,
+    products: pathname.startsWith('/admin/products'),
   });
 
   // Tự động mở rộng menu cha tương ứng khi người dùng duyệt vào nhánh con
@@ -126,6 +142,9 @@ export default function AdminSidebar() {
     }
     if (pathname.startsWith('/admin/news')) {
       setOpenSubmenus((prev) => ({ ...prev, news: true }));
+    }
+    if (pathname.startsWith('/admin/products')) {
+      setOpenSubmenus((prev) => ({ ...prev, products: true }));
     }
   }, [pathname]);
 

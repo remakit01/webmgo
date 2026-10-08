@@ -6,10 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowLeft, ExternalLink, Loader2, RefreshCw, Save } from 'lucide-react';
 import type { Locale } from '@remak/shared/locale';
 import {
-  EXTENSION_OF_TYPE,
-  PRODUCT_LIMITS,
-  PRODUCT_TYPE_LABEL,
-  PRODUCT_TYPES,
+  EXTENSION_OF_PROFILE,
   emptyExtensionFor,
   emptyProductInput,
   emptyTranslationInput,
@@ -17,8 +14,9 @@ import {
   type ProductCms,
   type ProductInput,
   type ProductPublishStatus,
+  type ProductSpecProfile,
   type ProductTranslationInput,
-  type ProductType,
+  type ProductTypeCms,
 } from '@remak/shared/contracts/product';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import { AdminPageBody, ADMIN_CARD } from '@/cms/components/layout/AdminPage';
@@ -27,12 +25,12 @@ import Skeleton from '@/cms/components/ui/Skeleton';
 import { isConflict } from '@/cms/lib/api-client';
 import { productsApi } from '@/cms/lib/products-api';
 import { productPath } from '@/lib/product-paths';
-import { SelectField, Switch, TextField } from './fields';
+import { SelectField, Switch } from './fields';
 import ProductContentSection from './ProductContentSection';
 import ProductExtensionSection from './ProductExtensionSection';
 import ProductSpecSection from './ProductSpecSection';
 import ProductVariantsSection from './ProductVariantsSection';
-import { SECTIONS, blankToNull, errorTarget, fieldId, firstErrorKey, isFormDirty, toProductInput, type SectionId } from './product-form';
+import { SECTIONS, errorTarget, fieldId, firstErrorKey, isFormDirty, toProductInput, type SectionId } from './product-form';
 
 type Banner = { message: string; conflict: boolean } | null;
 const LOCALES: Locale[] = ['vi', 'en'];
@@ -61,6 +59,35 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   const [expanded, setExpanded] = useState<number | null>(null);
   const focusRef = useRef<string | null>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
+  // Loại sản phẩm quản lý ở màn “Loại Sản Phẩm”; mẫu form thông số riêng đi theo loại đã chọn
+  const [types, setTypes] = useState<ProductTypeCms[] | null>(null);
+  const [typesError, setTypesError] = useState<string | null>(null);
+
+  const loadTypes = useCallback(() => {
+    setTypesError(null);
+    productsApi
+      .types()
+      .then((list) => {
+        setTypes(list);
+        // Sản phẩm mới: chọn sẵn loại đầu tiên đang hiển thị (đặt cả initial để form không bị coi là đã sửa)
+        if (productId) return;
+        const first = list.find((t) => t.isActive) ?? list[0];
+        if (!first) return;
+        const withType = (f: ProductInput) => (f.typeId ? f : { ...f, typeId: first.id, ...emptyExtensionFor(first.specProfile) });
+        setInitial(withType);
+        setForm(withType);
+      })
+      .catch((err: unknown) => setTypesError(err instanceof Error ? err.message : 'Không tải được loại sản phẩm'));
+  }, [productId]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- tải danh sách loại khi mở trang
+    loadTypes();
+  }, [loadTypes]);
+
+  const typeOf = (id: string) => types?.find((t) => t.id === id);
+  const profileOf = (id: string): ProductSpecProfile => typeOf(id)?.specProfile ?? 'NONE';
+  const profile = profileOf(form.typeId);
 
   const apply = useCallback((p: ProductCms) => {
     const input = toProductInput(p);
@@ -89,7 +116,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   }, [load]);
 
   const dirty = useMemo(() => isFormDirty(form, initial) || !!coverFile, [form, initial, coverFile]);
-  const errors = useMemo(() => (showErrors ? productInputErrors(form) : {}), [showErrors, form]);
+  const errors = useMemo(() => (showErrors ? productInputErrors(form, profile) : {}), [showErrors, form, profile]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -118,17 +145,22 @@ export default function ProductEditor({ productId }: { productId?: string }) {
       return { ...f, translations: { ...f.translations, [l]: { ...cur, ...patch } } };
     });
 
-  const changeType = (productType: ProductType) => {
-    const doIt = () =>
-      setForm((f) => {
-        const same = EXTENSION_OF_TYPE[f.productType] === EXTENSION_OF_TYPE[productType];
-        return { ...f, productType, ...(same ? {} : emptyExtensionFor(productType)) };
-      });
+  const changeType = (typeId: string) => {
+    const next = profileOf(typeId);
+    const same = EXTENSION_OF_PROFILE[profile] === EXTENSION_OF_PROFILE[next];
+    // Khối của mẫu mới đã có trong DB (đang ẩn) -> hiện lại dữ liệu cũ thay vì form trống, lưu không ghi đè
+    const stored = cms?.storedExtensions;
+    const restored = (ext: Pick<ProductInput, 'sip' | 'floor' | 'decorative'>) => ({
+      sip: ext.sip && stored?.sip ? stored.sip : ext.sip,
+      floor: ext.floor && stored?.floor ? stored.floor : ext.floor,
+      decorative: ext.decorative && stored?.decorative ? stored.decorative : ext.decorative,
+    });
+    const doIt = () => setForm((f) => ({ ...f, typeId, ...(same ? {} : restored(emptyExtensionFor(next))) }));
     const hasExt = !!(form.sip || form.floor || form.decorative);
-    if (hasExt && EXTENSION_OF_TYPE[form.productType] !== EXTENSION_OF_TYPE[productType]) {
+    if (hasExt && !same) {
       confirm({
         title: 'Đổi loại sản phẩm?',
-        description: `Thông số riêng của “${PRODUCT_TYPE_LABEL[form.productType].vi}” sẽ bị bỏ khi lưu.`,
+        description: `Thông số riêng của “${typeOf(form.typeId)?.translations.vi?.name ?? 'loại hiện tại'}” sẽ được ẩn đi (vẫn giữ trong hệ thống, hiện lại khi chọn loại có cùng mẫu thông số).`,
         confirmText: 'Đổi loại',
         variant: 'warning',
         onConfirm: doIt,
@@ -159,7 +191,9 @@ export default function ProductEditor({ productId }: { productId?: string }) {
 
   // ── Lưu ────────────────────────────────────────────────────────────────
   const save = async () => {
-    const found = productInputErrors(form);
+    // Mẫu thông số đi theo loại: chưa có danh sách loại thì không kiểm / lưu được đúng
+    if (!types) return;
+    const found = productInputErrors(form, profile);
     setShowErrors(true);
     const first = firstErrorKey(found);
     if (first) {
@@ -243,7 +277,12 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   const title = form.translations.vi.name.trim() || (cms ? 'Sửa sản phẩm' : 'Sản phẩm mới');
   const errorCount = Object.keys(errors).length;
   const sectionErrors = (s: SectionId) => Object.keys(errors).filter((k) => errorTarget(k).section === s).length;
-  const visibleSections = SECTIONS.filter((s) => s.id !== 'extension' || EXTENSION_OF_TYPE[form.productType]);
+  const visibleSections = SECTIONS.filter((s) => s.id !== 'extension' || EXTENSION_OF_PROFILE[profile]);
+  const typeName = typeOf(form.typeId)?.translations.vi?.name ?? '';
+  // Loại đang ẩn vẫn hiện trong danh sách nếu sản phẩm đang thuộc loại đó
+  const typeOptions = (types ?? [])
+    .filter((t) => t.isActive || t.id === form.typeId)
+    .map((t) => ({ value: t.id, label: `${t.translations.vi?.name ?? t.id}${t.isActive ? '' : ' (đang ẩn)'}` }));
 
   return (
     <div className="flex min-h-full grow shrink-0 flex-col bg-slate-50">
@@ -268,7 +307,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
           <button
             type="button"
             onClick={() => void save()}
-            disabled={saving || (!dirty && !!cms)}
+            disabled={saving || !types || (!dirty && !!cms)}
             aria-keyshortcuts="Control+S"
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4E7202] px-4 text-sm font-semibold text-white hover:bg-[#3F5E02] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
           >
@@ -280,6 +319,21 @@ export default function ProductEditor({ productId }: { productId?: string }) {
 
       <AdminPageBody className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-6">
         <div className="min-w-0 space-y-6">
+          {typesError && (
+            <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <div className="flex-1 space-y-2">
+                <p>Không tải được danh sách loại sản phẩm ({typesError}) — chưa lưu được sản phẩm.</p>
+                <button
+                  type="button"
+                  onClick={loadTypes}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 text-xs font-semibold text-rose-800 hover:bg-rose-100 cursor-pointer"
+                >
+                  <RefreshCw size={13} aria-hidden="true" /> Thử lại
+                </button>
+              </div>
+            </div>
+          )}
           {banner && (
             <div ref={bannerRef} tabIndex={-1} role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 focus:outline-none">
               <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -322,7 +376,9 @@ export default function ProductEditor({ productId }: { productId?: string }) {
             errors={errors}
           />
           <ProductSpecSection spec={form.technicalSpec} variants={form.variants} onChange={(patch) => setForm((f) => ({ ...f, technicalSpec: { ...f.technicalSpec, ...patch } }))} errors={errors} />
-          {EXTENSION_OF_TYPE[form.productType] && <ProductExtensionSection form={form} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} errors={errors} />}
+          {EXTENSION_OF_PROFILE[profile] && (
+            <ProductExtensionSection form={form} typeName={typeName} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} errors={errors} />
+          )}
         </div>
 
         <aside className="sticky top-20 space-y-4" aria-label="Thiết lập sản phẩm">
@@ -377,21 +433,19 @@ export default function ProductEditor({ productId }: { productId?: string }) {
               Thiết lập
             </h2>
             <div className="mt-3 space-y-3">
-              <SelectField<ProductType>
-                path="productType"
+              <SelectField<string>
+                path="typeId"
                 label="Loại sản phẩm"
-                emptyLabel={null}
-                value={form.productType}
-                options={PRODUCT_TYPES.map((t) => ({ value: t, label: PRODUCT_TYPE_LABEL[t].vi }))}
+                emptyLabel={types ? (form.typeId ? null : '— Chọn loại —') : 'Đang tải...'}
+                value={form.typeId || null}
+                options={typeOptions}
                 onChange={(t) => t && changeType(t)}
-              />
-              <TextField
-                path="tradeName"
-                label="Tên thương mại"
-                placeholder="vd Remak® FireOFF MgO"
-                maxLength={PRODUCT_LIMITS.tradeName}
-                value={form.tradeName ?? ''}
-                onChange={(v) => setForm((f) => ({ ...f, tradeName: blankToNull(v) }))}
+                errors={errors}
+                hint={
+                  <Link href="/admin/products/types" target="_blank" className="inline-flex items-center gap-1 font-semibold text-[#4E7202] hover:underline">
+                    Quản lý loại <ExternalLink size={12} aria-label="(mở tab mới)" />
+                  </Link>
+                }
               />
               <Switch id="product-featured" label="Nổi bật" hint="Ưu tiên ở trang chủ và đầu danh sách." checked={form.isFeatured} onChange={(isFeatured) => setForm((f) => ({ ...f, isFeatured }))} />
             </div>

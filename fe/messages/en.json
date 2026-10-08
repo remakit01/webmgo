@@ -317,6 +317,7 @@
     "compareClear": "Clear comparison",
     "compareHint": "Select at least one more product to compare",
     "compareType": "Type",
+    "viewTypePage": "View {name} page",
     "comparePrice": "Price",
     "compareStock": "Availability",
     "requestQuote": "Get a quote",

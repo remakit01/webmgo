@@ -13,6 +13,7 @@ import {
   formatRange,
   hasPublicPrice,
   isCorrosionProof,
+  isReservedProductSlug,
   meetsTargetEi,
   priceRange,
   productInputErrors,
@@ -181,11 +182,15 @@ describe('chứng chỉ', () => {
 
 describe('productInputErrors — kiểm lỗi form dùng chung api / CMS', () => {
   it('form trống: chỉ thiếu tên', () => {
-    expect(productInputErrors(emptyProductInput())).toEqual({ 'translations.vi.name': 'Nhập tên sản phẩm tiếng Việt' });
+    expect(productInputErrors(emptyProductInput('t1'), 'NONE')).toEqual({ 'translations.vi.name': 'Nhập tên sản phẩm tiếng Việt' });
+  });
+
+  it('chưa chọn loại sản phẩm', () => {
+    expect(productInputErrors(emptyProductInput(), 'NONE').typeId).toBe('Chọn loại sản phẩm');
   });
 
   it('bắt lỗi giá / khoảng / trùng / mặc định / sai phần mở rộng', () => {
-    const p = emptyProductInput('STANDARD');
+    const p = emptyProductInput('t1');
     p.translations.vi.name = 'Tấm';
     p.translations.vi.status = 'PUBLISHED';
     p.technicalSpec.densityMinKgM3 = 1150;
@@ -195,7 +200,7 @@ describe('productInputErrors — kiểm lỗi form dùng chung api / CMS', () =>
       { ...emptyVariantInput(8), priceVnd: 200, compareAtPriceVnd: 100, isDefault: true, fireRatingMinMinutes: 90, fireRatingMaxMinutes: 60 },
     ];
     p.floor = emptyExtensionFor('FLOOR').floor;
-    expect(Object.keys(productInputErrors(p)).sort()).toEqual([
+    expect(Object.keys(productInputErrors(p, 'NONE')).sort()).toEqual([
       'floor',
       'technicalSpec.densityMaxKgM3',
       'translations.vi.summary',
@@ -208,14 +213,30 @@ describe('productInputErrors — kiểm lỗi form dùng chung api / CMS', () =>
   });
 
   it('bản tiếng Anh không xuất bản trước bản tiếng Việt', () => {
-    const p = emptyProductInput();
+    const p = emptyProductInput('t1');
     p.translations.vi.name = 'Tấm';
     p.translations.en = { ...p.translations.vi, name: 'Board', summary: 'x', status: 'PUBLISHED' };
-    expect(productInputErrors(p)['translations.en.status']).toBe('Xuất bản bản tiếng Việt trước');
+    expect(productInputErrors(p, 'NONE')['translations.en.status']).toBe('Xuất bản bản tiếng Việt trước');
   });
 
-  it('phần mở rộng trống đúng loại', () => {
-    expect(emptyExtensionFor('SIP_PANEL').sip).not.toBeNull();
-    expect(emptyExtensionFor('STANDARD')).toEqual({ sip: null, floor: null, decorative: null });
+  it('phần mở rộng trống đúng mẫu form', () => {
+    expect(emptyExtensionFor('SIP').sip).not.toBeNull();
+    expect(emptyExtensionFor('NONE')).toEqual({ sip: null, floor: null, decorative: null });
+  });
+
+  it('khối SIP chỉ hợp lệ với mẫu form SIP', () => {
+    const p = { ...emptyProductInput('t1'), ...emptyExtensionFor('SIP') };
+    p.translations.vi.name = 'Panel';
+    expect(productInputErrors(p, 'SIP').sip).toBeUndefined();
+    expect(productInputErrors(p, 'NONE').sip).toBe('Thông số SIP chỉ dùng cho loại Panel SIP');
+  });
+});
+
+describe('isReservedProductSlug — slug dành cho trang loại sản phẩm', () => {
+  it('chặn đoạn đường dẫn trang loại theo đúng ngôn ngữ', () => {
+    expect(isReservedProductSlug('vi', 'loai')).toBe(true);
+    expect(isReservedProductSlug('en', 'type')).toBe(true);
+    expect(isReservedProductSlug('vi', 'type')).toBe(false);
+    expect(isReservedProductSlug('vi', 'loai-tam')).toBe(false);
   });
 });

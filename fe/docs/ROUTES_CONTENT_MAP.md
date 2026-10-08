@@ -43,6 +43,15 @@ Tài liệu này cung cấp sẵn: **Nội dung hiển thị (Copywriting), Th�
 
 ---
 
+### 2b. Route: `/san-pham/loai/[slug]` ⇄ `/en/products/type/[slug]` (Trang Loại Sản Phẩm)
+* **Nguồn dữ liệu:** CMS → **Sản Phẩm MGO › Loại Sản Phẩm** (`/admin/products/types`). Tên, slug, mô tả, SEO title / description nhập riêng cho từng ngôn ngữ; slug đổi thì URL cũ tự chuyển hướng 301.
+* **Thẻ H1:** Tên loại (vd "Tấm sàn MgO").
+* **Nội dung:** Mô tả loại + danh mục sản phẩm thuộc loại (lọc độ dày / chịu lửa / so sánh) + form đăng ký mẫu thử.
+* **Hiển thị:** Chỉ loại đang bật, có bản dịch ở ngôn ngữ đó và có ≥ 1 sản phẩm đã xuất bản. Loại chưa có tên tiếng Anh không có trang `/en`.
+* **Liên kết vào:** Nút lọc theo loại ở `/san-pham` ("Xem trang …"), nhãn loại trên trang chi tiết sản phẩm, sitemap.xml.
+
+---
+
 ### 3. Route: `/ung-dung` (Ứng Dụng Tổng Quan)
 * **SEO Title:** Ứng Dụng Tấm Chống Cháy MGO Trong Xây Dựng & Thẩm Duyệt PCCC
 * **Meta Description:** Khám phá các giải pháp ứng dụng tấm MGO: Ốp bọc ống gió PCCC, vách ngăn chống cháy karaoke, lót sàn chịu lực, tường bao che ngoại thất và làm lõi cửa chống cháy.

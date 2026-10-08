@@ -87,10 +87,7 @@ export default function ProductContentSection({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4">
-              <TextField path={p('name')} label="Tên sản phẩm" required={tab === 'vi' || !!translations.en} value={t.name} onChange={(name) => set({ name })} errors={errors} maxLength={L.name} />
-              <TextField path={p('shortName')} label="Tên ngắn" hint="Dùng ở thẻ sản phẩm, menu." value={t.shortName ?? ''} onChange={(v) => set({ shortName: blankToNull(v) })} errors={errors} maxLength={L.shortName} />
-            </div>
+            <TextField path={p('name')} label="Tên sản phẩm" required={tab === 'vi' || !!translations.en} value={t.name} onChange={(name) => set({ name })} errors={errors} maxLength={L.name} />
 
             <div className="space-y-1">
               <label htmlFor={fieldId(p('slug'))} className={labelClass}>

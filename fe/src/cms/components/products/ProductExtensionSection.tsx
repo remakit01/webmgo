@@ -7,7 +7,6 @@ import {
   EDGE_PROFILE_LABEL,
   EDGE_PROFILES,
   LOAD_BEARING_TYPES,
-  PRODUCT_TYPE_LABEL,
   SCRATCH_RESISTANCES,
   SIP_CORE_MATERIAL_LABEL,
   SIP_CORE_MATERIALS,
@@ -26,14 +25,16 @@ const keyOptions = (keys: readonly string[]) => keys.map((k) => ({ value: k, lab
 /** Thông số riêng theo loại sản phẩm: Panel SIP, Tấm sàn, Tấm trang trí. Loại khác không có phần này. */
 export default function ProductExtensionSection({
   form,
+  typeName,
   onChange,
   errors,
 }: {
-  form: Pick<ProductInput, 'productType' | 'sip' | 'floor' | 'decorative'>;
+  form: Pick<ProductInput, 'sip' | 'floor' | 'decorative'>;
+  /** Tên tiếng Việt của loại đang chọn */
+  typeName: string;
   onChange: (patch: Partial<Pick<ProductInput, 'sip' | 'floor' | 'decorative'>>) => void;
   errors: Record<string, string>;
 }) {
-  const typeName = PRODUCT_TYPE_LABEL[form.productType].vi;
   return (
     <Section id="extension" title="Thông số riêng theo loại" description={`Loại hiện tại: ${typeName}. Đổi loại ở khung “Thiết lập” bên phải.`}>
       {form.sip ? (

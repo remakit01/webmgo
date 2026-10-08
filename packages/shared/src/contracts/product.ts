@@ -10,8 +10,12 @@ type L10n = Record<Locale, string>;
 
 // ─── Enum (khớp Prisma) ──────────────────────────────────────────────────────
 
-export const PRODUCT_TYPES = ['STANDARD', 'SIP_PANEL', 'FLOOR', 'DECORATIVE', 'LITECORE', 'CUSTOM'] as const;
-export type ProductType = (typeof PRODUCT_TYPES)[number];
+/**
+ * Mẫu form thông số riêng của một Loại sản phẩm. Loại sản phẩm là dữ liệu (CMS thêm/sửa/xoá);
+ * chỉ danh sách mẫu này cố định vì mỗi mẫu có bảng DB + ô nhập riêng.
+ */
+export const PRODUCT_SPEC_PROFILES = ['NONE', 'SIP', 'FLOOR', 'DECORATIVE'] as const;
+export type ProductSpecProfile = (typeof PRODUCT_SPEC_PROFILES)[number];
 
 export const PRICE_MODES = ['FIXED', 'CONTACT'] as const;
 export type PriceMode = (typeof PRICE_MODES)[number];
@@ -44,13 +48,11 @@ export const SCRATCH_RESISTANCES = ['VERY_HIGH', 'HIGH', 'STANDARD'] as const;
 
 // ─── Nhãn vi/en ──────────────────────────────────────────────────────────────
 
-export const PRODUCT_TYPE_LABEL: Record<ProductType, L10n> = {
-  STANDARD: { vi: 'Tấm MgO tiêu chuẩn', en: 'Standard MgO board' },
-  SIP_PANEL: { vi: 'Panel SIP MgO', en: 'MgO SIP panel' },
-  FLOOR: { vi: 'Tấm sàn MgO', en: 'MgO floor board' },
-  DECORATIVE: { vi: 'Tấm trang trí FireSafe', en: 'FireSafe decorative board' },
-  LITECORE: { vi: 'Tấm composite LiteCore™', en: 'LiteCore™ composite board' },
-  CUSTOM: { vi: 'Tấm MgO tuỳ chỉnh', en: 'Custom MgO board' },
+export const PRODUCT_SPEC_PROFILE_LABEL: Record<ProductSpecProfile, L10n> = {
+  NONE: { vi: 'Không có thông số riêng', en: 'None' },
+  SIP: { vi: 'Panel SIP', en: 'SIP panel' },
+  FLOOR: { vi: 'Tấm sàn', en: 'Floor board' },
+  DECORATIVE: { vi: 'Tấm trang trí', en: 'Decorative board' },
 };
 
 export const STOCK_STATUS_LABEL: Record<StockStatus, L10n> = {
@@ -480,12 +482,82 @@ export interface ProductVariantPublic {
   minOrderQty: number | null;
 }
 
+// ─── Loại sản phẩm (bảng product_types, quản lý trong CMS) ───────────────────
+
+/** Loại sản phẩm theo 1 ngôn ngữ — gắn vào sản phẩm trả ra web */
+export interface ProductTypeRef {
+  id: string;
+  specProfile: ProductSpecProfile;
+  name: string;
+  /** rỗng = loại không có trang ở ngôn ngữ này (chưa dịch / đang ẩn) — không đặt link */
+  slug: string;
+}
+
+/** Trang loại trên web */
+export interface ProductTypePublic extends ProductTypeRef {
+  description: string | null;
+  seo: { title: string; description: string };
+  /** slug theo từng ngôn ngữ có bản dịch — hreflang / đổi ngôn ngữ */
+  alternates: Partial<Record<Locale, string>>;
+}
+
+export interface ProductTypeSitemapEntry {
+  slugs: Partial<Record<Locale, string>>;
+}
+
+export interface ProductTypeTranslationCms {
+  name: string;
+  slug: string;
+  description: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}
+
+/** CMS: một dòng trong màn Loại sản phẩm */
+export interface ProductTypeCms {
+  id: string;
+  specProfile: ProductSpecProfile;
+  sortOrder: number;
+  isActive: boolean;
+  /** Số sản phẩm chưa xoá */
+  productCount: number;
+  /** Số sản phẩm trong thùng rác — vẫn chặn xoá loại */
+  trashedProductCount: number;
+  version: string;
+  translations: Partial<Record<Locale, ProductTypeTranslationCms>>;
+}
+
+export interface ProductTypeTranslationInput {
+  name: string;
+  /** bỏ trống = tự sinh từ tên */
+  slug?: string;
+  description: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+}
+
+export interface ProductTypeInput {
+  specProfile: ProductSpecProfile;
+  isActive: boolean;
+  /** en = null: chưa có bản tiếng Anh (loại không hiện ở web /en) */
+  translations: { vi: ProductTypeTranslationInput; en: ProductTypeTranslationInput | null };
+}
+
+export const PRODUCT_TYPE_LIMITS = { name: 100, slug: 120, description: 500, seoTitle: 120, seoDescription: 320 } as const;
+
+/** Đoạn đường dẫn trang loại: /san-pham/loai/<slug> ⇄ /en/products/type/<slug> */
+export const PRODUCT_TYPE_PATH_SEGMENT: Record<Locale, string> = { vi: 'loai', en: 'type' };
+
+/** Slug sản phẩm trùng đoạn đường dẫn trang loại thì trang sản phẩm bị che — không cho dùng */
+export function isReservedProductSlug(locale: Locale, slug: string): boolean {
+  return slug === PRODUCT_TYPE_PATH_SEGMENT[locale];
+}
+
 export interface ProductListItemPublic {
   id: string;
-  productType: ProductType;
+  type: ProductTypeRef;
   slug: string;
   name: string;
-  shortName: string | null;
   tagline: string | null;
   summary: string;
   badge: string | null;
@@ -525,7 +597,6 @@ export interface CertificatePublic {
 }
 
 export interface ProductDetailPublic extends ProductListItemPublic {
-  tradeName: string | null;
   /** RichDoc */
   description: unknown;
   highlights: string[];
@@ -543,6 +614,9 @@ export interface ProductDetailPublic extends ProductListItemPublic {
 /** GET /products/public/:slug — slug cũ / slug ngôn ngữ khác trả { redirect } để fe 301 */
 export type ProductBySlugResponse = { product: ProductDetailPublic } | { redirect: string };
 
+/** GET /products/public/types/:slug — slug cũ / slug ngôn ngữ khác trả { redirect } */
+export type ProductTypeBySlugResponse = { type: ProductTypePublic; products: ProductListItemPublic[] } | { redirect: string };
+
 export interface ProductSitemapEntry {
   slugs: Partial<Record<Locale, string>>;
   updatedAt: string;
@@ -551,8 +625,8 @@ export interface ProductSitemapEntry {
 /** CMS: dòng trong danh sách sản phẩm */
 export interface ProductListItemCms {
   id: string;
-  productType: ProductType;
-  tradeName: string | null;
+  /** name = tên tiếng Việt của loại */
+  type: { id: string; name: string; specProfile: ProductSpecProfile };
   coverImageUrl: string | null;
   isFeatured: boolean;
   sortOrder: number;
@@ -570,7 +644,6 @@ export type ProductPublishStatus = (typeof PRODUCT_PUBLISH_STATUSES)[number];
 
 export const PRODUCT_LIMITS = {
   name: 200,
-  shortName: 120,
   slug: 160,
   tagline: 200,
   summary: 600,
@@ -579,13 +652,11 @@ export const PRODUCT_LIMITS = {
   seoTitle: 120,
   seoDescription: 320,
   variants: 60,
-  tradeName: 120,
 } as const;
 
 export interface ProductTranslationInput {
   status: ProductPublishStatus;
   name: string;
-  shortName: string | null;
   /** bỏ trống = tự sinh từ tên */
   slug: string | null;
   tagline: string | null;
@@ -645,8 +716,8 @@ export interface DecorativeSpecInput {
 }
 
 export interface ProductInput {
-  productType: ProductType;
-  tradeName: string | null;
+  /** id bảng product_types */
+  typeId: string;
   isFeatured: boolean;
   translations: { vi: ProductTranslationInput; en: ProductTranslationInput | null };
   technicalSpec: TechnicalSpecInput;
@@ -665,12 +736,17 @@ export interface ProductCms extends ProductInput {
   sortOrder: number;
   /** slug đang dùng + ngày đăng theo ngôn ngữ */
   published: Partial<Record<Locale, { slug: string; status: string; publishedAt: string | null }>>;
+  /**
+   * Mọi khối thông số riêng đang lưu trong DB, kể cả khối không khớp mẫu của loại hiện tại (đang ẩn).
+   * CMS dùng khi đổi sang loại có mẫu đó để hiện lại dữ liệu cũ thay vì form trống (tránh ghi đè).
+   */
+  storedExtensions: Pick<ProductInput, 'sip' | 'floor' | 'decorative'>;
   updatedAt: string;
 }
 
-/** Phần mở rộng hợp lệ cho từng loại */
-export const EXTENSION_OF_TYPE: Partial<Record<ProductType, 'sip' | 'floor' | 'decorative'>> = {
-  SIP_PANEL: 'sip',
+/** Phần mở rộng hợp lệ cho từng mẫu form */
+export const EXTENSION_OF_PROFILE: Partial<Record<ProductSpecProfile, 'sip' | 'floor' | 'decorative'>> = {
+  SIP: 'sip',
   FLOOR: 'floor',
   DECORATIVE: 'decorative',
 };
@@ -680,10 +756,12 @@ const rangeOk = (min: number | null | undefined, max: number | null | undefined)
 /**
  * Kiểm lỗi nghiệp vụ form sản phẩm — dùng chung: API chặn lưu, CMS báo lỗi tại ô.
  * Khoá lỗi theo đường dẫn trường: "translations.vi.name", "variants.2.priceVnd", "technicalSpec.densityMaxKgM3"…
+ * `specProfile` = mẫu form của loại đã chọn (loại là dữ liệu DB nên bên gọi tra rồi truyền vào).
  * (CHECK trong DB là lớp chặn cuối; hàm này cho thông báo dễ hiểu.)
  */
-export function productInputErrors(p: ProductInput): Record<string, string> {
+export function productInputErrors(p: ProductInput, specProfile: ProductSpecProfile): Record<string, string> {
   const e: Record<string, string> = {};
+  if (!p.typeId) e['typeId'] = 'Chọn loại sản phẩm';
   const vi = p.translations.vi;
   const en = p.translations.en;
   if (!vi.name.trim()) e['translations.vi.name'] = 'Nhập tên sản phẩm tiếng Việt';
@@ -713,7 +791,7 @@ export function productInputErrors(p: ProductInput): Record<string, string> {
   });
   if (defaults > 1) e['variants'] = 'Chỉ chọn 1 độ dày mặc định';
 
-  const ext = EXTENSION_OF_TYPE[p.productType];
+  const ext = EXTENSION_OF_PROFILE[specProfile];
   if (p.sip && ext !== 'sip') e['sip'] = 'Thông số SIP chỉ dùng cho loại Panel SIP';
   if (p.floor && ext !== 'floor') e['floor'] = 'Thông số sàn chỉ dùng cho loại Tấm sàn';
   if (p.decorative && ext !== 'decorative') e['decorative'] = 'Lớp hoàn thiện chỉ dùng cho loại Tấm trang trí';
@@ -729,7 +807,6 @@ export function emptyTranslationInput(): ProductTranslationInput {
   return {
     status: 'DRAFT',
     name: '',
-    shortName: null,
     slug: null,
     tagline: null,
     summary: '',
@@ -746,10 +823,9 @@ export function emptyTranslationInput(): ProductTranslationInput {
 }
 
 /** Form trống cho sản phẩm mới */
-export function emptyProductInput(productType: ProductType = 'STANDARD'): ProductInput {
+export function emptyProductInput(typeId = ''): ProductInput {
   return {
-    productType,
-    tradeName: null,
+    typeId,
     isFeatured: false,
     translations: { vi: emptyTranslationInput(), en: null },
     technicalSpec: {
@@ -818,9 +894,9 @@ export function emptyVariantInput(thicknessMm = 10): ProductVariantInput {
   };
 }
 
-/** Phần mở rộng trống theo loại (khi đổi loại sản phẩm trong CMS) */
-export function emptyExtensionFor(type: ProductType): Pick<ProductInput, 'sip' | 'floor' | 'decorative'> {
-  const ext = EXTENSION_OF_TYPE[type];
+/** Phần mở rộng trống theo mẫu form (khi đổi loại sản phẩm trong CMS) */
+export function emptyExtensionFor(profile: ProductSpecProfile): Pick<ProductInput, 'sip' | 'floor' | 'decorative'> {
+  const ext = EXTENSION_OF_PROFILE[profile];
   return {
     sip:
       ext === 'sip'
