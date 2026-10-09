@@ -1,10 +1,12 @@
 // Sản phẩm tấm MgO — Composition Architecture (docs/catalog-mgo/MODEL_COMPOSITION_ARCHITECTURE.md) viết bằng
 // interface + hàm thuần (KHÔNG dùng class): dữ liệu đi qua API / Server→Client Component là JSON thuần.
 // Quy tắc: thiếu dữ liệu = null — KHÔNG có giá trị mặc định (không bịa tỷ trọng / EI cho sản phẩm chưa thử nghiệm).
-// Giá trị enum khớp Prisma (api/prisma/schema.prisma); tập hay mở rộng (bề mặt, màu…) là khoá text, thêm ở đây là dùng được.
+// Giá trị enum khớp Prisma (api/prisma/schema.prisma). Danh sách giá trị thông số (kiểu cạnh, màu lõi, pha tinh thể…)
+// KHÔNG khai báo ở đây — là dữ liệu bảng spec_options, quản lý ở CMS "Danh Mục Thông Số"; sản phẩm lưu mã (code).
 
 import type { Locale } from '../locale.js';
 import { formatNumber } from '../date.js';
+import { slugify } from '../slug.js';
 
 type L10n = Record<Locale, string>;
 
@@ -26,25 +28,81 @@ export type StockStatus = (typeof STOCK_STATUSES)[number];
 export const SALE_UNITS = ['SHEET', 'M2'] as const;
 export type SaleUnit = (typeof SALE_UNITS)[number];
 
-export const EDGE_PROFILES = ['SQUARE', 'TONGUE_GROOVE', 'SHIPLAP', 'V_GROOVE'] as const;
-export type EdgeProfile = (typeof EDGE_PROFILES)[number];
+/** Mã giá trị danh mục thông số (bảng spec_options) — vd 'TONGUE_GROOVE' */
+export type EdgeProfile = string;
+export type SipCoreMaterial = string;
+export type DecorativeFinishType = string;
 
-export const SIP_CORE_MATERIALS = ['EPS', 'XPS', 'PU', 'PIR', 'PHENOLIC'] as const;
-export type SipCoreMaterial = (typeof SIP_CORE_MATERIALS)[number];
+// ─── Danh mục thông số (bảng spec_options, quản lý trong CMS) ───────────────
 
-export const DECORATIVE_FINISH_TYPES = ['HPL', 'PVC_FILM', 'INTUMESCENT_PAINT', 'PRINT_3D'] as const;
-export type DecorativeFinishType = (typeof DECORATIVE_FINISH_TYPES)[number];
+/** Nhóm giá trị — cố định vì mỗi nhóm gắn với cột thông số cụ thể; giá trị trong nhóm là dữ liệu */
+export const SPEC_OPTION_GROUPS = [
+  'EDGE_PROFILE',
+  'CORE_COLOR',
+  'SURFACE_FINISH',
+  'SCREW_HOLDING',
+  'CRYSTAL_PHASE',
+  'VOC_LEVEL',
+  'SUITABLE_FLOORING',
+  'SIP_CORE_MATERIAL',
+  'LOAD_BEARING',
+  'DECORATIVE_FINISH',
+  'SCRATCH_RESISTANCE',
+] as const;
+export type SpecOptionGroup = (typeof SPEC_OPTION_GROUPS)[number];
 
-// ─── Khoá text mở rộng (kiểm ở DTO bằng các mảng này) ───────────────────────
+/** Tên nhóm + trường dùng nhóm đó (hiện ở CMS) */
+export const SPEC_OPTION_GROUP_LABEL: Record<SpecOptionGroup, { name: string; fields: string }> = {
+  EDGE_PROFILE: { name: 'Kiểu cạnh', fields: 'Thông số chung › Kiểu cạnh · Tấm sàn › Kiểu cạnh ghép' },
+  CORE_COLOR: { name: 'Màu cốt tấm', fields: 'Thông số chung › Màu cốt tấm' },
+  SURFACE_FINISH: { name: 'Bề mặt', fields: 'Thông số chung › Bề mặt' },
+  SCREW_HOLDING: { name: 'Khả năng bám vít', fields: 'Thông số chung › Khả năng bám vít' },
+  CRYSTAL_PHASE: { name: 'Pha tinh thể', fields: 'Thông số chung › Pha tinh thể' },
+  VOC_LEVEL: { name: 'Mức VOC', fields: 'Thông số chung › Mức VOC' },
+  SUITABLE_FLOORING: { name: 'Lớp phủ sàn phù hợp', fields: 'Tấm sàn › Lớp phủ sàn phù hợp' },
+  SIP_CORE_MATERIAL: { name: 'Vật liệu lõi SIP', fields: 'Panel SIP › Vật liệu lõi' },
+  LOAD_BEARING: { name: 'Khả năng chịu lực', fields: 'Panel SIP › Khả năng chịu lực' },
+  DECORATIVE_FINISH: { name: 'Loại hoàn thiện bề mặt', fields: 'Tấm trang trí › Loại hoàn thiện' },
+  SCRATCH_RESISTANCE: { name: 'Chống trầy', fields: 'Tấm trang trí › Chống trầy' },
+};
 
-export const CORE_COLORS = ['OFF_WHITE', 'LIGHT_GREY', 'CONCRETE_GREY'] as const;
-export const SURFACE_FINISHES = ['SMOOTH', 'SANDED', 'HPL', 'PVC_FILM', 'INTUMESCENT_PAINT', 'PRINT_3D', 'TEXTURED'] as const;
-export const SCREW_HOLDING_RATINGS = ['EXCELLENT', 'GOOD', 'STANDARD'] as const;
-export const CRYSTAL_PHASES = ['PHASE_517', 'PHASE_318', 'OTHER'] as const;
-export const VOC_LEVELS = ['VERY_LOW', 'LOW', 'STANDARD'] as const;
-export const SUITABLE_FLOORINGS = ['WOOD', 'TILE', 'CARPET', 'EPOXY', 'VINYL'] as const;
-export const LOAD_BEARING_TYPES = ['STRUCTURAL', 'NON_STRUCTURAL'] as const;
-export const SCRATCH_RESISTANCES = ['VERY_HIGH', 'HIGH', 'STANDARD'] as const;
+export const SPEC_OPTION_CODE_MAX = 40;
+export const SPEC_OPTION_LABEL_MAX = 100;
+const SPEC_OPTION_CODE_PATTERN = /^[A-Z0-9]+(_[A-Z0-9]+)*$/;
+
+/** Mã: chữ in hoa không dấu, số, gạch dưới đơn — vd PHASE_517 */
+export const isValidSpecOptionCode = (code: string): boolean => code.length > 0 && code.length <= SPEC_OPTION_CODE_MAX && SPEC_OPTION_CODE_PATTERN.test(code);
+
+/** Gợi ý mã từ nhãn tiếng Việt: "Hèm âm dương" -> HEM_AM_DUONG */
+export const specOptionCodeFrom = (label: string): string => slugify(label, SPEC_OPTION_CODE_MAX).replace(/-/g, '_').toUpperCase();
+
+/** CMS: một giá trị trong danh mục */
+export interface SpecOptionCms {
+  id: string;
+  group: SpecOptionGroup;
+  code: string;
+  sortOrder: number;
+  isActive: boolean;
+  /** Số sản phẩm đang dùng (kể cả trong thùng rác) — > 0 thì không xoá được */
+  usageCount: number;
+  version: string;
+  labels: Partial<Record<Locale, string>>;
+}
+
+export interface SpecOptionInput {
+  group: SpecOptionGroup;
+  /** bỏ trống = sinh từ nhãn tiếng Việt; chỉ dùng khi tạo — không đổi được sau đó */
+  code?: string;
+  isActive: boolean;
+  /** en = null: web /en dùng nhãn tiếng Việt */
+  labels: { vi: string; en: string | null };
+}
+
+/** Nhãn theo 1 ngôn ngữ: nhóm -> mã -> nhãn */
+export type SpecOptionLabels = Partial<Record<SpecOptionGroup, Record<string, string>>>;
+
+/** Nhãn hiển thị của mã; chưa có nhãn -> hiện chính mã */
+export const optionLabel = (labels: SpecOptionLabels, group: SpecOptionGroup, code: string): string => labels[group]?.[code] ?? code;
 
 // ─── Nhãn vi/en ──────────────────────────────────────────────────────────────
 
@@ -75,61 +133,6 @@ export const SCHEMA_AVAILABILITY: Record<StockStatus, string> = {
 };
 
 export const SALE_UNIT_LABEL: Record<SaleUnit, L10n> = { SHEET: { vi: 'tấm', en: 'sheet' }, M2: { vi: 'm²', en: 'm²' } };
-
-export const EDGE_PROFILE_LABEL: Record<EdgeProfile, L10n> = {
-  SQUARE: { vi: 'Cạnh vuông phẳng', en: 'Square edge' },
-  TONGUE_GROOVE: { vi: 'Âm dương (T&G)', en: 'Tongue & groove' },
-  SHIPLAP: { vi: 'Shiplap', en: 'Shiplap' },
-  V_GROOVE: { vi: 'Rãnh chữ V', en: 'V-groove' },
-};
-
-export const SIP_CORE_MATERIAL_LABEL: Record<SipCoreMaterial, L10n> = {
-  EPS: { vi: 'EPS', en: 'EPS' },
-  XPS: { vi: 'XPS', en: 'XPS' },
-  PU: { vi: 'PU cứng', en: 'Rigid PU' },
-  PIR: { vi: 'PIR', en: 'PIR' },
-  PHENOLIC: { vi: 'Foam Phenolic', en: 'Phenolic foam' },
-};
-
-export const DECORATIVE_FINISH_TYPE_LABEL: Record<DecorativeFinishType, L10n> = {
-  HPL: { vi: 'Phủ Laminate HPL', en: 'HPL laminate' },
-  PVC_FILM: { vi: 'Phủ màng PVC', en: 'PVC film' },
-  INTUMESCENT_PAINT: { vi: 'Sơn trương nở chống cháy', en: 'Intumescent coating' },
-  PRINT_3D: { vi: 'In 3D theo thiết kế', en: 'Custom 3D print' },
-};
-
-/** Nhãn cho các khoá text mở rộng; khoá chưa khai báo -> hiện chính khoá */
-export const SPEC_KEY_LABEL: Record<string, L10n> = {
-  OFF_WHITE: { vi: 'Trắng ngà', en: 'Off-white' },
-  LIGHT_GREY: { vi: 'Xám nhạt', en: 'Light grey' },
-  CONCRETE_GREY: { vi: 'Xám bê tông', en: 'Concrete grey' },
-  SMOOTH: { vi: 'Nhẵn phẳng', en: 'Smooth' },
-  SANDED: { vi: 'Chà nhám phẳng', en: 'Sanded' },
-  HPL: { vi: 'Phủ HPL', en: 'HPL' },
-  PVC_FILM: { vi: 'Màng PVC', en: 'PVC film' },
-  INTUMESCENT_PAINT: { vi: 'Sơn chống cháy', en: 'Intumescent paint' },
-  PRINT_3D: { vi: 'In 3D', en: '3D print' },
-  TEXTURED: { vi: 'Nhám thô / hoa văn', en: 'Textured' },
-  EXCELLENT: { vi: 'Xuất sắc', en: 'Excellent' },
-  GOOD: { vi: 'Tốt', en: 'Good' },
-  STANDARD: { vi: 'Tiêu chuẩn', en: 'Standard' },
-  PHASE_517: { vi: 'Pha tinh thể 517', en: '517 crystal phase' },
-  PHASE_318: { vi: 'Pha tinh thể 318', en: '318 crystal phase' },
-  OTHER: { vi: 'Khác', en: 'Other' },
-  VERY_LOW: { vi: 'Cực thấp', en: 'Very low' },
-  LOW: { vi: 'Thấp', en: 'Low' },
-  WOOD: { vi: 'Sàn gỗ', en: 'Wood flooring' },
-  TILE: { vi: 'Gạch men', en: 'Tiles' },
-  CARPET: { vi: 'Thảm', en: 'Carpet' },
-  EPOXY: { vi: 'Epoxy', en: 'Epoxy' },
-  VINYL: { vi: 'Sàn vinyl', en: 'Vinyl' },
-  STRUCTURAL: { vi: 'Chịu lực kết cấu', en: 'Structural' },
-  NON_STRUCTURAL: { vi: 'Không chịu lực', en: 'Non-structural' },
-  VERY_HIGH: { vi: 'Rất cao', en: 'Very high' },
-  HIGH: { vi: 'Cao', en: 'High' },
-};
-
-export const specKeyLabel = (key: string | null, locale: Locale): string | null => (key ? (SPEC_KEY_LABEL[key]?.[locale] ?? key) : null);
 
 // ─── 5 sub-model (Composition) ───────────────────────────────────────────────
 
@@ -607,6 +610,8 @@ export interface ProductDetailPublic extends ProductListItemPublic {
   variants: ProductVariantPublic[];
   decorativeOptions: DecorativeFinishOptionPublic[];
   certificates: CertificatePublic[];
+  /** Nhãn (theo ngôn ngữ đang xem) của mọi mã danh mục thông số sản phẩm dùng */
+  optionLabels: SpecOptionLabels;
   seo: { title: string; description: string; ogImageUrl: string | null; noindex: boolean };
   updatedAt: string;
 }
@@ -750,6 +755,38 @@ export const EXTENSION_OF_PROFILE: Partial<Record<ProductSpecProfile, 'sip' | 'f
   FLOOR: 'floor',
   DECORATIVE: 'decorative',
 };
+
+/**
+ * Mọi mã danh mục thông số form đang dùng, kèm nhóm + đường dẫn trường (khoá lỗi) —
+ * API kiểm mã có trong danh mục, đọc nhãn cho trang web.
+ */
+export function specOptionCodesOf(p: ProductInput): { group: SpecOptionGroup; path: string; code: string }[] {
+  const out: { group: SpecOptionGroup; path: string; code: string }[] = [];
+  const one = (group: SpecOptionGroup, path: string, code: string | null | undefined) => {
+    if (code) out.push({ group, path, code });
+  };
+  const many = (group: SpecOptionGroup, path: string, codes: string[]) => codes.forEach((code) => one(group, path, code));
+  const s = p.technicalSpec;
+  one('EDGE_PROFILE', 'technicalSpec.edgeProfile', s.edgeProfile);
+  one('CORE_COLOR', 'technicalSpec.coreColor', s.coreColor);
+  one('SURFACE_FINISH', 'technicalSpec.surfaceFinish', s.surfaceFinish);
+  one('SCREW_HOLDING', 'technicalSpec.screwHoldingRating', s.screwHoldingRating);
+  one('CRYSTAL_PHASE', 'technicalSpec.crystalPhase', s.crystalPhase);
+  one('VOC_LEVEL', 'technicalSpec.vocLevel', s.vocLevel);
+  if (p.floor) {
+    many('EDGE_PROFILE', 'floor.edgeProfiles', p.floor.edgeProfiles);
+    many('SUITABLE_FLOORING', 'floor.suitableFloorings', p.floor.suitableFloorings);
+  }
+  if (p.sip) {
+    many('SIP_CORE_MATERIAL', 'sip.coreMaterials', p.sip.coreMaterials);
+    one('LOAD_BEARING', 'sip.loadBearing', p.sip.loadBearing);
+  }
+  p.decorative?.options.forEach((o, i) => {
+    one('DECORATIVE_FINISH', `decorative.options.${i}.finishType`, o.finishType);
+    one('SCRATCH_RESISTANCE', `decorative.options.${i}.scratchResistance`, o.scratchResistance);
+  });
+  return out;
+}
 
 const rangeOk = (min: number | null | undefined, max: number | null | undefined) => min == null || max == null || min <= max;
 

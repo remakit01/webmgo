@@ -18,7 +18,12 @@ import {
   priceRange,
   productInputErrors,
   productStockStatus,
-  specKeyLabel,
+  SPEC_OPTION_GROUPS,
+  SPEC_OPTION_GROUP_LABEL,
+  isValidSpecOptionCode,
+  optionLabel,
+  specOptionCodeFrom,
+  specOptionCodesOf,
   toSpecView,
   weightMismatch,
   type TechnicalSpecRow,
@@ -104,10 +109,49 @@ describe('hiển thị khoảng số', () => {
     expect(formatFireRating(null, null)).toBeNull();
   });
 
-  it('nhãn khoá mở rộng: khoá lạ hiện chính khoá', () => {
-    expect(specKeyLabel('SANDED', 'vi')).toBe('Chà nhám phẳng');
-    expect(specKeyLabel('NEW_FINISH', 'en')).toBe('NEW_FINISH');
-    expect(specKeyLabel(null, 'vi')).toBeNull();
+  it('nhãn danh mục thông số: mã chưa có nhãn hiện chính mã', () => {
+    const labels = { CRYSTAL_PHASE: { PHASE_517: 'Pha tinh thể 517' } };
+    expect(optionLabel(labels, 'CRYSTAL_PHASE', 'PHASE_517')).toBe('Pha tinh thể 517');
+    expect(optionLabel(labels, 'CRYSTAL_PHASE', 'NEW_PHASE')).toBe('NEW_PHASE');
+    expect(optionLabel(labels, 'VOC_LEVEL', 'LOW')).toBe('LOW');
+  });
+});
+
+describe('danh mục thông số — mã giá trị', () => {
+  it('sinh mã từ nhãn tiếng Việt', () => {
+    expect(specOptionCodeFrom('Hèm âm dương')).toBe('HEM_AM_DUONG');
+    expect(specOptionCodeFrom('  Xám bê-tông 2 ')).toBe('XAM_BE_TONG_2');
+    expect(specOptionCodeFrom('Đỏ')).toBe('DO');
+  });
+
+  it('kiểm mã hợp lệ', () => {
+    expect(isValidSpecOptionCode('PHASE_517')).toBe(true);
+    expect(isValidSpecOptionCode('phase')).toBe(false);
+    expect(isValidSpecOptionCode('A__B')).toBe(false);
+    expect(isValidSpecOptionCode('')).toBe(false);
+    expect(isValidSpecOptionCode('A'.repeat(41))).toBe(false);
+  });
+
+  it('liệt kê mọi mã form đang dùng kèm nhóm + đường dẫn lỗi', () => {
+    const p = emptyProductInput('t1');
+    p.technicalSpec.crystalPhase = 'PHASE_517';
+    p.floor = { edgeProfiles: ['SHIPLAP'], floorSizes: [], suitableFloorings: ['WOOD'], moistureResistantFloor: null, sandedSurface: null };
+    p.decorative = {
+      customPrintSupported: false,
+      options: [{ finishType: 'HPL', scratchResistance: 'HIGH', translations: {} }],
+    };
+    expect(specOptionCodesOf(p)).toEqual([
+      { group: 'CRYSTAL_PHASE', path: 'technicalSpec.crystalPhase', code: 'PHASE_517' },
+      { group: 'EDGE_PROFILE', path: 'floor.edgeProfiles', code: 'SHIPLAP' },
+      { group: 'SUITABLE_FLOORING', path: 'floor.suitableFloorings', code: 'WOOD' },
+      { group: 'DECORATIVE_FINISH', path: 'decorative.options.0.finishType', code: 'HPL' },
+      { group: 'SCRATCH_RESISTANCE', path: 'decorative.options.0.scratchResistance', code: 'HIGH' },
+    ]);
+  });
+
+  it('đủ 11 nhóm, mỗi nhóm có tên tiếng Việt', () => {
+    expect(SPEC_OPTION_GROUPS).toHaveLength(11);
+    for (const g of SPEC_OPTION_GROUPS) expect(SPEC_OPTION_GROUP_LABEL[g].name).toBeTruthy();
   });
 });
 
