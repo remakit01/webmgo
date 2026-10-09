@@ -17,12 +17,15 @@ import { apiFetch, ifMatch } from './api-client';
 const json = (body: unknown) => JSON.stringify(body);
 
 export const productsApi = {
-  list: () => apiFetch<ProductListItemCms[]>('/products'),
+  list: (opts?: { trash?: boolean }) =>
+    apiFetch<ProductListItemCms[]>(`/products${opts?.trash ? '?trash=true' : ''}`),
   get: (id: string) => apiFetch<ProductCms>(`/products/${id}`),
   create: (body: ProductInput) => apiFetch<ProductCms>('/products', { method: 'POST', body: json(body) }),
   update: (id: string, body: ProductInput, version: string) =>
     apiFetch<ProductCms>(`/products/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),
   remove: (id: string) => apiFetch<{ success: boolean }>(`/products/${id}`, { method: 'DELETE' }),
+  restore: (id: string) => apiFetch<{ success: boolean }>(`/products/${id}/restore`, { method: 'POST' }),
+  purge: (id: string) => apiFetch<{ success: boolean }>(`/products/${id}/permanent`, { method: 'DELETE' }),
   reorder: (ids: string[]) => apiFetch<ProductListItemCms[]>('/products/order', { method: 'PUT', body: json({ ids }) }),
 
   // ── Loại sản phẩm ──

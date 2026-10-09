@@ -307,6 +307,7 @@ export function toListItemCms(p: ListRow): ProductListItemCms {
     stockStatus: productStockStatus(p.variants.map(offerOf)),
     locales: Object.fromEntries(p.translations.map((t) => [t.locale, { name: t.name, slug: t.slug, status: t.status }])),
     updatedAt: p.updatedAt.toISOString(),
+    deletedAt: p.deletedAt?.toISOString() ?? null,
   };
 }
 

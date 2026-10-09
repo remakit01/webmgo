@@ -640,6 +640,7 @@ export interface ProductListItemCms {
   stockStatus: StockStatus;
   locales: Partial<Record<Locale, { name: string; slug: string; status: string }>>;
   updatedAt: string;
+  deletedAt?: string | null;
 }
 
 // ─── Form CMS / body API ghi (một hình dạng dùng chung) ─────────────────────

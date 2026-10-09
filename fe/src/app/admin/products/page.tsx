@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Plus, Trash2 } from 'lucide-react';
 import type { ProductListItemCms } from '@remak/shared/contracts/product';
 import { AdminPage, AdminPageBand, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
@@ -11,7 +11,19 @@ import { fetchCurrentUser } from '@/cms/lib/api-auth';
 import { productsApi } from '@/cms/lib/products-api';
 
 export default function AdminProductsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProductsPage />
+    </Suspense>
+  );
+}
+
+function ProductsPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const inTrash = searchParams.get('trash') === 'true';
+
   const confirm = useConfirm();
   const showToast = useToast();
   const [items, setItems] = useState<ProductListItemCms[] | null>(null);
@@ -22,21 +34,32 @@ export default function AdminProductsPage() {
   const load = useCallback(
     () =>
       productsApi
-        .list()
+        .list({ trash: inTrash })
         .then(setItems)
         .catch((err: unknown) => showToast(err instanceof Error ? err.message : 'Không tải được sản phẩm', 'error')),
-    [showToast],
+    [inTrash, showToast],
   );
 
   useEffect(() => {
     void load();
+  }, [load]);
+
+  useEffect(() => {
     fetchCurrentUser()
       .then((u) => setIsAdmin(u?.role === 'ADMIN'))
       .catch(() => setIsAdmin(false));
-  }, [load]);
+  }, []);
+
+  const toggleTrash = () => {
+    if (inTrash) {
+      router.push(pathname);
+    } else {
+      router.push(`${pathname}?trash=true`);
+    }
+  };
 
   const move = async (p: ProductListItemCms, dir: -1 | 1) => {
-    if (!items) return;
+    if (!items || inTrash) return;
     const from = items.findIndex((x) => x.id === p.id);
     const to = from + dir;
     if (to < 0 || to >= items.length) return;
@@ -55,17 +78,43 @@ export default function AdminProductsPage() {
     }
   };
 
-  const remove = (p: ProductListItemCms) =>
+  const moveToTrash = (p: ProductListItemCms) =>
     confirm({
-      title: 'Xoá sản phẩm?',
-      description: `“${p.locales.vi?.name}” sẽ bị gỡ khỏi website (cả bản tiếng Anh). Dữ liệu vẫn được giữ trong hệ thống để khôi phục khi cần.`,
-      confirmText: 'Xoá sản phẩm',
-      variant: 'danger',
+      title: 'Chuyển sản phẩm vào thùng rác?',
+      description: `“${p.locales.vi?.name || p.id}” sẽ bị ẩn khỏi website ngay (cả bản tiếng Anh). Bạn có thể khôi phục trong thùng rác.`,
+      confirmText: 'Chuyển vào thùng rác',
+      variant: 'warning',
       onConfirm: async () => {
         await productsApi.remove(p.id);
         await load();
       },
-      successMessage: 'Đã xoá sản phẩm',
+      successMessage: 'Đã chuyển sản phẩm vào thùng rác',
+    });
+
+  const restore = (p: ProductListItemCms) =>
+    confirm({
+      title: 'Khôi phục sản phẩm?',
+      description: `“${p.locales.vi?.name || p.id}” sẽ trở lại danh sách với trạng thái xuất bản như trước khi xoá.`,
+      confirmText: 'Khôi phục',
+      variant: 'info',
+      onConfirm: async () => {
+        await productsApi.restore(p.id);
+        await load();
+      },
+      successMessage: 'Đã khôi phục sản phẩm',
+    });
+
+  const purge = (p: ProductListItemCms) =>
+    confirm({
+      title: 'Xoá vĩnh viễn sản phẩm?',
+      description: `“${p.locales.vi?.name || p.id}”, mọi bản dịch, thông số kỹ thuật và độ dày sẽ bị xoá hẳn khỏi cơ sở dữ liệu, không thể khôi phục.`,
+      confirmText: 'Xoá vĩnh viễn',
+      variant: 'danger',
+      onConfirm: async () => {
+        await productsApi.purge(p.id);
+        await load();
+      },
+      successMessage: 'Đã xoá vĩnh viễn sản phẩm',
     });
 
   const published = items?.filter((p) => p.locales.vi?.status === 'PUBLISHED').length ?? 0;
@@ -73,33 +122,73 @@ export default function AdminProductsPage() {
   const add = () => router.push('/admin/products/new');
 
   return (
-    <AdminPage title="Sản Phẩm MGO" subtitle="Dòng tấm, độ dày, giá, thông số kỹ thuật và thứ tự hiển thị trên website">
+    <AdminPage
+      title={inTrash ? 'Thùng Rác Sản Phẩm' : 'Sản Phẩm MGO'}
+      subtitle={
+        inTrash
+          ? 'Danh sách các dòng sản phẩm đã bị ẩn. Bạn có thể khôi phục hoặc xoá vĩnh viễn.'
+          : 'Dòng tấm, độ dày, giá, thông số kỹ thuật và thứ tự hiển thị trên website'
+      }
+    >
       <AdminPageBand
         title={
           <p className="text-sm text-slate-700" aria-live="polite">
             {items ? (
-              <>
-                <strong className="text-slate-900">{items.length}</strong> sản phẩm · {published} đang hiện trên web
-                {missingEn > 0 && ` · ${missingEn} chưa có bản tiếng Anh`}
-              </>
+              inTrash ? (
+                <>
+                  <strong className="text-rose-900">{items.length}</strong> sản phẩm trong thùng rác · Đã bị ẩn khỏi website
+                </>
+              ) : (
+                <>
+                  <strong className="text-slate-900">{items.length}</strong> sản phẩm · {published} đang hiện trên web
+                  {missingEn > 0 && ` · ${missingEn} chưa có bản tiếng Anh`}
+                </>
+              )
             ) : (
               'Đang tải…'
             )}
           </p>
         }
-        label="Sản phẩm"
+        label={inTrash ? 'Thùng rác sản phẩm' : 'Sản phẩm'}
         actions={
-          <button
-            type="button"
-            onClick={add}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#4E7202] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#3F5E02] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
-          >
-            <Plus size={14} aria-hidden="true" /> Thêm sản phẩm
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={toggleTrash}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5F8A03] ${
+                inTrash
+                  ? 'bg-rose-50 border-rose-300 text-rose-700 hover:bg-rose-100'
+                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <Trash2 size={13} aria-hidden="true" />
+              {inTrash ? 'Quay lại danh sách' : 'Thùng rác'}
+            </button>
+            {!inTrash && (
+              <button
+                type="button"
+                onClick={add}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4E7202] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#3F5E02] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
+              >
+                <Plus size={14} aria-hidden="true" /> Thêm sản phẩm
+              </button>
+            )}
+          </>
         }
       />
       <AdminPageBody>
-        <ProductTable items={items} isAdmin={isAdmin} reordering={reordering} onMove={move} onDelete={remove} onAdd={add} />
+        <ProductTable
+          items={items}
+          isAdmin={isAdmin}
+          reordering={reordering}
+          inTrash={inTrash}
+          onMove={move}
+          onDelete={moveToTrash}
+          onRestore={restore}
+          onPurge={purge}
+          onAdd={add}
+          onBackToList={toggleTrash}
+        />
         <p className="sr-only" aria-live="polite">
           {announce}
         </p>

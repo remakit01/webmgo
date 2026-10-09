@@ -52,6 +52,7 @@ const setup = (existing: object | null = null) => {
     product: {
       findFirst: vi.fn(async () => existing),
       updateMany: vi.fn(async () => ({ count: 1 })),
+      update: vi.fn(async () => ({ id: 'p1' })),
       findMany: vi.fn(async () => []),
       aggregate: vi.fn(async () => ({ _max: { sortOrder: 4 } })),
     },
@@ -60,7 +61,11 @@ const setup = (existing: object | null = null) => {
     $executeRaw: vi.fn(async () => 0),
   };
   const cache = { invalidate: vi.fn(async () => undefined) };
-  const slugRedirects = { release: vi.fn(async () => undefined), record: vi.fn(async () => undefined) };
+  const slugRedirects = {
+    release: vi.fn(async () => undefined),
+    record: vi.fn(async () => undefined),
+    removeFor: vi.fn(async () => undefined),
+  };
   const specOptions = {
     codesByGroup: vi.fn(async () => new Map<string, Set<string>>([['CRYSTAL_PHASE', new Set(['PHASE_517'])], ['VOC_LEVEL', new Set(['LOW'])]])),
   };
@@ -202,6 +207,42 @@ describe('ProductsService — ghi', () => {
     const { service, prisma } = setup();
     prisma.product.updateMany.mockResolvedValue({ count: 0 });
     await expect(service.remove('x')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('khôi phục sản phẩm: không có trong thùng rác -> 404', async () => {
+    const { service, prisma } = setup();
+    prisma.product.findFirst.mockResolvedValue(null);
+    await expect(service.restore('x')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('khôi phục sản phẩm: có trong thùng rác -> set deletedAt null', async () => {
+    const { service, prisma, cache } = setup();
+    prisma.product.findFirst.mockResolvedValue({ id: 'p1', deletedAt: new Date() } as never);
+    prisma.product.update.mockResolvedValue({ id: 'p1', deletedAt: null } as never);
+    const res = await service.restore('p1');
+    expect(res).toEqual({ success: true });
+    expect(prisma.product.update).toHaveBeenCalledWith({ where: { id: 'p1' }, data: { deletedAt: null } });
+    expect(cache.invalidate).toHaveBeenCalledWith(PRODUCTS_INVALIDATE);
+  });
+
+  it('xoá vĩnh viễn: không có trong thùng rác -> 404', async () => {
+    const { service, prisma } = setup();
+    prisma.product.findFirst.mockResolvedValue(null);
+    await expect(service.purge('x')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('xoá vĩnh viễn: có trong thùng rác -> xoá DB, slugRedirects, ảnh và cache', async () => {
+    const { service, prisma, tx, cache, slugRedirects } = setup();
+    prisma.product.findFirst.mockResolvedValue({ id: 'p1', coverImageKey: 'covers/p1.jpg', deletedAt: new Date() } as never);
+    const media = { removeImage: vi.fn(async () => undefined) };
+    (service as unknown as { media: typeof media }).media = media;
+
+    const res = await service.purge('p1');
+    expect(res).toEqual({ success: true });
+    expect(tx.product.delete).toHaveBeenCalledWith({ where: { id: 'p1' } });
+    expect(slugRedirects.removeFor).toHaveBeenCalledWith('product', 'p1', tx);
+    expect(media.removeImage).toHaveBeenCalledWith('covers/p1.jpg');
+    expect(cache.invalidate).toHaveBeenCalledWith(PRODUCTS_INVALIDATE);
   });
 });
 
