@@ -122,35 +122,52 @@ enum SaleUnit {
   @@map("sale_unit")
 }
 
-/// Kiểu cạnh tấm
-enum EdgeProfile {
-  SQUARE
-  TONGUE_GROOVE
-  SHIPLAP
-  V_GROOVE
+/// Nhóm danh mục thông số — mỗi nhóm gắn với cột thông số cụ thể (xem SPEC_OPTION_GROUP_LABEL ở @remak/shared)
+enum SpecOptionGroup {
+  EDGE_PROFILE
+  CORE_COLOR
+  SURFACE_FINISH
+  SCREW_HOLDING
+  CRYSTAL_PHASE
+  VOC_LEVEL
+  SUITABLE_FLOORING
+  SIP_CORE_MATERIAL
+  LOAD_BEARING
+  DECORATIVE_FINISH
+  SCRATCH_RESISTANCE
 
-  @@map("edge_profile")
+  @@map("spec_option_group")
 }
 
-/// Lõi cách nhiệt của panel SIP
-enum SipCoreMaterial {
-  EPS
-  XPS
-  PU
-  PIR
-  PHENOLIC
+/// Giá trị danh mục thông số (kiểu cạnh, màu lõi, pha tinh thể…) — quản lý trong CMS; cột sản phẩm lưu `code`
+model SpecOption {
+  id        String          @id @default(cuid())
+  group     SpecOptionGroup
+  /// Mã lưu trong cột sản phẩm — KHÔNG đổi sau khi tạo (CHECK định dạng trong migration)
+  code      String
+  sortOrder Int             @default(0) @map("sort_order")
+  isActive  Boolean         @default(true) @map("is_active")
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  @@map("sip_core_material")
+  translations SpecOptionTranslation[]
+
+  @@unique([group, code])
+  // Danh sách theo nhóm, đúng thứ tự CMS
+  @@index([group, sortOrder, id])
+  @@map("spec_options")
 }
 
-/// Công nghệ hoàn thiện bề mặt tấm trang trí FireSafe
-enum DecorativeFinishType {
-  HPL
-  PVC_FILM
-  INTUMESCENT_PAINT
-  PRINT_3D
+model SpecOptionTranslation {
+  optionId String        @map("option_id")
+  locale   ContentLocale
+  label    String
 
-  @@map("decorative_finish_type")
+  option SpecOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  // PK bắt đầu bằng option_id nên đã phủ index cho FK
+  @@id([optionId, locale])
+  @@map("spec_option_translations")
 }
 
 /// Dòng tấm MgO (= 1 trang sản phẩm)
@@ -227,7 +244,7 @@ model ProductTechnicalSpec {
   // ── physical ──
   /// Khổ tiêu chuẩn: [{ widthMm, lengthMm }]
   standardSizes Json         @default("[]") @map("standard_sizes")
-  edgeProfile   EdgeProfile? @map("edge_profile")
+  edgeProfile   String?      @map("edge_profile")
   /// Khoá màu cốt tấm (OFF_WHITE, LIGHT_GREY…)
   coreColor     String?      @map("core_color")
   /// Khoá hoàn thiện bề mặt (SMOOTH, SANDED, HPL…)
@@ -344,7 +361,7 @@ model ProductVariantTranslation {
 /// Mở rộng cho panel SIP MgO (loại có mẫu thông số SIP)
 model SipPanelSpec {
   productId           String            @id @map("product_id")
-  coreMaterials       SipCoreMaterial[] @default([]) @map("core_materials")
+  coreMaterials       String[]          @default([]) @map("core_materials")
   coreThicknessMinMm  Int?              @map("core_thickness_min_mm")
   coreThicknessMaxMm  Int?              @map("core_thickness_max_mm")
   /// Độ dày tấm MgO ốp 2 mặt, vd [10, 12]
@@ -363,7 +380,7 @@ model SipPanelSpec {
 /// Mở rộng cho tấm sàn MgO (loại có mẫu thông số FLOOR)
 model FloorBoardSpec {
   productId              String        @id @map("product_id")
-  edgeProfiles           EdgeProfile[] @default([]) @map("edge_profiles")
+  edgeProfiles           String[]      @default([]) @map("edge_profiles")
   /// Khổ sàn: [{ widthMm, lengthMm }]
   floorSizes             Json          @default("[]") @map("floor_sizes")
   /// Khoá vật liệu lót sàn tương thích (WOOD, TILE, CARPET, EPOXY, VINYL…)
@@ -392,7 +409,7 @@ model DecorativeFinishSpec {
 model DecorativeFinishOption {
   id                String               @id @default(cuid())
   productId         String               @map("product_id")
-  finishType        DecorativeFinishType @map("finish_type")
+  finishType        String               @map("finish_type")
   /// Khoá mức chống trầy (VERY_HIGH, HIGH, STANDARD)
   scratchResistance String?              @map("scratch_resistance")
   sortOrder         Int                  @default(0) @map("sort_order")
