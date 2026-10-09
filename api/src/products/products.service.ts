@@ -44,10 +44,14 @@ export class ProductsService {
 
   // ── Đọc ─────────────────────────────────────────────────────────────────
 
-  async list(): Promise<ProductListItemCms[]> {
+  async list(opts: { trash?: boolean } = {}): Promise<ProductListItemCms[]> {
+    const where = opts.trash ? { deletedAt: { not: null } } : LIVE;
+    const orderBy = opts.trash
+      ? [{ deletedAt: 'desc' as const }, { id: 'asc' as const }]
+      : [{ sortOrder: 'asc' as const }, { id: 'asc' as const }];
     const rows = await this.prisma.product.findMany({
-      where: LIVE,
-      orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+      where,
+      orderBy,
       include: productListInclude,
     });
     return rows.map(toListItemCms);
@@ -96,10 +100,32 @@ export class ProductsService {
     return this.get(id);
   }
 
-  /** Xoá mềm (ẩn khỏi web, giữ dữ liệu) */
+  /** Xoá mềm (chuyển vào thùng rác, ẩn khỏi web, giữ dữ liệu) */
   async remove(id: string) {
     const { count } = await this.prisma.product.updateMany({ where: { id, ...LIVE }, data: { deletedAt: new Date() } });
     if (!count) throw new NotFoundException('Không tìm thấy sản phẩm');
+    await this.cache.invalidate(PRODUCTS_INVALIDATE);
+    return { success: true };
+  }
+
+  /** Khôi phục từ thùng rác */
+  async restore(id: string) {
+    const p = await this.prisma.product.findFirst({ where: { id, deletedAt: { not: null } } });
+    if (!p) throw new NotFoundException('Không tìm thấy sản phẩm trong thùng rác');
+    await this.prisma.product.update({ where: { id }, data: { deletedAt: null } });
+    await this.cache.invalidate(PRODUCTS_INVALIDATE);
+    return { success: true };
+  }
+
+  /** Xoá vĩnh viễn (chỉ ADMIN, sản phẩm phải trong thùng rác): DB + redirect slug + ảnh đại diện */
+  async purge(id: string) {
+    const p = await this.prisma.product.findFirst({ where: { id, deletedAt: { not: null } } });
+    if (!p) throw new NotFoundException('Không tìm thấy sản phẩm trong thùng rác');
+    await this.prisma.$transaction(async (tx) => {
+      await this.slugRedirects.removeFor(PRODUCT_SLUG_ENTITY, id, tx);
+      await tx.product.delete({ where: { id } });
+    });
+    if (p.coverImageKey) await this.media.removeImage(p.coverImageKey);
     await this.cache.invalidate(PRODUCTS_INVALIDATE);
     return { success: true };
   }

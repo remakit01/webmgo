@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowDown, ArrowUp, Boxes, EyeOff, ImageOff, Pencil, Plus, Star, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Boxes, EyeOff, ImageOff, Pencil, Plus, RotateCcw, Star, Trash2 } from 'lucide-react';
 import { STOCK_STATUS_LABEL, type ProductListItemCms } from '@remak/shared/contracts/product';
 import IconAction from '@/cms/components/shared/IconAction';
 import Skeleton from '@/cms/components/ui/Skeleton';
@@ -25,19 +25,48 @@ function PriceCell({ item }: { item: Item }) {
 export default function ProductTable({
   items,
   isAdmin,
-  reordering,
+  reordering = false,
+  inTrash = false,
   onMove,
   onDelete,
+  onRestore,
+  onPurge,
   onAdd,
+  onBackToList,
 }: {
   items: Item[] | null;
   isAdmin: boolean;
-  reordering: boolean;
-  onMove: (p: Item, dir: -1 | 1) => void;
-  onDelete: (p: Item) => void;
-  onAdd: () => void;
+  reordering?: boolean;
+  inTrash?: boolean;
+  onMove?: (p: Item, dir: -1 | 1) => void;
+  onDelete?: (p: Item) => void;
+  onRestore?: (p: Item) => void;
+  onPurge?: (p: Item) => void;
+  onAdd?: () => void;
+  onBackToList?: () => void;
 }) {
   if (items?.length === 0) {
+    if (inTrash) {
+      return (
+        <div className="rounded-xl border border-slate-300 bg-white px-6 py-16 text-center shadow-2xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-500">
+            <Trash2 size={24} aria-hidden="true" />
+          </div>
+          <h2 className="mt-3 text-sm font-semibold text-slate-900">Thùng rác trống</h2>
+          <p className="mt-1.5 text-sm text-slate-600">Hiện không có sản phẩm nào bị chuyển vào thùng rác.</p>
+          {onBackToList && (
+            <button
+              type="button"
+              onClick={onBackToList}
+              className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
+            >
+              Quay lại danh sách
+            </button>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="rounded-xl border border-slate-300 bg-white px-6 py-16 text-center shadow-2xs">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-slate-300 bg-slate-100 text-slate-500">
@@ -45,13 +74,15 @@ export default function ProductTable({
         </div>
         <h2 className="mt-3 text-sm font-semibold text-slate-900">Chưa có sản phẩm nào</h2>
         <p className="mt-1.5 text-sm text-slate-600">Tạo dòng tấm đầu tiên: nội dung, độ dày, giá và thông số kỹ thuật.</p>
-        <button
-          type="button"
-          onClick={onAdd}
-          className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4E7202] px-4 text-sm font-semibold text-white hover:bg-[#3F5E02] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
-        >
-          <Plus size={16} aria-hidden="true" /> Thêm sản phẩm
-        </button>
+        {onAdd && (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4E7202] px-4 text-sm font-semibold text-white hover:bg-[#3F5E02] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
+          >
+            <Plus size={16} aria-hidden="true" /> Thêm sản phẩm
+          </button>
+        )}
       </div>
     );
   }
@@ -62,7 +93,7 @@ export default function ProductTable({
         <caption className="sr-only">Sản phẩm, theo thứ tự hiển thị trên website</caption>
         <thead className="sticky top-[var(--admin-sticky-top)] z-10 bg-slate-100 text-xs font-semibold text-slate-700 shadow-[inset_0_-1px_0_var(--color-slate-300)]">
           <tr>
-            <th scope="col" className="w-28 px-4 py-3">Thứ tự</th>
+            <th scope="col" className="w-28 px-4 py-3">{inTrash ? 'STT' : 'Thứ tự'}</th>
             <th scope="col" className="px-4 py-3">Sản phẩm</th>
             <th scope="col" className="w-24 px-4 py-3 text-right">Độ dày</th>
             <th scope="col" className="px-4 py-3">Giá</th>
@@ -97,13 +128,19 @@ export default function ProductTable({
                 return (
                   <tr key={p.id} className="align-top transition-colors hover:bg-slate-50">
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-0.5">
-                        <IconAction label={i === 0 ? 'Đã ở đầu danh sách' : `Chuyển “${name}” lên`} icon={ArrowUp} disabled={i === 0 || reordering} onClick={() => onMove(p, -1)} />
-                        <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800" aria-label={`Vị trí ${i + 1}`}>
+                      {inTrash ? (
+                        <span className="inline-block w-6 text-center text-sm font-semibold tabular-nums text-slate-500" aria-label={`STT ${i + 1}`}>
                           {i + 1}
                         </span>
-                        <IconAction label={i === items.length - 1 ? 'Đã ở cuối danh sách' : `Chuyển “${name}” xuống`} icon={ArrowDown} disabled={i === items.length - 1 || reordering} onClick={() => onMove(p, 1)} />
-                      </div>
+                      ) : (
+                        <div className="flex items-center gap-0.5">
+                          <IconAction label={i === 0 ? 'Đã ở đầu danh sách' : `Chuyển “${name}” lên`} icon={ArrowUp} disabled={i === 0 || reordering} onClick={() => onMove?.(p, -1)} />
+                          <span className="w-6 text-center text-sm font-semibold tabular-nums text-slate-800" aria-label={`Vị trí ${i + 1}`}>
+                            {i + 1}
+                          </span>
+                          <IconAction label={i === items.length - 1 ? 'Đã ở cuối danh sách' : `Chuyển “${name}” xuống`} icon={ArrowDown} disabled={i === items.length - 1 || reordering} onClick={() => onMove?.(p, 1)} />
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-3">
@@ -116,9 +153,13 @@ export default function ProductTable({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <a href={href} className="font-bold text-slate-900 hover:text-[#3F5E02] hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-[#5F8A03]">
-                            {name}
-                          </a>
+                          {inTrash ? (
+                            <span className="font-bold text-slate-700">{name}</span>
+                          ) : (
+                            <a href={href} className="font-bold text-slate-900 hover:text-[#3F5E02] hover:underline focus-visible:rounded focus-visible:outline-2 focus-visible:outline-[#5F8A03]">
+                              {name}
+                            </a>
+                          )}
                           {p.isFeatured && (
                             <span className="ml-1.5 inline-flex items-center gap-0.5 align-middle text-xs font-semibold text-amber-700">
                               <Star size={12} className="fill-current" aria-hidden="true" /> Nổi bật
@@ -138,7 +179,7 @@ export default function ProductTable({
                                 );
                               }
                               const label = `${l.toUpperCase()} ${t.status === 'PUBLISHED' ? 'Đã xuất bản' : 'Nháp'}`;
-                              return t.status === 'PUBLISHED' ? (
+                              return t.status === 'PUBLISHED' && !inTrash ? (
                                 <a
                                   key={l}
                                   href={productPath(l, t.slug)}
@@ -151,7 +192,7 @@ export default function ProductTable({
                                   {label} <span aria-hidden="true">↗</span>
                                 </a>
                               ) : (
-                                <span key={l} className={`inline-flex rounded border px-1.5 py-0.5 font-semibold ${STATUS_CHIP.DRAFT}`}>
+                                <span key={l} className={`inline-flex rounded border px-1.5 py-0.5 font-semibold ${t.status === 'PUBLISHED' ? STATUS_CHIP.PUBLISHED : STATUS_CHIP.DRAFT}`}>
                                   {label}
                                 </span>
                               );
@@ -175,8 +216,17 @@ export default function ProductTable({
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center justify-end gap-1">
-                        <IconAction label={`Sửa “${name}”`} icon={Pencil} href={href} tipAlign={isAdmin ? 'center' : 'end'} />
-                        {isAdmin && <IconAction label={`Xoá “${name}”`} icon={Trash2} danger onClick={() => onDelete(p)} tipAlign="end" />}
+                        {inTrash ? (
+                          <>
+                            {onRestore && <IconAction label={`Khôi phục “${name}”`} icon={RotateCcw} onClick={() => onRestore(p)} tipAlign={isAdmin ? 'center' : 'end'} />}
+                            {isAdmin && onPurge && <IconAction label={`Xoá vĩnh viễn “${name}”`} icon={Trash2} danger onClick={() => onPurge(p)} tipAlign="end" />}
+                          </>
+                        ) : (
+                          <>
+                            <IconAction label={`Sửa “${name}”`} icon={Pencil} href={href} tipAlign={isAdmin ? 'center' : 'end'} />
+                            {isAdmin && onDelete && <IconAction label={`Chuyển “${name}” vào thùng rác`} icon={Trash2} danger onClick={() => onDelete(p)} tipAlign="end" />}
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

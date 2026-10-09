@@ -1,4 +1,4 @@
-import { applyDecorators, Body, Controller, Delete, Get, Headers, Param, Post, Put, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { applyDecorators, Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiCookieAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
@@ -21,9 +21,9 @@ export class ProductsController {
   constructor(private readonly products: ProductsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách sản phẩm (mọi trạng thái xuất bản)' })
-  list() {
-    return this.products.list();
+  @ApiOperation({ summary: 'Danh sách sản phẩm (mọi trạng thái xuất bản, hoặc thùng rác)' })
+  list(@Query('trash') trash?: string) {
+    return this.products.list({ trash: trash === 'true' });
   }
 
   @Post()
@@ -62,9 +62,22 @@ export class ProductsController {
     return this.products.updateCover(id, file, parseIfMatch(ifMatch));
   }
 
+  @Post(':id/restore')
+  @ApiOperation({ summary: 'Khôi phục sản phẩm từ thùng rác' })
+  restore(@Param('id') id: string) {
+    return this.products.restore(id);
+  }
+
+  @Delete(':id/permanent')
+  @Roles('ADMIN')
+  @ApiOperation({ summary: 'Xoá vĩnh viễn sản phẩm trong thùng rác (chỉ ADMIN)' })
+  purge(@Param('id') id: string) {
+    return this.products.purge(id);
+  }
+
   @Delete(':id')
   @Roles('ADMIN')
-  @ApiOperation({ summary: 'Ẩn sản phẩm khỏi web (xoá mềm, chỉ ADMIN)' })
+  @ApiOperation({ summary: 'Ẩn sản phẩm khỏi web (xoá mềm, chuyển vào thùng rác, chỉ ADMIN)' })
   remove(@Param('id') id: string) {
     return this.products.remove(id);
   }
