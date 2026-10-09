@@ -190,6 +190,14 @@ describe('products.mapper — chi tiết public', () => {
     expect(toDetailPublic(std, (std as { translations: unknown[] }).translations[0] as never, 'vi', NOW).spec).toBeNull();
   });
 
+  it('lớp hoàn thiện chỉ hiện khi loại có mẫu Tấm trang trí (sản phẩm đổi loại không lộ khối ẩn)', () => {
+    const option = { id: 'o1', productId: 'p1', finishType: 'PVC_FILM', scratchResistance: 'VERY_HIGH', sortOrder: 0, translations: [] };
+    const hidden = product({ decorativeOptions: [option] }); // loại NONE
+    expect(toDetailPublic(hidden, (hidden as { translations: unknown[] }).translations[0] as never, 'vi', NOW).decorativeOptions).toEqual([]);
+    const decor = product({ type: productType('pt_decorative', 'DECORATIVE'), decorativeOptions: [option] });
+    expect(toDetailPublic(decor, (decor as { translations: unknown[] }).translations[0] as never, 'vi', NOW).decorativeOptions).toHaveLength(1);
+  });
+
   it('nhãn danh mục thông số truyền vào được gắn vào chi tiết', () => {
     const p = product();
     const labels = { EDGE_PROFILE: { TONGUE_GROOVE: 'Âm dương (T&G)' } };

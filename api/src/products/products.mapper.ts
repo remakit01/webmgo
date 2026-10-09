@@ -260,7 +260,9 @@ function certificatesOf(p: DetailRow, locale: Locale, today: string): Certificat
 export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale, now = new Date(), optionLabels: SpecOptionLabels = {}): ProductDetailPublic {
   const base = toListItemPublic(p, tr, now);
   const gallery = asArray<{ url: string }>(p.gallery);
-  const decorativeOptions: DecorativeFinishOptionPublic[] = p.decorativeOptions.map((o) => {
+  // Lớp hoàn thiện chỉ thuộc mẫu Tấm trang trí — sản phẩm đã đổi loại còn dòng cũ trong DB (ẩn), không xuất ra web
+  const decorativeRows = p.type.specProfile === 'DECORATIVE' ? p.decorativeOptions : [];
+  const decorativeOptions: DecorativeFinishOptionPublic[] = decorativeRows.map((o) => {
     const t = o.translations.find((x) => x.locale === locale) ?? o.translations.find((x) => x.locale === 'vi');
     return {
       finishType: o.finishType,
