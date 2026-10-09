@@ -17,6 +17,7 @@ import {
   type ProductSpecProfile,
   type ProductTranslationInput,
   type ProductTypeCms,
+  type SpecOptionCms,
 } from '@remak/shared/contracts/product';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
 import { AdminPageBody, ADMIN_CARD } from '@/cms/components/layout/AdminPage';
@@ -61,14 +62,16 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   const bannerRef = useRef<HTMLDivElement>(null);
   // Loại sản phẩm quản lý ở màn “Loại Sản Phẩm”; mẫu form thông số riêng đi theo loại đã chọn
   const [types, setTypes] = useState<ProductTypeCms[] | null>(null);
+  // Danh mục thông số (màn “Danh Mục Thông Số”) — lựa chọn cho kiểu cạnh, màu lõi, pha tinh thể…
+  const [specOptions, setSpecOptions] = useState<SpecOptionCms[] | null>(null);
   const [typesError, setTypesError] = useState<string | null>(null);
 
   const loadTypes = useCallback(() => {
     setTypesError(null);
-    productsApi
-      .types()
-      .then((list) => {
+    Promise.all([productsApi.types(), productsApi.specOptions()])
+      .then(([list, opts]) => {
         setTypes(list);
+        setSpecOptions(opts);
         // Sản phẩm mới: chọn sẵn loại đầu tiên đang hiển thị (đặt cả initial để form không bị coi là đã sửa)
         if (productId) return;
         const first = list.find((t) => t.isActive) ?? list[0];
@@ -77,7 +80,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
         setInitial(withType);
         setForm(withType);
       })
-      .catch((err: unknown) => setTypesError(err instanceof Error ? err.message : 'Không tải được loại sản phẩm'));
+      .catch((err: unknown) => setTypesError(err instanceof Error ? err.message : 'Không tải được loại sản phẩm / danh mục thông số'));
   }, [productId]);
 
   useEffect(() => {
@@ -192,7 +195,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   // ── Lưu ────────────────────────────────────────────────────────────────
   const save = async () => {
     // Mẫu thông số đi theo loại: chưa có danh sách loại thì không kiểm / lưu được đúng
-    if (!types) return;
+    if (!types || !specOptions) return;
     const found = productInputErrors(form, profile);
     setShowErrors(true);
     const first = firstErrorKey(found);
@@ -307,7 +310,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
           <button
             type="button"
             onClick={() => void save()}
-            disabled={saving || !types || (!dirty && !!cms)}
+            disabled={saving || !types || !specOptions || (!dirty && !!cms)}
             aria-keyshortcuts="Control+S"
             className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4E7202] px-4 text-sm font-semibold text-white hover:bg-[#3F5E02] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
           >
@@ -323,7 +326,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
             <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800">
               <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
               <div className="flex-1 space-y-2">
-                <p>Không tải được danh sách loại sản phẩm ({typesError}) — chưa lưu được sản phẩm.</p>
+                <p>Không tải được loại sản phẩm / danh mục thông số ({typesError}) — chưa lưu được sản phẩm.</p>
                 <button
                   type="button"
                   onClick={loadTypes}
@@ -375,9 +378,9 @@ export default function ProductEditor({ productId }: { productId?: string }) {
             onExpand={setExpanded}
             errors={errors}
           />
-          <ProductSpecSection spec={form.technicalSpec} variants={form.variants} onChange={(patch) => setForm((f) => ({ ...f, technicalSpec: { ...f.technicalSpec, ...patch } }))} errors={errors} />
+          <ProductSpecSection spec={form.technicalSpec} variants={form.variants} options={specOptions ?? []} onChange={(patch) => setForm((f) => ({ ...f, technicalSpec: { ...f.technicalSpec, ...patch } }))} errors={errors} />
           {EXTENSION_OF_PROFILE[profile] && (
-            <ProductExtensionSection form={form} typeName={typeName} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} errors={errors} />
+            <ProductExtensionSection form={form} typeName={typeName} options={specOptions ?? []} onChange={(patch) => setForm((f) => ({ ...f, ...patch }))} errors={errors} />
           )}
         </div>
 
@@ -448,6 +451,9 @@ export default function ProductEditor({ productId }: { productId?: string }) {
                 }
               />
               <Switch id="product-featured" label="Nổi bật" hint="Ưu tiên ở trang chủ và đầu danh sách." checked={form.isFeatured} onChange={(isFeatured) => setForm((f) => ({ ...f, isFeatured }))} />
+              <Link href="/admin/products/spec-options" target="_blank" className="inline-flex items-center gap-1 text-xs font-semibold text-[#4E7202] hover:underline">
+                Quản lý danh mục thông số (kiểu cạnh, màu lõi…) <ExternalLink size={12} aria-label="(mở tab mới)" />
+              </Link>
             </div>
           </section>
 
