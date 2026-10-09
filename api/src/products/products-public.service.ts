@@ -20,9 +20,11 @@ import {
   toDetailPublic,
   toListItemPublic,
   typeRefOf,
+  usedSpecOptionCodes,
 } from './products.mapper.js';
 import { PRODUCT_SLUG_ENTITY, PRODUCT_TYPE_SLUG_ENTITY, PRODUCTS_CACHE_PREFIX, PRODUCTS_CACHE_TTL } from './products.constants.js';
 import { SlugRedirectService } from '../slug-redirect/slug-redirect.service.js';
+import { SpecOptionsService } from './spec-options.service.js';
 
 /** Bản dịch hiển thị công khai: đã xuất bản, đã tới giờ, sản phẩm chưa bị xoá */
 const visibleTranslation = (locale: Locale, now = new Date()) =>
@@ -37,6 +39,7 @@ export class ProductsPublicService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly slugRedirects: SlugRedirectService,
+    private readonly specOptions: SpecOptionsService,
   ) {}
 
   list(locale: Locale): Promise<ProductListItemPublic[]> {
@@ -61,7 +64,11 @@ export class ProductsPublicService {
         where: { deletedAt: null, translations: { some: { ...visibleTranslation(locale, now), slug } } },
         include: productDetailInclude,
       });
-      if (p) return { product: toDetailPublic(p, p.translations.find((t) => t.locale === locale)!, locale, now) };
+      if (p) {
+        // Nhãn danh mục thông số theo ngôn ngữ cho đúng các mã đang hiện
+        const optionLabels = await this.specOptions.labelsFor(locale, usedSpecOptionCodes(p));
+        return { product: toDetailPublic(p, p.translations.find((t) => t.locale === locale)!, locale, now, optionLabels) };
+      }
 
       // Slug cũ cùng ngôn ngữ, hoặc slug của ngôn ngữ khác (vd /en/products/<slug-vi>) -> 301 sang slug đúng ngôn ngữ
       const owner =

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Prisma } from '../generated/prisma/client.js';
-import { toDetailPublic, toListItemCms, toListItemPublic, toProductCms } from './products.mapper.js';
+import { toDetailPublic, toListItemCms, toListItemPublic, toProductCms, usedSpecOptionCodes } from './products.mapper.js';
 
 const D = (n: number) => new Prisma.Decimal(n);
 const NOW = new Date('2026-10-08T03:00:00Z');
@@ -188,6 +188,19 @@ describe('products.mapper — chi tiết public', () => {
     // STANDARD có floorSpec "lạc" -> không trả phần mở rộng sai loại
     const std = product();
     expect(toDetailPublic(std, (std as { translations: unknown[] }).translations[0] as never, 'vi', NOW).spec).toBeNull();
+  });
+
+  it('nhãn danh mục thông số truyền vào được gắn vào chi tiết', () => {
+    const p = product();
+    const labels = { EDGE_PROFILE: { TONGUE_GROOVE: 'Âm dương (T&G)' } };
+    expect(toDetailPublic(p, (p as { translations: unknown[] }).translations[0] as never, 'vi', NOW, labels).optionLabels).toEqual(labels);
+  });
+
+  it('mã cần nhãn: chỉ mã đang hiện (khối không khớp mẫu của loại thì bỏ)', () => {
+    // loại NONE: floorSpec còn trong DB nhưng ẩn -> không cần nhãn TONGUE_GROOVE
+    expect(usedSpecOptionCodes(product())).toEqual([]);
+    const floor = product({ type: productType('pt_floor', 'FLOOR') });
+    expect(usedSpecOptionCodes(floor)).toEqual([{ group: 'EDGE_PROFILE', path: 'floor.edgeProfiles', code: 'TONGUE_GROOVE' }]);
   });
 });
 

@@ -20,22 +20,12 @@ import {
   ValidateNested,
 } from 'class-validator';
 import {
-  CORE_COLORS,
-  CRYSTAL_PHASES,
-  DECORATIVE_FINISH_TYPES,
-  EDGE_PROFILES,
-  LOAD_BEARING_TYPES,
   PRICE_MODES,
   PRODUCT_LIMITS as L,
   PRODUCT_PUBLISH_STATUSES,
+  SPEC_OPTION_CODE_MAX as CODE,
   SALE_UNITS,
-  SCRATCH_RESISTANCES,
-  SCREW_HOLDING_RATINGS,
-  SIP_CORE_MATERIALS,
   STOCK_STATUSES,
-  SUITABLE_FLOORINGS,
-  SURFACE_FINISHES,
-  VOC_LEVELS,
   type DecorativeFinishType,
   type EdgeProfile,
   type PriceMode,
@@ -116,16 +106,16 @@ const OptInt = (max: number) => (target: object, key: string) => {
 
 export class TechnicalSpecDto {
   @IsArray() @ArrayMaxSize(10) @ValidateNested({ each: true }) @Type(() => SheetSizeDto) standardSizes!: SheetSizeDto[];
-  @IsOptional() @IsIn(EDGE_PROFILES) edgeProfile!: EdgeProfile | null;
-  @IsOptional() @IsIn(CORE_COLORS) coreColor!: string | null;
-  @IsOptional() @IsIn(SURFACE_FINISHES) surfaceFinish!: string | null;
+  @IsOptional() @IsString() @MaxLength(CODE) edgeProfile!: EdgeProfile | null;
+  @IsOptional() @IsString() @MaxLength(CODE) coreColor!: string | null;
+  @IsOptional() @IsString() @MaxLength(CODE) surfaceFinish!: string | null;
   @OptInt(5000) densityMinKgM3!: number | null;
   @OptInt(5000) densityMaxKgM3!: number | null;
   @OptNum(100) densityReductionPct!: number | null;
   @OptNum(1000) flexuralMinMpa!: number | null;
   @OptNum(1000) flexuralMaxMpa!: number | null;
   @OptNum(1000) flexuralCrossMinMpa!: number | null;
-  @IsOptional() @IsIn(SCREW_HOLDING_RATINGS) screwHoldingRating!: string | null;
+  @IsOptional() @IsString() @MaxLength(CODE) screwHoldingRating!: string | null;
   @IsOptional() @Transform(blankNull) @IsString() @MaxLength(20) reactionToFireClass!: string | null;
   @IsArray() @ArrayMaxSize(20) @IsString({ each: true }) @MaxLength(80, { each: true }) fireClassStandards!: string[];
   @OptInt(5000) maxTemperatureC!: number | null;
@@ -135,12 +125,12 @@ export class TechnicalSpecDto {
   @OptNum(100) waterAbsorptionMaxPct!: number | null;
   @OptNum(100) thicknessSwellingMaxPct!: number | null;
   @IsOptional() @IsBoolean() moldResistant!: boolean | null;
-  @IsOptional() @IsIn(CRYSTAL_PHASES) crystalPhase!: string | null;
+  @IsOptional() @IsString() @MaxLength(CODE) crystalPhase!: string | null;
   @OptNum(100) mgoContentMinPct!: number | null;
   @OptNum(100) chlorideMaxPct!: number | null;
   @IsOptional() @IsBoolean() asbestosFree!: boolean | null;
   @OptNum(1000) formaldehydeMgL!: number | null;
-  @IsOptional() @IsIn(VOC_LEVELS) vocLevel!: string | null;
+  @IsOptional() @IsString() @MaxLength(CODE) vocLevel!: string | null;
   @IsArray() @ArrayMaxSize(20) @IsString({ each: true }) @MaxLength(60, { each: true }) greenCertifications!: string[];
   @IsArray() @ArrayMaxSize(40) @ValidateNested({ each: true }) @Type(() => ExtraSpecDto) extraSpecs!: ExtraSpecDto[];
 }
@@ -182,19 +172,19 @@ export class ProductVariantDto {
 }
 
 class SipSpecDto {
-  @IsArray() @ArrayUnique() @IsIn(SIP_CORE_MATERIALS, { each: true }) coreMaterials!: SipCoreMaterial[];
+  @IsArray() @ArrayUnique() @IsString({ each: true }) @MaxLength(CODE, { each: true }) coreMaterials!: SipCoreMaterial[];
   @OptInt(2000) coreThicknessMinMm!: number | null;
   @OptInt(2000) coreThicknessMaxMm!: number | null;
   @IsArray() @ArrayMaxSize(10) @IsInt({ each: true }) @Min(1, { each: true }) @Max(200, { each: true }) facingThicknessesMm!: number[];
   @OptInt(20000) maxWidthMm!: number | null;
   @OptInt(20000) maxLengthMm!: number | null;
-  @IsOptional() @IsIn(LOAD_BEARING_TYPES) loadBearing!: string | null;
+  @IsOptional() @IsString() @MaxLength(CODE) loadBearing!: string | null;
 }
 
 class FloorSpecDto {
-  @IsArray() @ArrayUnique() @IsIn(EDGE_PROFILES, { each: true }) edgeProfiles!: EdgeProfile[];
+  @IsArray() @ArrayUnique() @IsString({ each: true }) @MaxLength(CODE, { each: true }) edgeProfiles!: EdgeProfile[];
   @IsArray() @ArrayMaxSize(10) @ValidateNested({ each: true }) @Type(() => SheetSizeDto) floorSizes!: SheetSizeDto[];
-  @IsArray() @ArrayUnique() @IsIn(SUITABLE_FLOORINGS, { each: true }) suitableFloorings!: string[];
+  @IsArray() @ArrayUnique() @IsString({ each: true }) @MaxLength(CODE, { each: true }) suitableFloorings!: string[];
   @IsOptional() @IsBoolean() moistureResistantFloor!: boolean | null;
   @IsOptional() @IsBoolean() sandedSurface!: boolean | null;
 }
@@ -212,14 +202,14 @@ class DecorativeOptionTranslationsDto {
 }
 
 class DecorativeOptionDto {
-  @IsIn(DECORATIVE_FINISH_TYPES) finishType!: DecorativeFinishType;
-  @IsOptional() @IsIn(SCRATCH_RESISTANCES) scratchResistance!: string | null;
+  @IsString() @IsNotEmpty() @MaxLength(CODE) finishType!: DecorativeFinishType;
+  @IsOptional() @IsString() @MaxLength(CODE) scratchResistance!: string | null;
   @ValidateNested() @Type(() => DecorativeOptionTranslationsDto) translations!: DecorativeOptionTranslationsDto;
 }
 
 class DecorativeSpecDto {
   @IsBoolean() customPrintSupported!: boolean;
-  @IsArray() @ArrayMaxSize(DECORATIVE_FINISH_TYPES.length) @ValidateNested({ each: true }) @Type(() => DecorativeOptionDto) options!: DecorativeOptionDto[];
+  @IsArray() @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => DecorativeOptionDto) options!: DecorativeOptionDto[];
 }
 
 /** Body tạo / sửa sản phẩm — cùng hình dạng ProductInput (@remak/shared/contracts/product) */

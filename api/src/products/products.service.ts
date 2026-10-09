@@ -5,6 +5,7 @@ import {
   EXTENSION_OF_PROFILE,
   isReservedProductSlug,
   productInputErrors,
+  specOptionCodesOf,
   type ProductCms,
   type ProductInput,
   type ProductListItemCms,
@@ -20,6 +21,7 @@ import type { Prisma } from '../generated/prisma/client.js';
 import type { ProductInputDto } from './dto/product-input.dto.js';
 import { productDetailInclude, productListInclude, toListItemCms, toProductCms } from './products.mapper.js';
 import { PRODUCTS_COVER_PREFIX, PRODUCTS_INVALIDATE, PRODUCT_SLUG_ENTITY } from './products.constants.js';
+import { SpecOptionsService } from './spec-options.service.js';
 
 type Tx = Prisma.TransactionClient;
 const LIVE = { deletedAt: null } as const;
@@ -37,6 +39,7 @@ export class ProductsService {
     private readonly cache: ContentCacheService,
     private readonly media: MediaService,
     private readonly slugRedirects: SlugRedirectService,
+    private readonly specOptions: SpecOptionsService,
   ) {}
 
   // ── Đọc ─────────────────────────────────────────────────────────────────
@@ -153,6 +156,11 @@ export class ProductsService {
       if (t.slug && isReservedProductSlug(l, t.slug)) {
         errors[`translations.${l}.slug`] = `Đường dẫn "${t.slug}" dành cho trang loại sản phẩm, hãy chọn đường dẫn khác`;
       }
+    }
+    // Mã thông số phải có trong danh mục (kể cả đang tắt — sản phẩm cũ vẫn lưu được)
+    const codes = await this.specOptions.codesByGroup();
+    for (const { group, path, code } of specOptionCodesOf(dto)) {
+      if (!codes.get(group)?.has(code)) errors[path] ??= `Giá trị "${code}" không có trong danh mục thông số`;
     }
     if (Object.keys(errors).length) {
       throw new BadRequestException({ message: Object.values(errors)[0], errors });
