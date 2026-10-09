@@ -155,7 +155,7 @@ export default async function ProductDetailPage({ params }: Props) {
         {p.spec && (
           <section aria-labelledby="thong-so">
             <SectionTitle id="thong-so">{t('specsTitle')}</SectionTitle>
-            <SpecSheet spec={p.spec} variants={p.variants} name={p.name} locale={locale} />
+            <SpecSheet spec={p.spec} variants={p.variants} name={p.name} labels={p.optionLabels} locale={locale} />
           </section>
         )}
 
@@ -176,7 +176,7 @@ export default async function ProductDetailPage({ params }: Props) {
         {p.decorativeOptions.length > 0 && (
           <section aria-labelledby="hoan-thien">
             <SectionTitle id="hoan-thien">{t('decorativeTitle')}</SectionTitle>
-            <DecorativeOptions options={p.decorativeOptions} customPrint={p.spec?.extension?.type === 'DECORATIVE' && p.spec.extension.customPrintSupported} locale={locale} />
+            <DecorativeOptions options={p.decorativeOptions} customPrint={p.spec?.extension?.type === 'DECORATIVE' && p.spec.extension.customPrintSupported} labels={p.optionLabels} />
           </section>
         )}
 
