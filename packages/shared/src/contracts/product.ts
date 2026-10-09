@@ -944,3 +944,34 @@ export function emptyExtensionFor(profile: ProductSpecProfile): Pick<ProductInpu
     decorative: ext === 'decorative' ? { customPrintSupported: false, options: [] } : null,
   };
 }
+
+// ─── AI dịch tự động (Gemini) ────────────────────────────────────────────────
+
+/**
+ * Sự kiện tiến trình AI dịch sản phẩm (luồng NDJSON: mỗi dòng một JSON)
+ * prepare -> progress (sau mỗi lô Gemini) -> assemble -> result | error
+ */
+export type ProductAiDraftEvent =
+  /** Đã đọc dữ liệu: số ô cần dịch (tiêu đề, tóm tắt, SEO, RichText, highlights, FAQ) và tổng ký tự */
+  | { type: 'prepare'; fields: number; chars: number; blocks: number; images: number }
+  /** done/total ô đã có bản dịch, batchesDone/batchesTotal lô gọi Gemini */
+  | { type: 'progress'; done: number; total: number; cached: number; batchesDone: number; batchesTotal: number }
+  /** Đang ghép bản dịch vào cấu trúc RichDoc, mảng danh sách và sinh slug tiếng Anh */
+  | { type: 'assemble' }
+  | { type: 'result'; draft: ProductAiDraft }
+  | { type: 'error'; status: number; message: string };
+
+/** Bản nháp tiếng Anh do AI dịch từ bản tiếng Việt (chưa lưu) */
+export interface ProductAiDraft extends ProductTranslationInput {
+  origin: 'AI';
+  /** Số khối phải bỏ định dạng vì AI trả thẻ sai — CMS nhắc kiểm tra lại */
+  fallbackBlocks: number;
+  sourceUpdatedAt?: string;
+}
+
+export interface ProductAiDraftRequest {
+  /** Bản tiếng Việt gửi từ form client (nếu có, ưu tiên dịch bản này thay vì đọc DB) */
+  sourceVi?: ProductTranslationInput;
+  /** Slug tiếng Anh hiện tại (nếu có thì giữ nguyên để không đổi URL) */
+  currentEnSlug?: string | null;
+}

@@ -227,7 +227,7 @@ export default function CategoryEditor({
               onChange={setTab}
               tabs={[
                 { locale: 'vi', label: 'Tiếng Việt' },
-                { locale: 'en', label: 'English', hint: enMissing ? 'chưa dịch' : undefined },
+                { locale: 'en', label: 'Tiếng Anh', hint: enMissing ? 'chưa dịch' : undefined },
               ]}
             />
           </div>

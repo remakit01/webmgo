@@ -3,7 +3,22 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, ArrowLeft, ExternalLink, Loader2, RefreshCw, Save } from 'lucide-react';
+import {
+  AlertCircle,
+  ArrowLeft,
+  ExternalLink,
+  Image as ImageIcon,
+  Layers,
+  ListTree,
+  Loader2,
+  RefreshCw,
+  Save,
+  Send,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+  type LucideIcon,
+} from 'lucide-react';
 import type { Locale } from '@remak/shared/locale';
 import {
   EXTENSION_OF_PROFILE,
@@ -20,21 +35,49 @@ import {
   type SpecOptionCms,
 } from '@remak/shared/contracts/product';
 import { useConfirm, useToast } from '@/cms/components/ConfirmDialog';
-import { AdminPageBody, ADMIN_CARD } from '@/cms/components/layout/AdminPage';
+import { AdminPageBody } from '@/cms/components/layout/AdminPage';
+import AiTranslateDialog, { type AiTranslateState } from '@/cms/components/shared/AiTranslateDialog';
+import { describeAiError } from '@/cms/components/shared/ai-error';
 import ImageUploadField from '@/cms/components/shared/ImageUploadField';
+import LocaleTabs from '@/cms/components/shared/LocaleTabs';
 import Skeleton from '@/cms/components/ui/Skeleton';
-import { isConflict } from '@/cms/lib/api-client';
+import StatusBadge from '@/cms/components/shared/StatusBadge';
+import { ApiError, isConflict } from '@/cms/lib/api-client';
 import { productsApi } from '@/cms/lib/products-api';
 import { productPath } from '@/lib/product-paths';
-import { SelectField, Switch } from './fields';
+import { SelectField } from './fields';
 import ProductContentSection from './ProductContentSection';
 import ProductExtensionSection from './ProductExtensionSection';
+import ProductPublishPanel from './ProductPublishPanel';
 import ProductSpecSection from './ProductSpecSection';
 import ProductVariantsSection from './ProductVariantsSection';
 import { SECTIONS, errorTarget, fieldId, firstErrorKey, isFormDirty, toProductInput, type SectionId } from './product-form';
 
 type Banner = { message: string; conflict: boolean } | null;
 const LOCALES: Locale[] = ['vi', 'en'];
+
+/** Panel cài đặt bên cột phải — kế thừa phong cách NewsEditor */
+function SidebarPanel({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon?: LucideIcon;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="bg-white rounded-xl border border-slate-300 shadow-2xs focus-within:z-20 relative overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/70 rounded-t-xl">
+        <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+          {Icon && <Icon size={14} className="text-[#5F8A03]" aria-hidden="true" />}
+          {title}
+        </h2>
+      </div>
+      <div className="p-4 space-y-3.5">{children}</div>
+    </section>
+  );
+}
 
 /**
  * Trang tạo / sửa sản phẩm (desktop). Một nút “Lưu” ghi toàn bộ form trong 1 lần (API: 1 transaction, If-Match).
@@ -92,12 +135,26 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   const profileOf = (id: string): ProductSpecProfile => typeOf(id)?.specProfile ?? 'NONE';
   const profile = profileOf(form.typeId);
 
+  // Quản lý huy hiệu AI, kết quả dịch AI và cảnh báo lệch nội dung khi tiếng Việt bị sửa sau khi dịch
+  const [aiFilledKeys, setAiFilledKeys] = useState<Set<string>>(new Set());
+  const [aiViSnapshot, setAiViSnapshot] = useState<string | null>(null);
+  const [enStaleDismissed, setEnStaleDismissed] = useState(false);
+  const [aiResult, setAiResult] = useState<{ fallbackBlocks: number } | null>(null);
+  const [aiState, setAiState] = useState<AiTranslateState | null>(null);
+  const aiAbort = useRef<AbortController | null>(null);
+
   const apply = useCallback((p: ProductCms) => {
     const input = toProductInput(p);
     setCms(p);
     setInitial(input);
     setForm(input);
     setCoverFile(null);
+    setAiResult(null);
+    setAiFilledKeys(new Set());
+    if (input.translations.vi) {
+      setAiViSnapshot(JSON.stringify(input.translations.vi));
+    }
+    setEnStaleDismissed(false);
   }, []);
 
   const load = useCallback(async () => {
@@ -118,8 +175,26 @@ export default function ProductEditor({ productId }: { productId?: string }) {
     void load();
   }, [load]);
 
+  // Chuẩn hoá: nếu tab tiếng Anh chưa có tên / sapo thì không bắt lỗi form và gửi en: null
+  const normalizedForm = useMemo((): ProductInput => {
+    const en = form.translations.en;
+    const hasEnData = !!en && (!!en.name.trim() || !!en.summary.trim() || !!en.tagline?.trim());
+    return {
+      ...form,
+      translations: {
+        vi: form.translations.vi,
+        en: hasEnData ? en : null,
+      },
+    };
+  }, [form]);
+
   const dirty = useMemo(() => isFormDirty(form, initial) || !!coverFile, [form, initial, coverFile]);
-  const errors = useMemo(() => (showErrors ? productInputErrors(form, profile) : {}), [showErrors, form, profile]);
+  const errors = useMemo(() => (showErrors ? productInputErrors(normalizedForm, profile) : {}), [showErrors, normalizedForm, profile]);
+
+  const enStale = useMemo(() => {
+    if (!aiViSnapshot || enStaleDismissed || !form.translations.en?.name?.trim()) return false;
+    return JSON.stringify(form.translations.vi) !== aiViSnapshot;
+  }, [aiViSnapshot, enStaleDismissed, form.translations]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -141,12 +216,20 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   }, [errors, tab, expanded]);
 
   // ── Cập nhật form ───────────────────────────────────────────────────────
-  const setTr = (l: Locale, patch: Partial<ProductTranslationInput>) =>
+  const setTr = (l: Locale, patch: Partial<ProductTranslationInput>) => {
+    if (l === 'en') {
+      setAiFilledKeys((prev) => {
+        if (prev.size === 0) return prev;
+        const next = new Set(prev);
+        Object.keys(patch).forEach((k) => next.delete(k));
+        return next;
+      });
+    }
     setForm((f) => {
-      const cur = l === 'vi' ? f.translations.vi : f.translations.en;
-      if (!cur) return f;
+      const cur = l === 'vi' ? f.translations.vi : (f.translations.en ?? emptyTranslationInput());
       return { ...f, translations: { ...f.translations, [l]: { ...cur, ...patch } } };
     });
+  };
 
   const changeType = (typeId: string) => {
     const next = profileOf(typeId);
@@ -177,8 +260,143 @@ export default function ProductEditor({ productId }: { productId?: string }) {
       description: 'Khi lưu, nội dung tiếng Anh bị xoá và sản phẩm không còn hiện ở trang /en.',
       confirmText: 'Bỏ bản tiếng Anh',
       variant: 'danger',
-      onConfirm: () => setForm((f) => ({ ...f, translations: { ...f.translations, en: null } })),
+      onConfirm: () => {
+        setForm((f) => ({ ...f, translations: { ...f.translations, en: null } }));
+        setAiFilledKeys(new Set());
+      },
     });
+
+  // ── AI Dịch tự động (Gemini) ───────────────────────────────────────────
+  /** Chép nguyên văn bản tiếng Việt sang bản tiếng Anh để tự biên tập */
+  const copyViToEn = () => {
+    const vi = form.translations.vi;
+    if (!vi.name.trim()) {
+      showToast('Chưa có nội dung tiếng Việt để sao chép', 'warning');
+      return;
+    }
+    setForm((f) => ({
+      ...f,
+      translations: {
+        ...f.translations,
+        en: {
+          status: f.translations.en?.status ?? 'DRAFT',
+          name: vi.name,
+          slug: f.translations.en?.slug ?? (vi.slug ? `${vi.slug}-en` : null),
+          tagline: vi.tagline,
+          summary: vi.summary,
+          description: vi.description,
+          highlights: [...(vi.highlights ?? [])],
+          advantages: (vi.advantages ?? []).map((a) => ({ ...a })),
+          faqs: (vi.faqs ?? []).map((q) => ({ ...q })),
+          coverAlt: vi.coverAlt,
+          seoTitle: vi.seoTitle,
+          seoDescription: vi.seoDescription,
+          focusKeyword: vi.focusKeyword,
+          noindex: vi.noindex,
+        },
+      },
+    }));
+    setAiFilledKeys(new Set());
+    setAiViSnapshot(JSON.stringify(vi));
+    setEnStaleDismissed(false);
+    setTab('en');
+    showToast('Đã chép nội dung bản tiếng Việt sang tiếng Anh', 'success');
+  };
+
+  /** Chạy AI dịch sang tiếng Anh kèm dialog tiến trình thời gian thực */
+  const runAiTranslate = async () => {
+    const vi = form.translations.vi;
+    if (!vi.name.trim()) {
+      showToast('Vui lòng nhập tên sản phẩm tiếng Việt trước khi dịch AI', 'warning');
+      return;
+    }
+
+    const en = form.translations.en;
+    const hasEnContent = !!en && (!!en.name.trim() || !!en.summary.trim());
+    if (hasEnContent) {
+      const ok = await confirm({
+        title: 'Thay bản tiếng Anh bằng bản AI dịch?',
+        description: 'Nội dung tiếng Anh đang có trên form sẽ được thay bằng bản dịch mới (chưa lưu cho tới khi bạn bấm Lưu). Đường dẫn tiếng Anh hiện tại được giữ nguyên.',
+        confirmText: 'Dịch lại bằng AI',
+        variant: 'warning',
+      });
+      if (!ok) return;
+    }
+
+    aiAbort.current?.abort();
+    const abort = new AbortController();
+    aiAbort.current = abort;
+    setAiResult(null);
+    const startedAt = Date.now();
+    setAiState({ phase: 'connecting', startedAt });
+
+    try {
+      await productsApi.aiDraftStream(
+        cms?.id ?? 'new',
+        {
+          sourceVi: form.translations.vi,
+          currentEnSlug: form.translations.en?.slug,
+        },
+        (event) => {
+          if (event.type === 'prepare') {
+            setAiState((s) => s && { ...s, phase: 'prepare', prepare: event, lastEventAt: Date.now() });
+          } else if (event.type === 'progress') {
+            setAiState((s) => s && { ...s, phase: 'translate', progress: event, lastEventAt: Date.now() });
+          } else if (event.type === 'assemble') {
+            setAiState((s) => s && { ...s, phase: 'assemble' });
+          } else if (event.type === 'error') {
+            setAiState((s) => s && { ...s, phase: 'error', finishedAt: Date.now(), error: describeAiError(event.status, event.message) });
+          } else if (event.type === 'result') {
+            const draftAi = event.draft;
+            setForm((f) => ({
+              ...f,
+              translations: {
+                ...f.translations,
+                en: {
+                  status: f.translations.en?.status ?? 'DRAFT',
+                  name: draftAi.name,
+                  slug: draftAi.slug,
+                  tagline: draftAi.tagline,
+                  summary: draftAi.summary,
+                  description: draftAi.description,
+                  highlights: draftAi.highlights,
+                  advantages: draftAi.advantages,
+                  faqs: draftAi.faqs,
+                  coverAlt: draftAi.coverAlt,
+                  seoTitle: draftAi.seoTitle,
+                  seoDescription: draftAi.seoDescription,
+                  focusKeyword: draftAi.focusKeyword,
+                  noindex: draftAi.noindex,
+                },
+              },
+            }));
+            setAiResult({ fallbackBlocks: draftAi.fallbackBlocks });
+            setAiFilledKeys(new Set(['name', 'slug', 'tagline', 'summary', 'description', 'highlights', 'advantages', 'faqs', 'coverAlt', 'seoTitle', 'seoDescription', 'focusKeyword']));
+            setAiViSnapshot(JSON.stringify(form.translations.vi));
+            setEnStaleDismissed(false);
+            setTab('en');
+            setAiState((s) => s && { ...s, phase: 'done', finishedAt: Date.now(), fallbackBlocks: draftAi.fallbackBlocks });
+            showToast('Đã dịch xong — kiểm tra lại trước khi lưu', 'success');
+          }
+        },
+        abort.signal,
+      );
+    } catch (err) {
+      if (abort.signal.aborted) {
+        setAiState(null);
+        showToast('Đã huỷ dịch — bản tiếng Anh giữ nguyên như trước', 'info');
+      } else {
+        setAiState((s) => s && {
+          ...s,
+          phase: 'error',
+          finishedAt: Date.now(),
+          error: describeAiError(err instanceof ApiError ? err.status : 500, err instanceof Error ? err.message : ''),
+        });
+      }
+    } finally {
+      if (aiAbort.current === abort) aiAbort.current = null;
+    }
+  };
 
   /** Rời trang có hỏi khi còn thay đổi chưa lưu */
   const leave = (href: string) => {
@@ -193,10 +411,11 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   };
 
   // ── Lưu ────────────────────────────────────────────────────────────────
-  const save = async () => {
+  const save = async (overrideForm?: ProductInput, action: 'save' | 'publish' | 'unpublish' = 'save') => {
     // Mẫu thông số đi theo loại: chưa có danh sách loại thì không kiểm / lưu được đúng
     if (!types || !specOptions) return;
-    const found = productInputErrors(form, profile);
+    const formToSave = overrideForm ?? normalizedForm;
+    const found = productInputErrors(formToSave, profile);
     setShowErrors(true);
     const first = firstErrorKey(found);
     if (first) {
@@ -212,12 +431,21 @@ export default function ProductEditor({ productId }: { productId?: string }) {
     setSaving(true);
     setBanner(null);
     try {
-      let saved = cms ? await productsApi.update(cms.id, form, cms.version) : await productsApi.create(form);
+      let saved = cms ? await productsApi.update(cms.id, formToSave, cms.version) : await productsApi.create(formToSave);
       if (coverFile) saved = await productsApi.updateCover(saved.id, coverFile, saved.version);
       apply(saved);
       setShowErrors(false);
-      showToast(cms ? 'Đã lưu sản phẩm' : 'Đã tạo sản phẩm', 'success');
-      if (!cms) router.replace(`/admin/products/${saved.id}`);
+      
+      if (!cms) {
+        showToast('Đã tạo sản phẩm', 'success');
+        router.replace(`/admin/products/${saved.id}`);
+      } else if (action === 'publish') {
+        showToast('Đã xuất bản — trang web cập nhật trong giây lát', 'success');
+      } else if (action === 'unpublish') {
+        showToast('Đã chuyển về bản nháp', 'success');
+      } else {
+        showToast('Đã lưu nháp', 'success');
+      }
     } catch (err) {
       const conflict = isConflict(err);
       setBanner({
@@ -232,6 +460,38 @@ export default function ProductEditor({ productId }: { productId?: string }) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handlePublishLocale = async () => {
+    const cur = tab === 'vi' ? form.translations.vi : (form.translations.en ?? emptyTranslationInput());
+    const nextForm: ProductInput = {
+      ...normalizedForm,
+      translations: {
+        ...normalizedForm.translations,
+        [tab]: {
+          ...cur,
+          status: 'PUBLISHED',
+        },
+      },
+    };
+    setForm(nextForm);
+    await save(nextForm, 'publish');
+  };
+
+  const handleUnpublishLocale = async () => {
+    const cur = tab === 'vi' ? form.translations.vi : (form.translations.en ?? emptyTranslationInput());
+    const nextForm: ProductInput = {
+      ...normalizedForm,
+      translations: {
+        ...normalizedForm.translations,
+        [tab]: {
+          ...cur,
+          status: 'DRAFT',
+        },
+      },
+    };
+    setForm(nextForm);
+    await save(nextForm, 'unpublish');
   };
 
   // Ctrl/Cmd + S
@@ -262,13 +522,13 @@ export default function ProductEditor({ productId }: { productId?: string }) {
   if (loadError) {
     return (
       <AdminPageBody>
-        <div role="alert" className="rounded-xl border border-rose-300 bg-rose-50 px-5 py-4 text-sm text-rose-800">
-          <p className="font-semibold">{loadError}</p>
+        <div role="alert" className="rounded-xl border border-rose-300 bg-rose-50 px-5 py-4 text-sm text-rose-900 shadow-2xs">
+          <p className="font-bold">{loadError}</p>
           <div className="mt-3 flex gap-2">
-            <button type="button" onClick={() => void load()} className="h-9 rounded-lg border border-rose-300 bg-white px-3 text-sm font-semibold hover:bg-rose-100 cursor-pointer">
+            <button type="button" onClick={() => void load()} className="h-9 rounded-lg border border-rose-300 bg-white px-3.5 text-sm font-bold text-rose-800 hover:bg-rose-100 cursor-pointer transition-colors shadow-2xs">
               Thử lại
             </button>
-            <Link href="/admin/products" className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-semibold hover:underline">
+            <Link href="/admin/products" className="inline-flex h-9 items-center rounded-lg px-3.5 text-sm font-bold text-slate-700 hover:text-slate-900 hover:underline">
               Về danh sách
             </Link>
           </div>
@@ -287,50 +547,126 @@ export default function ProductEditor({ productId }: { productId?: string }) {
     .filter((t) => t.isActive || t.id === form.typeId)
     .map((t) => ({ value: t.id, label: `${t.translations.vi?.name ?? t.id}${t.isActive ? '' : ' (đang ẩn)'}` }));
 
+  const currentStatus = form.translations[tab]?.status ?? null;
+  const viLive = form.translations.vi?.status === 'PUBLISHED';
+  const tabHasError = (l: Locale) => Object.keys(errors).some((k) => k.startsWith(`translations.${l}.`));
+
   return (
     <div className="flex min-h-full grow shrink-0 flex-col bg-slate-50">
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-slate-300 bg-white px-6 shadow-2xs">
-        <div className="flex min-w-0 items-center gap-2.5">
+      {/* ── TOP ACTION BAR (STICKY) ── */}
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-slate-300 bg-white px-4 sm:px-6 shadow-2xs">
+        {/* Left: Quay lại & Trạng thái & Tiêu đề sản phẩm */}
+        <div className="flex items-center gap-2.5 min-w-0">
           <button
             type="button"
             onClick={() => leave('/admin/products')}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-[#4E7202] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5F8A03]"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[#5F8A03] hover:bg-slate-100 px-2.5 py-1.5 rounded-lg transition-colors shrink-0 cursor-pointer"
+            title="Quay lại danh sách sản phẩm"
           >
-            <ArrowLeft size={15} aria-hidden="true" /> Danh sách sản phẩm
+            <ArrowLeft size={15} aria-hidden="true" />
+            <span className="hidden sm:inline">Quay lại danh sách</span>
           </button>
-          <span className="h-5 w-px shrink-0 bg-slate-200" aria-hidden="true" />
-          <h1 className="min-w-0 truncate text-sm font-bold text-slate-900" title={title}>
-            {title}
-          </h1>
+
+          <span className="w-px h-5 bg-slate-200 shrink-0" aria-hidden="true" />
+
+          <div className="flex items-center gap-2 min-w-0">
+            <StatusBadge status={currentStatus} />
+            <h1 className="text-xs sm:text-sm font-bold text-slate-900 truncate max-w-[130px] sm:max-w-[200px] md:max-w-xs lg:max-w-sm hidden md:block" title={title}>
+              {title}
+            </h1>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3">
-          <p className="text-xs font-semibold" aria-live="polite">
-            {errorCount > 0 ? <span className="text-rose-700">{errorCount} lỗi cần sửa</span> : dirty ? <span className="text-amber-800">Có thay đổi chưa lưu</span> : null}
-          </p>
+
+        {/* Center: Chuyển ngôn ngữ WAI-ARIA & Thông tin loại / biến thể */}
+        <div className="hidden lg:flex items-center gap-3.5 mx-2">
+          <LocaleTabs
+            panelId="product-locale-panel"
+            active={tab}
+            onChange={setTab}
+            tabs={[
+              { locale: 'vi', label: 'Tiếng Việt', hint: tabHasError('vi') ? 'có lỗi' : undefined },
+              { locale: 'en', label: 'Tiếng Anh', hint: tabHasError('en') ? 'có lỗi' : undefined },
+            ]}
+          />
+
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 tabular-nums px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300">
+            <Layers size={13} className="text-[#5F8A03]" aria-hidden="true" />
+            <span>{typeName || 'Chưa chọn loại'}</span>
+            <span className="text-slate-300">·</span>
+            <span>{form.variants.length} độ dày</span>
+          </div>
+        </div>
+
+        {/* Right: Thao tác chính: Trạng thái đồng bộ + Lưu nháp + Xuất bản */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div aria-live="polite">
+            {errorCount > 0 ? (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-800 shadow-2xs">
+                <AlertCircle size={14} className="shrink-0 text-rose-600" aria-hidden="true" />
+                <span className="hidden sm:inline">{errorCount} lỗi cần sửa</span>
+                <span className="sm:hidden">{errorCount} lỗi</span>
+              </span>
+            ) : dirty ? (
+              <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-900 shadow-2xs">
+                <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" aria-hidden="true" />
+                <span className="hidden sm:inline">Có thay đổi chưa lưu</span>
+                <span className="sm:hidden">Chưa lưu</span>
+              </span>
+            ) : (
+              <span className="text-xs font-medium text-slate-500 hidden sm:inline">Đã đồng bộ</span>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={() => void save()}
             disabled={saving || !types || !specOptions || (!dirty && !!cms)}
             aria-keyshortcuts="Control+S"
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4E7202] px-4 text-sm font-semibold text-white hover:bg-[#3F5E02] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-colors shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
           >
-            {saving ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <Save size={15} aria-hidden="true" />}
-            {saving ? 'Đang lưu…' : cms ? 'Lưu thay đổi' : 'Tạo sản phẩm'}
+            {saving ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Save size={13} aria-hidden="true" />}
+            <span>Lưu nháp</span>
+          </button>
+
+          <button
+            type="button"
+            disabled={saving || !types || !specOptions || (tab === 'en' && !viLive)}
+            onClick={() => void handlePublishLocale()}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-remak-orange hover:bg-remak-orange-dark text-white text-xs font-bold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+          >
+            {saving ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Send size={13} aria-hidden="true" />}
+            <span>{currentStatus === 'PUBLISHED' ? 'Cập nhật' : 'Xuất bản'}</span>
           </button>
         </div>
       </header>
 
+      {/* Sub-bar cho Mobile & Tablet */}
+      <div className="lg:hidden px-4 py-2 border-b border-slate-300 flex items-center justify-between gap-2 bg-white">
+        <LocaleTabs
+          panelId="product-locale-panel"
+          active={tab}
+          onChange={setTab}
+          tabs={[
+            { locale: 'vi', label: 'Tiếng Việt', hint: tabHasError('vi') ? 'có lỗi' : undefined },
+            { locale: 'en', label: 'Tiếng Anh', hint: tabHasError('en') ? 'có lỗi' : undefined },
+          ]}
+        />
+        <span className="text-[11px] font-semibold text-slate-600 tabular-nums">
+          {typeName} · {form.variants.length} độ dày
+        </span>
+      </div>
+
       <AdminPageBody className="grid grid-cols-[minmax(0,1fr)_320px] items-start gap-6">
         <div className="min-w-0 space-y-6">
           {typesError && (
-            <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <div role="alert" className="flex items-start gap-3 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3.5 text-sm text-rose-900 shadow-2xs">
+              <AlertCircle size={18} className="mt-0.5 shrink-0 text-rose-600" aria-hidden="true" />
               <div className="flex-1 space-y-2">
-                <p>Không tải được loại sản phẩm / danh mục thông số ({typesError}) — chưa lưu được sản phẩm.</p>
+                <p className="font-medium">Không tải được loại sản phẩm / danh mục thông số ({typesError}) — chưa lưu được sản phẩm.</p>
                 <button
                   type="button"
                   onClick={loadTypes}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 text-xs font-semibold text-rose-800 hover:bg-rose-100 cursor-pointer"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 text-xs font-bold text-rose-800 hover:bg-rose-100 cursor-pointer transition-colors shadow-2xs"
                 >
                   <RefreshCw size={13} aria-hidden="true" /> Thử lại
                 </button>
@@ -338,8 +674,8 @@ export default function ProductEditor({ productId }: { productId?: string }) {
             </div>
           )}
           {banner && (
-            <div ref={bannerRef} tabIndex={-1} role="alert" className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-800 focus:outline-none">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+            <div ref={bannerRef} tabIndex={-1} role="alert" className="flex items-start gap-3 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3.5 text-sm text-rose-900 shadow-2xs focus:outline-none">
+              <AlertCircle size={18} className="mt-0.5 shrink-0 text-rose-600" aria-hidden="true" />
               <div className="flex-1 space-y-2">
                 <p>
                   <strong className="font-bold">Không lưu được:</strong> {banner.message}
@@ -351,7 +687,7 @@ export default function ProductEditor({ productId }: { productId?: string }) {
                       setBanner(null);
                       void load();
                     }}
-                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 text-xs font-semibold hover:bg-rose-100 cursor-pointer"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 text-xs font-bold text-rose-800 hover:bg-rose-100 cursor-pointer transition-colors shadow-2xs"
                   >
                     <RefreshCw size={13} aria-hidden="true" /> Tải bản mới nhất
                   </button>
@@ -366,9 +702,15 @@ export default function ProductEditor({ productId }: { productId?: string }) {
             tab={tab}
             onTab={setTab}
             onChange={setTr}
-            onAddEn={() => setForm((f) => ({ ...f, translations: { ...f.translations, en: emptyTranslationInput() } }))}
             onRemoveEn={removeEn}
+            onAiTranslate={() => void runAiTranslate()}
+            onCopyViToEn={copyViToEn}
+            isAiTranslating={aiState?.phase === 'connecting' || aiState?.phase === 'prepare' || aiState?.phase === 'translate' || aiState?.phase === 'assemble'}
+            aiResult={aiResult}
             errors={errors}
+            isAi={(field) => tab === 'en' && aiFilledKeys.has(field)}
+            enStale={enStale}
+            onDismissStale={() => setEnStaleDismissed(true)}
           />
           <ProductVariantsSection
             variants={form.variants}
@@ -385,57 +727,21 @@ export default function ProductEditor({ productId }: { productId?: string }) {
         </div>
 
         <aside className="sticky top-20 space-y-4" aria-label="Thiết lập sản phẩm">
-          <section className={ADMIN_CARD} aria-labelledby="pub-title">
-            <h2 id="pub-title" className="text-sm font-bold text-slate-900">
-              Xuất bản
-            </h2>
-            <div className="mt-3 space-y-3">
-              {LOCALES.map((l) => {
-                const t = l === 'vi' ? form.translations.vi : form.translations.en;
-                const live = cms?.published[l];
-                const path = `translations.${l}.status`;
-                return (
-                  <div key={l} className="space-y-1.5">
-                    {t ? (
-                      <SelectField<ProductPublishStatus>
-                        path={path}
-                        label={l === 'vi' ? 'Tiếng Việt' : 'English'}
-                        emptyLabel={null}
-                        value={t.status}
-                        options={[
-                          { value: 'DRAFT', label: 'Nháp — chưa hiện trên web' },
-                          { value: 'PUBLISHED', label: 'Xuất bản' },
-                        ]}
-                        onChange={(status) => status && setTr(l, { status })}
-                        errors={errors}
-                      />
-                    ) : (
-                      <p className="text-xs text-slate-600">
-                        <span className="font-bold text-slate-700">English:</span> chưa có bản dịch
-                      </p>
-                    )}
-                    {live?.status === 'PUBLISHED' && (
-                      <a
-                        href={productPath(l, live.slug)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex max-w-full items-center gap-1 break-all font-mono text-xs text-[#4E7202] underline-offset-2 hover:underline"
-                      >
-                        {productPath(l, live.slug)} <ExternalLink size={12} className="shrink-0" aria-label="(mở tab mới)" />
-                      </a>
-                    )}
-                  </div>
-                );
-              })}
-              <p className="text-xs text-slate-600">Trang web cập nhật trong vòng 1 phút sau khi lưu.</p>
-            </div>
-          </section>
+          {/* Group 1: Xuất bản */}
+          <SidebarPanel title="Xuất bản" icon={Send}>
+            <ProductPublishPanel
+              key={`${tab}-${form.translations[tab]?.status ?? 'none'}`}
+              locale={tab}
+              form={form}
+              cms={cms}
+              busy={saving}
+              onUnpublish={() => void handleUnpublishLocale()}
+            />
+          </SidebarPanel>
 
-          <section className={ADMIN_CARD} aria-labelledby="setup-title">
-            <h2 id="setup-title" className="text-sm font-bold text-slate-900">
-              Thiết lập
-            </h2>
-            <div className="mt-3 space-y-3">
+          {/* Group 2: Thiết lập */}
+          <SidebarPanel title="Thiết lập" icon={SlidersHorizontal}>
+            <div className="space-y-3.5">
               <SelectField<string>
                 path="typeId"
                 label="Loại sản phẩm"
@@ -445,21 +751,33 @@ export default function ProductEditor({ productId }: { productId?: string }) {
                 onChange={(t) => t && changeType(t)}
                 errors={errors}
                 hint={
-                  <Link href="/admin/products/types" target="_blank" className="inline-flex items-center gap-1 font-semibold text-[#4E7202] hover:underline">
+                  <Link href="/admin/products/types" target="_blank" className="inline-flex items-center gap-1 font-bold text-[#4E7202] hover:underline">
                     Quản lý loại <ExternalLink size={12} aria-label="(mở tab mới)" />
                   </Link>
                 }
               />
-              <Switch id="product-featured" label="Nổi bật" hint="Ưu tiên ở trang chủ và đầu danh sách." checked={form.isFeatured} onChange={(isFeatured) => setForm((f) => ({ ...f, isFeatured }))} />
-              <Link href="/admin/products/spec-options" target="_blank" className="inline-flex items-center gap-1 text-xs font-semibold text-[#4E7202] hover:underline">
-                Quản lý danh mục thông số (kiểu cạnh, màu lõi…) <ExternalLink size={12} aria-label="(mở tab mới)" />
+              <div className="pt-2 border-t border-slate-100">
+                <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="accent-[#5F8A03] rounded h-4 w-4 cursor-pointer"
+                    checked={form.isFeatured}
+                    onChange={(e) => setForm((f) => ({ ...f, isFeatured: e.target.checked }))}
+                  />
+                  <Star size={13} className="text-amber-500 fill-amber-500 shrink-0" aria-hidden="true" />
+                  <span>Sản phẩm nổi bật (hiển thị trang chủ & đầu danh sách)</span>
+                </label>
+              </div>
+              <Link href="/admin/products/spec-options" target="_blank" className="inline-flex items-center gap-1 text-xs font-bold text-[#4E7202] hover:underline">
+                Quản lý danh mục thông số<ExternalLink size={12} aria-label="(mở tab mới)" />
               </Link>
             </div>
-          </section>
+          </SidebarPanel>
 
-          <section className={ADMIN_CARD} aria-label="Ảnh đại diện">
+          {/* Group 3: Ảnh đại diện */}
+          <SidebarPanel title="Ảnh đại diện" icon={ImageIcon}>
             <ImageUploadField
-              label="Ảnh đại diện"
+              label="Tải ảnh lên"
               currentUrl={cms?.coverImageUrl}
               file={coverFile}
               onPick={setCoverFile}
@@ -468,28 +786,45 @@ export default function ProductEditor({ productId }: { productId?: string }) {
               aspect="aspect-[4/3]"
               hint="Ảnh tấm sản phẩm, nền sáng. Lưu cùng nút “Lưu”."
             />
-          </section>
+          </SidebarPanel>
 
-          <nav className={ADMIN_CARD} aria-label="Mục lục form">
-            <ul className="space-y-0.5 text-sm">
+          {/* Group 4: Mục lục form */}
+          <SidebarPanel title="Mục lục form" icon={ListTree}>
+            <ul className="space-y-1 text-sm">
               {visibleSections.map((s) => {
                 const n = sectionErrors(s.id);
                 return (
                   <li key={s.id}>
                     <a
                       href={`#${s.id}`}
-                      className="flex items-center justify-between rounded-md px-2 py-1.5 font-medium text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-[#5F8A03]"
+                      className="flex items-center justify-between rounded-lg px-2.5 py-2 font-bold text-slate-800 hover:bg-slate-100 hover:text-[#4E7202] border border-transparent hover:border-slate-200 transition-colors focus-visible:outline-2 focus-visible:outline-[#4E7202]"
                     >
-                      {s.label}
-                      {n > 0 && <span className="rounded-full bg-rose-100 px-1.5 text-xs font-bold text-rose-800">{n} lỗi</span>}
+                      <span>{s.label}</span>
+                      {n > 0 && <span className="rounded-full border border-rose-300 bg-rose-100 px-2 py-0.5 text-xs font-bold text-rose-800">{n} lỗi</span>}
                     </a>
                   </li>
                 );
               })}
             </ul>
-          </nav>
+          </SidebarPanel>
         </aside>
       </AdminPageBody>
+
+      <AiTranslateDialog
+        open={!!aiState}
+        state={aiState}
+        title="Dịch sản phẩm sang tiếng Anh bằng AI"
+        onCancel={() => {
+          aiAbort.current?.abort();
+          setAiState(null);
+        }}
+        onClose={() => setAiState(null)}
+        onRetry={() => void runAiTranslate()}
+        onCopySource={() => {
+          setAiState(null);
+          copyViToEn();
+        }}
+      />
     </div>
   );
 }

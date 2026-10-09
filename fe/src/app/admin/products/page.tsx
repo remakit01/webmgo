@@ -170,7 +170,7 @@ function ProductsPage() {
                 onClick={add}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[#4E7202] px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[#3F5E02] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
               >
-                <Plus size={14} aria-hidden="true" /> Thêm sản phẩm
+                Thêm sản phẩm
               </button>
             )}
           </>

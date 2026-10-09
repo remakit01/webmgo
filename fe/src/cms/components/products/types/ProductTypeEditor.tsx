@@ -245,7 +245,7 @@ export default function ProductTypeEditor({
             onChange={setTab}
             tabs={[
               { locale: 'vi', label: 'Tiếng Việt' },
-              { locale: 'en', label: 'English', hint: enMissing ? 'chưa dịch' : undefined },
+              { locale: 'en', label: 'Tiếng Anh', hint: enMissing ? 'chưa dịch' : undefined },
             ]}
           />
           {tab === 'en' && <p className="text-xs text-slate-600">Bỏ trống tên tiếng Anh = loại không hiện ở website tiếng Anh.</p>}

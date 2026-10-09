@@ -226,7 +226,7 @@ export default function AuthorEditor({
             onChange={setTab}
             tabs={[
               { locale: 'vi', label: 'Tiếng Việt' },
-              { locale: 'en', label: 'English', hint: enMissing ? 'chưa dịch' : undefined },
+              { locale: 'en', label: 'Tiếng Anh', hint: enMissing ? 'chưa dịch' : undefined },
             ]}
           />
           <div id={`${ids}-panel`} role="tabpanel" aria-labelledby={`tab-${tab}`} lang={tab} className="space-y-4">

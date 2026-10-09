@@ -1,12 +1,17 @@
-import { applyDecorators, Body, Controller, Delete, Get, Headers, Param, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { applyDecorators, Body, Controller, Delete, Get, Headers, HttpException, Param, Post, Put, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiCookieAuth, ApiHeader, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import type { Response } from 'express';
 import { memoryStorage } from 'multer';
+import type { ProductAiDraftEvent, ProductAiDraftRequest } from '@remak/shared/contracts/product';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../common/guards/roles.guard.js';
 import { Roles } from '../common/decorators/roles.decorator.js';
 import { parseIfMatch } from '../common/site-settings.js';
+import { TranslationAbortedError } from '../translation/translation.service.js';
 import { ProductsService } from './products.service.js';
+import { ProductsTranslateService } from './products-translate.service.js';
 import { ProductInputDto, ReorderProductsDto } from './dto/product-input.dto.js';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -18,7 +23,10 @@ const IfMatch = () => applyDecorators(ApiHeader({ name: 'If-Match', required: tr
 @Roles('ADMIN', 'EDITOR')
 @ApiCookieAuth('access_token')
 export class ProductsController {
-  constructor(private readonly products: ProductsService) {}
+  constructor(
+    private readonly products: ProductsService,
+    private readonly translate: ProductsTranslateService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Danh sách sản phẩm (mọi trạng thái xuất bản, hoặc thùng rác)' })
@@ -81,4 +89,55 @@ export class ProductsController {
   remove(@Param('id') id: string) {
     return this.products.remove(id);
   }
+
+  @Post(':id/translations/en/ai-draft/stream')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({ summary: 'AI dịch sản phẩm vi -> en theo luồng NDJSON (không lưu)' })
+  async aiDraftStream(
+    @Param('id') id: string,
+    @Body() body: ProductAiDraftRequest,
+    @Res() res: Response,
+  ) {
+    const abort = new AbortController();
+    res.on('close', () => {
+      if (!res.writableEnded) abort.abort();
+    });
+    let started = false;
+    const send = (event: ProductAiDraftEvent) => {
+      if (res.writableEnded || abort.signal.aborted) return;
+      if (!started) {
+        started = true;
+        res.status(200);
+        res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-transform');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.flushHeaders();
+      }
+      res.write(`${JSON.stringify(event)}\n`);
+    };
+
+    try {
+      const draft = await this.translate.aiDraft(id, body, { onEvent: send, signal: abort.signal });
+      send({ type: 'result', draft });
+    } catch (err) {
+      if (err instanceof TranslationAbortedError) return void res.end();
+      const status = err instanceof HttpException ? err.getStatus() : 500;
+      const respBody = err instanceof HttpException ? err.getResponse() : null;
+      const message =
+        typeof respBody === 'object' && respBody && 'message' in respBody
+          ? String((respBody as { message: unknown }).message)
+          : err instanceof Error && status !== 500
+            ? err.message
+            : 'Dịch thất bại, vui lòng thử lại sau';
+      if (started) {
+        send({ type: 'error', status, message });
+      } else {
+        res.status(status).json({ statusCode: status, message });
+      }
+    } finally {
+      if (!res.writableEnded) res.end();
+    }
+  }
 }
+
