@@ -11,15 +11,34 @@ import { BareInput, BareNumber, NumberField, RangeField, RepeatList, Section, Se
 import { blankToNull, fieldId } from './product-form';
 import { choicesFor } from './spec-option-choices';
 
-function Group({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function Group({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
-    <fieldset className="space-y-3 border-t border-slate-200 pt-4 first:border-t-0 first:pt-0">
-      <legend className="float-left w-full">
-        <span className="block text-xs font-bold uppercase tracking-wide text-slate-600">{title}</span>
-        {description && <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-slate-600">{description}</span>}
-      </legend>
-      <div className="clear-both grid grid-cols-3 gap-x-4 gap-y-3">{children}</div>
-    </fieldset>
+    <div className="space-y-4 pt-7 first:pt-0">
+      <div className="relative flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+          <div className="w-full border-t border-slate-300" />
+        </div>
+        <div className="relative flex flex-col items-center bg-white px-4 text-center">
+          <span className="inline-block rounded-full border border-slate-300 bg-slate-100 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-900 shadow-2xs select-none">
+            {title}
+          </span>
+          {description && (
+            <p className="mt-1.5 text-xs font-normal text-slate-600 max-w-xl leading-normal">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="grid grid-cols-3 items-start gap-x-4 gap-y-3.5">{children}</div>
+    </div>
   );
 }
 
@@ -55,7 +74,7 @@ export default function ProductSpecSection({
             newItem={() => ({ widthMm: 1220, lengthMm: 2440 })}
             onChange={(standardSizes) => onChange({ standardSizes })}
             renderItem={(s, setS, i) => (
-              <div className="grid max-w-md grid-cols-2 gap-2">
+              <div className="grid max-w-md grid-cols-2 gap-2.5">
                 <BareNumber label={`Khổ ${i + 1}: rộng`} unit="mm" value={s.widthMm} onChange={(w) => setS({ ...s, widthMm: w ?? 0 })} />
                 <BareNumber label={`Khổ ${i + 1}: dài`} unit="mm" value={s.lengthMm} onChange={(l) => setS({ ...s, lengthMm: l ?? 0 })} />
               </div>
@@ -80,9 +99,7 @@ export default function ProductSpecSection({
           onChange={(flexuralMinMpa, flexuralMaxMpa) => onChange({ flexuralMinMpa, flexuralMaxMpa })}
           errors={errors}
         />
-        <div className="space-y-3">
-          <NumberField path={p('flexuralCrossMinMpa')} label="Cường độ uốn (ngang) ≥" unit="MPa" value={spec.flexuralCrossMinMpa} onChange={(flexuralCrossMinMpa) => onChange({ flexuralCrossMinMpa })} errors={errors} />
-        </div>
+        <NumberField path={p('flexuralCrossMinMpa')} label="Cường độ uốn (ngang) ≥" unit="MPa" value={spec.flexuralCrossMinMpa} onChange={(flexuralCrossMinMpa) => onChange({ flexuralCrossMinMpa })} errors={errors} />
         <NumberField path={p('densityReductionPct')} label="Nhẹ hơn tấm tiêu chuẩn" unit="%" hint="Chỉ dùng cho dòng nhẹ (LiteCore™)." value={spec.densityReductionPct} onChange={(densityReductionPct) => onChange({ densityReductionPct })} errors={errors} />
         <SelectField path={p('screwHoldingRating')} label="Khả năng bám vít" value={spec.screwHoldingRating} options={choicesFor(options, 'SCREW_HOLDING', spec.screwHoldingRating)} onChange={(screwHoldingRating) => onChange({ screwHoldingRating })} errors={errors} />
       </Group>
@@ -124,7 +141,7 @@ export default function ProductSpecSection({
             newItem={() => ({ key: '', value: '', unit: '' })}
             onChange={(extraSpecs) => onChange({ extraSpecs })}
             renderItem={(s, setS, i) => (
-              <div className="grid grid-cols-[2fr_2fr_1fr] gap-2">
+              <div className="grid grid-cols-[2fr_2fr_1fr] gap-2.5">
                 <BareInput label={`Chỉ tiêu ${i + 1}: tên`} placeholder="Tên chỉ tiêu" value={s.key} onChange={(key) => setS({ ...s, key })} />
                 <BareInput label={`Chỉ tiêu ${i + 1}: giá trị`} placeholder="Giá trị" value={s.value} onChange={(value) => setS({ ...s, value })} />
                 <BareInput label={`Chỉ tiêu ${i + 1}: đơn vị`} placeholder="Đơn vị" value={s.unit ?? ''} onChange={(unit) => setS({ ...s, unit })} />

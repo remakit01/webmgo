@@ -3,6 +3,8 @@
 // Gọi API Sản phẩm từ CMS (danh sách, form sửa, ảnh đại diện, thứ tự).
 
 import type {
+  ProductAiDraftEvent,
+  ProductAiDraftRequest,
   ProductCms,
   ProductInput,
   ProductListItemCms,
@@ -12,7 +14,7 @@ import type {
   SpecOptionGroup,
   SpecOptionInput,
 } from '@remak/shared/contracts/product';
-import { apiFetch, ifMatch } from './api-client';
+import { apiFetch, apiStreamNdjson, ifMatch } from './api-client';
 
 const json = (body: unknown) => JSON.stringify(body);
 
@@ -55,4 +57,12 @@ export const productsApi = {
     form.append('image', file);
     return (await apiFetch<{ url: string }>('/media/images?scope=products', { method: 'POST', body: form })).url;
   },
+  /** AI dịch toàn diện sản phẩm vi -> en (không lưu), nhận tiến trình streaming NDJSON */
+  aiDraftStream: (
+    id: string,
+    body: ProductAiDraftRequest,
+    onEvent: (event: ProductAiDraftEvent) => void,
+    signal?: AbortSignal,
+  ) =>
+    apiStreamNdjson<ProductAiDraftEvent>(`/products/${id}/translations/en/ai-draft/stream`, onEvent, signal, body),
 };

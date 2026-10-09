@@ -36,7 +36,7 @@ export default function ProductExtensionSection({
       ) : form.decorative ? (
         <DecorativeFields decorative={form.decorative} options={options} onChange={(decorative) => onChange({ decorative })} errors={errors} />
       ) : (
-        <p className="text-sm text-slate-600">{typeName} không có thông số riêng — chỉ dùng thông số chung và độ dày ở trên.</p>
+        <p className="text-sm font-medium text-slate-600">{typeName} không có thông số riêng — chỉ dùng thông số chung và độ dày ở trên.</p>
       )}
     </Section>
   );
@@ -47,7 +47,7 @@ function SipFields({ sip, options, onChange, errors }: { sip: SipSpecInput; opti
   return (
     <div className="space-y-4">
       <ChipsField label="Vật liệu lõi" options={choicesFor(options, 'SIP_CORE_MATERIAL', sip.coreMaterials)} value={sip.coreMaterials} onChange={(coreMaterials) => set({ coreMaterials })} />
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 items-start gap-4">
         <RangeField pathMin="sip.coreThicknessMinMm" pathMax="sip.coreThicknessMaxMm" label="Độ dày lõi" unit="mm" min={sip.coreThicknessMinMm} max={sip.coreThicknessMaxMm} onChange={(coreThicknessMinMm, coreThicknessMaxMm) => set({ coreThicknessMinMm, coreThicknessMaxMm })} errors={errors} />
         <NumberField path="sip.maxWidthMm" label="Rộng tối đa" unit="mm" integer value={sip.maxWidthMm} onChange={(maxWidthMm) => set({ maxWidthMm })} errors={errors} />
         <NumberField path="sip.maxLengthMm" label="Dài tối đa" unit="mm" integer value={sip.maxLengthMm} onChange={(maxLengthMm) => set({ maxLengthMm })} errors={errors} />
@@ -79,13 +79,13 @@ function FloorFields({ floor, options, onChange }: { floor: FloorSpecInput; opti
         onChange={(floorSizes) => set({ floorSizes })}
         hint="Bỏ trống = dùng khổ tiêu chuẩn của dòng."
         renderItem={(s, setS, i) => (
-          <div className="grid max-w-md grid-cols-2 gap-2">
+          <div className="grid max-w-md grid-cols-2 gap-2.5">
             <BareNumber label={`Khổ sàn ${i + 1}: rộng`} unit="mm" value={s.widthMm} onChange={(w) => setS({ ...s, widthMm: w ?? 0 })} />
             <BareNumber label={`Khổ sàn ${i + 1}: dài`} unit="mm" value={s.lengthMm} onChange={(l) => setS({ ...s, lengthMm: l ?? 0 })} />
           </div>
         )}
       />
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 items-start gap-4">
         <TriStateField label="Chống ẩm cho sàn" value={floor.moistureResistantFloor} onChange={(moistureResistantFloor) => set({ moistureResistantFloor })} />
         <TriStateField label="Bề mặt chà nhám" value={floor.sandedSurface} onChange={(sandedSurface) => set({ sandedSurface })} />
       </div>
@@ -111,7 +111,7 @@ function DecorativeFields({
   return (
     <div className="space-y-4">
       <Switch id="decorative-custom-print" label="Nhận in theo thiết kế riêng" hint="Hiện lời mời gửi file thiết kế trên trang sản phẩm." checked={decorative.customPrintSupported} onChange={(customPrintSupported) => onChange({ ...decorative, customPrintSupported })} />
-      {errors['decorative.options'] && <p className="text-xs font-semibold text-rose-700">{errors['decorative.options']}</p>}
+      {errors['decorative.options'] && <p className="text-xs font-bold text-rose-700">{errors['decorative.options']}</p>}
       <RepeatList
         label="Lớp hoàn thiện"
         itemName="lớp hoàn thiện"
@@ -126,8 +126,8 @@ function DecorativeFields({
           const vi = o.translations.vi ?? { name: '', description: null, patterns: [], suitableAreas: [] };
           const en = o.translations.en ?? { name: '', description: null, patterns: [], suitableAreas: [] };
           return (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3.5">
+              <div className="grid grid-cols-2 items-start gap-3.5">
                 <SelectField
                   path={`decorative.options.${i}.finishType`}
                   label="Loại hoàn thiện"
@@ -158,11 +158,11 @@ function DecorativeFields({
                   setO({ ...o, translations });
                 };
                 return (
-                  <div key={l} className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
-                    <p className={labelClass}>{l === 'vi' ? 'Tiếng Việt' : 'English (tuỳ chọn)'}</p>
+                  <div key={l} className="space-y-2.5 rounded-xl border border-slate-300 bg-slate-50/50 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-1.5">{l === 'vi' ? 'Tiếng Việt' : 'Tiếng Anh (tuỳ chọn)'}</p>
                     <BareInput label={`Tên hiển thị (${l})`} placeholder="Tên hiển thị" value={t.name} onChange={(name) => setT({ name })} />
                     <BareInput label={`Mô tả (${l})`} placeholder="Mô tả ngắn" rows={2} value={t.description ?? ''} onChange={(d) => setT({ description: d.trim() ? d : null })} />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 items-start gap-3">
                       <TagsField id={`pf-decor-${i}-${l}-patterns`} label="Mẫu vân / màu" placeholder="vd Vân gỗ sồi" value={t.patterns} onChange={(patterns) => setT({ patterns })} />
                       <TagsField id={`pf-decor-${i}-${l}-areas`} label="Khu vực phù hợp" placeholder="vd Sảnh khách sạn" value={t.suitableAreas} onChange={(suitableAreas) => setT({ suitableAreas })} />
                     </div>

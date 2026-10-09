@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Archive, CalendarClock, ExternalLink, Loader2, Send, Undo2 } from 'lucide-react';
+import { Archive, CalendarClock, ExternalLink, Loader2, Undo2 } from 'lucide-react';
 import { formatDateTime } from '@remak/shared/date';
 import type { Locale } from '@remak/shared/locale';
 import type { NewsTranslationCms } from '@/types/news';
@@ -80,15 +80,17 @@ export default function PublishPanel({
               {whenInPast && <p className="text-[11px] text-slate-500">Thời điểm đã qua: bài sẽ đăng ngay với ngày này.</p>}
             </div>
           )}
-          <button
-            type="button"
-            disabled={busy || (schedule && !when)}
-            onClick={() => onPublish(schedule && when ? new Date(when).toISOString() : undefined)}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-remak-orange hover:bg-remak-orange-dark text-white text-xs font-bold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-          >
-            {busy ? <Loader2 size={13} className="animate-spin" /> : schedule ? <CalendarClock size={13} /> : <Send size={13} />}
-            {schedule ? 'Lưu & lên lịch đăng' : status === 'PUBLISHED' ? 'Lưu & cập nhật bài đã đăng' : 'Lưu & xuất bản ngay'}
-          </button>
+          {schedule && (
+            <button
+              type="button"
+              disabled={busy || !when}
+              onClick={() => onPublish(when ? new Date(when).toISOString() : undefined)}
+              className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-remak-orange hover:bg-remak-orange-dark text-white text-xs font-bold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            >
+              {busy ? <Loader2 size={13} className="animate-spin" /> : <CalendarClock size={13} />}
+              <span>Lưu & lên lịch đăng</span>
+            </button>
+          )}
         </>
       )}
 

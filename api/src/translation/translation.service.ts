@@ -16,6 +16,8 @@ const CONTEXT_STYLE: Record<TranslateContext, string> = {
     'Homepage hero of a B2B manufacturer website: punchy headline, concise persuasive copy, short button labels and stat captions.',
   'news-article':
     'Technical news article for construction and fire-protection professionals: accurate, natural journalistic US English; keep headings concise, keep the meaning of standards, test results and figures exact.',
+  'product-catalog':
+    'B2B building materials product catalog for fire-rated magnesium oxide (MgO) boards: clear technical product naming, concise benefits, accurate specifications, professional copy for architects, contractors and fire-safety engineers.',
   general: 'Website content for a B2B building-materials manufacturer.',
 };
 

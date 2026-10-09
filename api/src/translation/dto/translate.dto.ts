@@ -9,7 +9,7 @@ import {
   type ValidationOptions,
 } from 'class-validator';
 
-export const TRANSLATE_CONTEXTS = ['homepage-hero', 'news-article', 'general'] as const;
+export const TRANSLATE_CONTEXTS = ['homepage-hero', 'news-article', 'product-catalog', 'general'] as const;
 export type TranslateContext = (typeof TRANSLATE_CONTEXTS)[number];
 
 export const MAX_FIELDS = 60;
