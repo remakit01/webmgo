@@ -39,6 +39,7 @@ const NEWS_SUBMENU = [
 const PRODUCTS_SUBMENU = [
   { id: 'products-list', name: 'Sản Phẩm', href: '/admin/products' },
   { id: 'product-types', name: 'Loại Sản Phẩm', href: '/admin/products/types' },
+  { id: 'spec-options', name: 'Danh Mục Thông Số', href: '/admin/products/spec-options' },
 ];
 
 interface SubmenuItem {
@@ -95,7 +96,9 @@ function getSubmenuDetailStatus(sub: SubmenuItem, pathname: string): { isDetail:
   }
   if (sub.href === '/admin/products') {
     if (pathname === '/admin/products/new') return { isDetail: true, label: 'Tạo mới' };
-    if (pathname.startsWith('/admin/products/') && pathname !== '/admin/products/types' && !pathname.startsWith('/admin/products/types/')) {
+    // /admin/products/<id> là trang sửa sản phẩm; các mục con khác (loại, danh mục thông số) không tính
+    const otherSub = PRODUCTS_SUBMENU.some((s) => s.href !== '/admin/products' && (pathname === s.href || pathname.startsWith(`${s.href}/`)));
+    if (pathname.startsWith('/admin/products/') && !otherSub) {
       return { isDetail: true, label: 'Sửa sản phẩm' };
     }
   }
