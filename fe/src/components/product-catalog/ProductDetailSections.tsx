@@ -2,12 +2,12 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Award, CheckCircle2, ChevronDown, ExternalLink, Star } from 'lucide-react';
 import {
-  DECORATIVE_FINISH_TYPE_LABEL,
   STOCK_STATUS_LABEL,
   formatFireRating,
-  specKeyLabel,
+  optionLabel,
   type CertificatePublic,
   type DecorativeFinishOptionPublic,
+  type SpecOptionLabels,
   type ProductVariantPublic,
 } from '@remak/shared/contracts/product';
 import type { Locale } from '@/i18n/routing';
@@ -88,14 +88,23 @@ export function AdvantageGrid({ items }: { items: { title: string; desc: string 
   );
 }
 
-export function DecorativeOptions({ options, customPrint, locale }: { options: DecorativeFinishOptionPublic[]; customPrint: boolean; locale: Locale }) {
+export function DecorativeOptions({
+  options,
+  customPrint,
+  labels,
+}: {
+  options: DecorativeFinishOptionPublic[];
+  customPrint: boolean;
+  /** Nhãn danh mục thông số theo ngôn ngữ đang xem (API) */
+  labels: SpecOptionLabels;
+}) {
   const t = useTranslations('Products');
   return (
     <div className="space-y-4">
       <ul className="grid gap-4 sm:grid-cols-2">
         {options.map((o) => (
           <li key={o.finishType} className="rounded-2xl border border-slate-200 bg-white p-5">
-            <p className="text-xs font-bold uppercase tracking-wide text-[#4E7202]">{DECORATIVE_FINISH_TYPE_LABEL[o.finishType][locale]}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-[#4E7202]">{optionLabel(labels, 'DECORATIVE_FINISH', o.finishType)}</p>
             <h3 className="mt-1 font-extrabold text-slate-900">{o.name}</h3>
             {o.description && <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{o.description}</p>}
             <dl className="mt-3 space-y-1.5 text-sm">
@@ -112,7 +121,7 @@ export function DecorativeOptions({ options, customPrint, locale }: { options: D
                 </div>
               )}
             </dl>
-            {o.scratchResistance && <p className="mt-2 text-xs font-semibold text-slate-700">{t('scratchResistance', { level: specKeyLabel(o.scratchResistance, locale) ?? o.scratchResistance })}</p>}
+            {o.scratchResistance && <p className="mt-2 text-xs font-semibold text-slate-700">{t('scratchResistance', { level: optionLabel(labels, 'SCRATCH_RESISTANCE', o.scratchResistance) })}</p>}
           </li>
         ))}
       </ul>

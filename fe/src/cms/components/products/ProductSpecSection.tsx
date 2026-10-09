@@ -2,22 +2,14 @@
 
 import React, { type ReactNode } from 'react';
 import {
-  CORE_COLORS,
-  CRYSTAL_PHASES,
-  EDGE_PROFILE_LABEL,
-  EDGE_PROFILES,
-  SCREW_HOLDING_RATINGS,
-  SURFACE_FINISHES,
-  VOC_LEVELS,
   maxFireRatingMinutes,
-  specKeyLabel,
   type ProductVariantInput,
+  type SpecOptionCms,
   type TechnicalSpecInput,
 } from '@remak/shared/contracts/product';
 import { BareInput, BareNumber, NumberField, RangeField, RepeatList, Section, SelectField, TagsField, TextField, TriStateField } from './fields';
 import { blankToNull, fieldId } from './product-form';
-
-const keyOptions = (keys: readonly string[]) => keys.map((k) => ({ value: k, label: specKeyLabel(k, 'vi') ?? k }));
+import { choicesFor } from './spec-option-choices';
 
 function Group({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
@@ -38,11 +30,14 @@ function Group({ title, description, children }: { title: string; description?: 
 export default function ProductSpecSection({
   spec,
   variants,
+  options,
   onChange,
   errors,
 }: {
   spec: TechnicalSpecInput;
   variants: ProductVariantInput[];
+  /** Danh mục thông số (CMS) — nguồn lựa chọn cho các ô chọn */
+  options: SpecOptionCms[];
   onChange: (patch: Partial<TechnicalSpecInput>) => void;
   errors: Record<string, string>;
 }) {
@@ -67,9 +62,9 @@ export default function ProductSpecSection({
             )}
           />
         </div>
-        <SelectField path={p('edgeProfile')} label="Kiểu cạnh" value={spec.edgeProfile} options={EDGE_PROFILES.map((e) => ({ value: e, label: EDGE_PROFILE_LABEL[e].vi }))} onChange={(edgeProfile) => onChange({ edgeProfile })} errors={errors} />
-        <SelectField path={p('coreColor')} label="Màu cốt tấm" value={spec.coreColor} options={keyOptions(CORE_COLORS)} onChange={(coreColor) => onChange({ coreColor })} errors={errors} />
-        <SelectField path={p('surfaceFinish')} label="Bề mặt" value={spec.surfaceFinish} options={keyOptions(SURFACE_FINISHES)} onChange={(surfaceFinish) => onChange({ surfaceFinish })} errors={errors} />
+        <SelectField path={p('edgeProfile')} label="Kiểu cạnh" value={spec.edgeProfile} options={choicesFor(options, 'EDGE_PROFILE', spec.edgeProfile)} onChange={(edgeProfile) => onChange({ edgeProfile })} errors={errors} />
+        <SelectField path={p('coreColor')} label="Màu cốt tấm" value={spec.coreColor} options={choicesFor(options, 'CORE_COLOR', spec.coreColor)} onChange={(coreColor) => onChange({ coreColor })} errors={errors} />
+        <SelectField path={p('surfaceFinish')} label="Bề mặt" value={spec.surfaceFinish} options={choicesFor(options, 'SURFACE_FINISH', spec.surfaceFinish)} onChange={(surfaceFinish) => onChange({ surfaceFinish })} errors={errors} />
       </Group>
 
       <Group title="Cơ lý">
@@ -89,7 +84,7 @@ export default function ProductSpecSection({
           <NumberField path={p('flexuralCrossMinMpa')} label="Cường độ uốn (ngang) ≥" unit="MPa" value={spec.flexuralCrossMinMpa} onChange={(flexuralCrossMinMpa) => onChange({ flexuralCrossMinMpa })} errors={errors} />
         </div>
         <NumberField path={p('densityReductionPct')} label="Nhẹ hơn tấm tiêu chuẩn" unit="%" hint="Chỉ dùng cho dòng nhẹ (LiteCore™)." value={spec.densityReductionPct} onChange={(densityReductionPct) => onChange({ densityReductionPct })} errors={errors} />
-        <SelectField path={p('screwHoldingRating')} label="Khả năng bám vít" value={spec.screwHoldingRating} options={keyOptions(SCREW_HOLDING_RATINGS)} onChange={(screwHoldingRating) => onChange({ screwHoldingRating })} errors={errors} />
+        <SelectField path={p('screwHoldingRating')} label="Khả năng bám vít" value={spec.screwHoldingRating} options={choicesFor(options, 'SCREW_HOLDING', spec.screwHoldingRating)} onChange={(screwHoldingRating) => onChange({ screwHoldingRating })} errors={errors} />
       </Group>
 
       <Group title="Nhiệt & chống cháy" description={`Giới hạn chịu lửa EI lấy từ từng độ dày${maxEi ? ` — hiện cao nhất EI ${maxEi}` : ' — chưa có độ dày nào nhập EI'}.`}>
@@ -109,11 +104,11 @@ export default function ProductSpecSection({
       </Group>
 
       <Group title="Hoá học & an toàn">
-        <SelectField path={p('crystalPhase')} label="Pha tinh thể" value={spec.crystalPhase} options={keyOptions(CRYSTAL_PHASES)} onChange={(crystalPhase) => onChange({ crystalPhase })} errors={errors} />
+        <SelectField path={p('crystalPhase')} label="Pha tinh thể" value={spec.crystalPhase} options={choicesFor(options, 'CRYSTAL_PHASE', spec.crystalPhase)} onChange={(crystalPhase) => onChange({ crystalPhase })} errors={errors} />
         <NumberField path={p('mgoContentMinPct')} label="Hàm lượng MgO ≥" unit="%" value={spec.mgoContentMinPct} onChange={(mgoContentMinPct) => onChange({ mgoContentMinPct })} errors={errors} />
         <NumberField path={p('chlorideMaxPct')} label="Clorua tự do ≤" unit="%" hint="≤ 0,02% thì web ghi “không gỉ khung thép”." value={spec.chlorideMaxPct} onChange={(chlorideMaxPct) => onChange({ chlorideMaxPct })} errors={errors} />
         <NumberField path={p('formaldehydeMgL')} label="Formaldehyde" unit="mg/L" value={spec.formaldehydeMgL} onChange={(formaldehydeMgL) => onChange({ formaldehydeMgL })} errors={errors} />
-        <SelectField path={p('vocLevel')} label="Mức VOC" value={spec.vocLevel} options={keyOptions(VOC_LEVELS)} onChange={(vocLevel) => onChange({ vocLevel })} errors={errors} />
+        <SelectField path={p('vocLevel')} label="Mức VOC" value={spec.vocLevel} options={choicesFor(options, 'VOC_LEVEL', spec.vocLevel)} onChange={(vocLevel) => onChange({ vocLevel })} errors={errors} />
         <TriStateField label="Không chứa amiăng" value={spec.asbestosFree} onChange={(asbestosFree) => onChange({ asbestosFree })} />
         <div className="col-span-3">
           <TagsField id={fieldId(p('greenCertifications'))} label="Chứng nhận công trình xanh" placeholder="vd LEED" value={spec.greenCertifications} onChange={(greenCertifications) => onChange({ greenCertifications })} />

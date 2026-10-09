@@ -6,6 +6,7 @@ import {
   discountPercent,
   emptyProductInput,
   emptyTranslationInput,
+  specOptionCodesOf,
   hasPublicPrice,
   maxFireRatingMinutes,
   priceRange,
@@ -21,6 +22,7 @@ import {
   type ProductListItemPublic,
   type ProductTranslationInput,
   type ProductTypeRef,
+  type SpecOptionLabels,
   type ProductVariantInput,
   type ProductVariantPublic,
   type SheetSize,
@@ -255,10 +257,12 @@ function certificatesOf(p: DetailRow, locale: Locale, today: string): Certificat
     .map(pick);
 }
 
-export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale, now = new Date()): ProductDetailPublic {
+export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale, now = new Date(), optionLabels: SpecOptionLabels = {}): ProductDetailPublic {
   const base = toListItemPublic(p, tr, now);
   const gallery = asArray<{ url: string }>(p.gallery);
-  const decorativeOptions: DecorativeFinishOptionPublic[] = p.decorativeOptions.map((o) => {
+  // Lớp hoàn thiện chỉ thuộc mẫu Tấm trang trí — sản phẩm đã đổi loại còn dòng cũ trong DB (ẩn), không xuất ra web
+  const decorativeRows = p.type.specProfile === 'DECORATIVE' ? p.decorativeOptions : [];
+  const decorativeOptions: DecorativeFinishOptionPublic[] = decorativeRows.map((o) => {
     const t = o.translations.find((x) => x.locale === locale) ?? o.translations.find((x) => x.locale === 'vi');
     return {
       finishType: o.finishType,
@@ -280,6 +284,7 @@ export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale,
     variants: p.variants.map((v) => toVariantPublic(v, locale)),
     decorativeOptions,
     certificates: certificatesOf(p, locale, toDayKey(now)),
+    optionLabels,
     seo: {
       title: tr.seoTitle || tr.name,
       description: tr.seoDescription || tr.summary.slice(0, 160),
@@ -413,4 +418,9 @@ function storedExtensionsOf(p: DetailRow): Pick<ProductCms, 'sip' | 'floor' | 'd
         }
       : null,
   };
+}
+
+/** Mã danh mục thông số đang HIỆN trên trang (khối không khớp mẫu của loại thì bỏ) — để lấy nhãn */
+export function usedSpecOptionCodes(p: DetailRow) {
+  return specOptionCodesOf(toProductCms(p));
 }

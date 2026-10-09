@@ -6,6 +6,7 @@ import { PRODUCTS_INVALIDATE } from './products.constants.js';
 import type { ProductInputDto } from './dto/product-input.dto.js';
 
 const noCache = { cacheOrLoad: <T>(_k: string, _t: number, loader: () => Promise<T>) => loader() };
+const noSpecOptions = { labelsFor: async () => ({}) };
 
 /** Form hợp lệ tối thiểu: tên tiếng Việt + 1 độ dày */
 const validInput = (): ProductInputDto => {
@@ -60,7 +61,10 @@ const setup = (existing: object | null = null) => {
   };
   const cache = { invalidate: vi.fn(async () => undefined) };
   const slugRedirects = { release: vi.fn(async () => undefined), record: vi.fn(async () => undefined) };
-  const service = new ProductsService(prisma as never, cache as never, {} as never, slugRedirects as never);
+  const specOptions = {
+    codesByGroup: vi.fn(async () => new Map<string, Set<string>>([['CRYSTAL_PHASE', new Set(['PHASE_517'])], ['VOC_LEVEL', new Set(['LOW'])]])),
+  };
+  const service = new ProductsService(prisma as never, cache as never, {} as never, slugRedirects as never, specOptions as never);
   // Đọc lại sau khi ghi: không kiểm ở đây
   vi.spyOn(service, 'get').mockResolvedValue({} as never);
   return { service, prisma, tx, cache, slugRedirects };
@@ -73,6 +77,27 @@ describe('ProductsService — ghi', () => {
     expect(err).toBeInstanceOf(BadRequestException);
     expect((err as BadRequestException).getResponse()).toMatchObject({ errors: { 'translations.vi.name': expect.any(String) } });
     expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('mã thông số không có trong danh mục -> 400 tại đúng ô, không ghi', async () => {
+    const { service, prisma } = setup();
+    const input = validInput();
+    input.technicalSpec.crystalPhase = 'XYZ';
+    input.technicalSpec.vocLevel = 'LOW';
+    const err = await service.create(input).catch((e: unknown) => e);
+    expect((err as BadRequestException).getResponse()).toMatchObject({
+      errors: { 'technicalSpec.crystalPhase': 'Giá trị "XYZ" không có trong danh mục thông số' },
+    });
+    expect(Object.keys((err as BadRequestException).getResponse() as { errors: object }).length).toBeGreaterThan(0);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it('mã có trong danh mục (kể cả đang tắt) -> lưu được', async () => {
+    const { service, tx } = setup();
+    const input = validInput();
+    input.technicalSpec.crystalPhase = 'PHASE_517';
+    await service.create(input);
+    expect(tx.productTechnicalSpec.upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ crystalPhase: 'PHASE_517' }) }));
   });
 
   it('loại sản phẩm không tồn tại -> 400, không ghi', async () => {
@@ -183,7 +208,7 @@ describe('ProductsService — ghi', () => {
 describe('ProductsPublicService.bySlug', () => {
   it('slug sai định dạng -> null, không chạm DB', async () => {
     const prisma = { product: { findFirst: vi.fn() } };
-    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never, noSpecOptions as never);
     await expect(service.bySlug('../etc', 'vi')).resolves.toBeNull();
     expect(prisma.product.findFirst).not.toHaveBeenCalled();
   });
@@ -194,7 +219,7 @@ describe('ProductsPublicService.bySlug', () => {
       productTranslation: { findFirst: vi.fn(async () => ({ slug: 'tam-moi' })) },
     };
     const slugRedirects = { resolve: vi.fn(async () => 'p1') };
-    const service = new ProductsPublicService(prisma as never, noCache as never, slugRedirects as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, slugRedirects as never, noSpecOptions as never);
     await expect(service.bySlug('tam-cu', 'vi')).resolves.toEqual({ redirect: 'tam-moi' });
     expect(slugRedirects.resolve).toHaveBeenCalledWith('product', 'vi', 'tam-cu');
   });
@@ -202,13 +227,13 @@ describe('ProductsPublicService.bySlug', () => {
   it('/en/products/<slug-vi> -> redirect sang slug tiếng Anh', async () => {
     const findFirst = vi.fn().mockResolvedValueOnce({ productId: 'p1' }).mockResolvedValueOnce({ slug: 'mgo-board' });
     const prisma = { product: { findFirst: vi.fn(async () => null) }, productTranslation: { findFirst } };
-    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never, noSpecOptions as never);
     await expect(service.bySlug('tam-mgo', 'en')).resolves.toEqual({ redirect: 'mgo-board' });
   });
 
   it('không có sản phẩm, không có redirect -> null (404)', async () => {
     const prisma = { product: { findFirst: vi.fn(async () => null) }, productTranslation: { findFirst: vi.fn(async () => null) } };
-    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never, noSpecOptions as never);
     await expect(service.bySlug('khong-co', 'vi')).resolves.toBeNull();
   });
 });
@@ -235,7 +260,7 @@ describe('ProductsPublicService.typeBySlug', () => {
       productType: { findFirst: vi.fn(async () => typeRow) },
       product: { findMany: vi.fn(async () => []) },
     };
-    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never, noSpecOptions as never);
     await expect(service.typeBySlug('tam-san-mgo', 'vi')).resolves.toBeNull();
   });
 
@@ -252,7 +277,7 @@ describe('ProductsPublicService.typeBySlug', () => {
         count: vi.fn(async (a: { where: { translations: { some: { locale: string } } } }) => (a.where.translations.some.locale === 'vi' ? 1 : 0)),
       },
     };
-    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never, noSpecOptions as never);
     const res = await service.typeBySlug('tam-san-mgo', 'vi');
     expect(res && 'type' in res && res.type.alternates).toEqual({ vi: 'tam-san-mgo' });
   });
@@ -262,7 +287,7 @@ describe('ProductsPublicService.typeBySlug', () => {
       productType: { findFirst: vi.fn(async () => typeRow) },
       product: { findMany: vi.fn(async () => [listRow]), count: vi.fn(async () => 1) },
     };
-    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, {} as never, noSpecOptions as never);
     const res = await service.typeBySlug('tam-san-mgo', 'vi');
     expect(res).toEqual({
       type: {
@@ -284,7 +309,7 @@ describe('ProductsPublicService.typeBySlug', () => {
       productType: { findFirst: vi.fn(async () => null) },
       productTypeTranslation: { findFirst: vi.fn().mockResolvedValueOnce({ typeId: 'pt_floor' }).mockResolvedValueOnce(null) },
     };
-    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, { resolve: async () => null } as never, noSpecOptions as never);
     await expect(service.typeBySlug('tam-san-mgo', 'en')).resolves.toBeNull();
   });
 
@@ -294,7 +319,7 @@ describe('ProductsPublicService.typeBySlug', () => {
       productTypeTranslation: { findFirst: vi.fn(async () => ({ slug: 'tam-san-moi' })) },
     };
     const slugRedirects = { resolve: vi.fn(async () => 'pt_floor') };
-    const service = new ProductsPublicService(prisma as never, noCache as never, slugRedirects as never);
+    const service = new ProductsPublicService(prisma as never, noCache as never, slugRedirects as never, noSpecOptions as never);
     await expect(service.typeBySlug('tam-san-mgo', 'vi')).resolves.toEqual({ redirect: 'tam-san-moi' });
     expect(slugRedirects.resolve).toHaveBeenCalledWith('product_type', 'vi', 'tam-san-mgo');
   });

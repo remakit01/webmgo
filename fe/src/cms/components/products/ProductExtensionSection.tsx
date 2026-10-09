@@ -2,47 +2,39 @@
 
 import React from 'react';
 import {
-  DECORATIVE_FINISH_TYPE_LABEL,
-  DECORATIVE_FINISH_TYPES,
-  EDGE_PROFILE_LABEL,
-  EDGE_PROFILES,
-  LOAD_BEARING_TYPES,
-  SCRATCH_RESISTANCES,
-  SIP_CORE_MATERIAL_LABEL,
-  SIP_CORE_MATERIALS,
-  SUITABLE_FLOORINGS,
-  specKeyLabel,
-  type DecorativeFinishType,
   type DecorativeSpecInput,
   type FloorSpecInput,
   type ProductInput,
   type SipSpecInput,
+  type SpecOptionCms,
 } from '@remak/shared/contracts/product';
 import { BareInput, BareNumber, ChipsField, NumberField, RangeField, RepeatList, Section, SelectField, Switch, TagsField, TriStateField, labelClass } from './fields';
-
-const keyOptions = (keys: readonly string[]) => keys.map((k) => ({ value: k, label: specKeyLabel(k, 'vi') ?? k }));
+import { choiceLabel, choicesFor } from './spec-option-choices';
 
 /** Thông số riêng theo loại sản phẩm: Panel SIP, Tấm sàn, Tấm trang trí. Loại khác không có phần này. */
 export default function ProductExtensionSection({
   form,
   typeName,
+  options,
   onChange,
   errors,
 }: {
   form: Pick<ProductInput, 'sip' | 'floor' | 'decorative'>;
   /** Tên tiếng Việt của loại đang chọn */
   typeName: string;
+  /** Danh mục thông số (CMS) — nguồn lựa chọn cho các ô */
+  options: SpecOptionCms[];
   onChange: (patch: Partial<Pick<ProductInput, 'sip' | 'floor' | 'decorative'>>) => void;
   errors: Record<string, string>;
 }) {
   return (
     <Section id="extension" title="Thông số riêng theo loại" description={`Loại hiện tại: ${typeName}. Đổi loại ở khung “Thiết lập” bên phải.`}>
       {form.sip ? (
-        <SipFields sip={form.sip} onChange={(sip) => onChange({ sip })} errors={errors} />
+        <SipFields sip={form.sip} options={options} onChange={(sip) => onChange({ sip })} errors={errors} />
       ) : form.floor ? (
-        <FloorFields floor={form.floor} onChange={(floor) => onChange({ floor })} />
+        <FloorFields floor={form.floor} options={options} onChange={(floor) => onChange({ floor })} />
       ) : form.decorative ? (
-        <DecorativeFields decorative={form.decorative} onChange={(decorative) => onChange({ decorative })} errors={errors} />
+        <DecorativeFields decorative={form.decorative} options={options} onChange={(decorative) => onChange({ decorative })} errors={errors} />
       ) : (
         <p className="text-sm text-slate-600">{typeName} không có thông số riêng — chỉ dùng thông số chung và độ dày ở trên.</p>
       )}
@@ -50,16 +42,16 @@ export default function ProductExtensionSection({
   );
 }
 
-function SipFields({ sip, onChange, errors }: { sip: SipSpecInput; onChange: (s: SipSpecInput) => void; errors: Record<string, string> }) {
+function SipFields({ sip, options, onChange, errors }: { sip: SipSpecInput; options: SpecOptionCms[]; onChange: (s: SipSpecInput) => void; errors: Record<string, string> }) {
   const set = (patch: Partial<SipSpecInput>) => onChange({ ...sip, ...patch });
   return (
     <div className="space-y-4">
-      <ChipsField label="Vật liệu lõi" options={SIP_CORE_MATERIALS.map((m) => ({ value: m, label: SIP_CORE_MATERIAL_LABEL[m].vi }))} value={sip.coreMaterials} onChange={(coreMaterials) => set({ coreMaterials })} />
+      <ChipsField label="Vật liệu lõi" options={choicesFor(options, 'SIP_CORE_MATERIAL', sip.coreMaterials)} value={sip.coreMaterials} onChange={(coreMaterials) => set({ coreMaterials })} />
       <div className="grid grid-cols-3 gap-4">
         <RangeField pathMin="sip.coreThicknessMinMm" pathMax="sip.coreThicknessMaxMm" label="Độ dày lõi" unit="mm" min={sip.coreThicknessMinMm} max={sip.coreThicknessMaxMm} onChange={(coreThicknessMinMm, coreThicknessMaxMm) => set({ coreThicknessMinMm, coreThicknessMaxMm })} errors={errors} />
         <NumberField path="sip.maxWidthMm" label="Rộng tối đa" unit="mm" integer value={sip.maxWidthMm} onChange={(maxWidthMm) => set({ maxWidthMm })} errors={errors} />
         <NumberField path="sip.maxLengthMm" label="Dài tối đa" unit="mm" integer value={sip.maxLengthMm} onChange={(maxLengthMm) => set({ maxLengthMm })} errors={errors} />
-        <SelectField path="sip.loadBearing" label="Khả năng chịu lực" value={sip.loadBearing} options={keyOptions(LOAD_BEARING_TYPES)} onChange={(loadBearing) => set({ loadBearing })} errors={errors} />
+        <SelectField path="sip.loadBearing" label="Khả năng chịu lực" value={sip.loadBearing} options={choicesFor(options, 'LOAD_BEARING', sip.loadBearing)} onChange={(loadBearing) => set({ loadBearing })} errors={errors} />
       </div>
       <TagsField
         id="pf-sip-facingThicknessesMm"
@@ -73,12 +65,12 @@ function SipFields({ sip, onChange, errors }: { sip: SipSpecInput; onChange: (s:
   );
 }
 
-function FloorFields({ floor, onChange }: { floor: FloorSpecInput; onChange: (f: FloorSpecInput) => void }) {
+function FloorFields({ floor, options, onChange }: { floor: FloorSpecInput; options: SpecOptionCms[]; onChange: (f: FloorSpecInput) => void }) {
   const set = (patch: Partial<FloorSpecInput>) => onChange({ ...floor, ...patch });
   return (
     <div className="space-y-4">
-      <ChipsField label="Kiểu cạnh ghép" options={EDGE_PROFILES.map((e) => ({ value: e, label: EDGE_PROFILE_LABEL[e].vi }))} value={floor.edgeProfiles} onChange={(edgeProfiles) => set({ edgeProfiles })} />
-      <ChipsField label="Lớp phủ sàn phù hợp" options={keyOptions(SUITABLE_FLOORINGS)} value={floor.suitableFloorings} onChange={(suitableFloorings) => set({ suitableFloorings })} />
+      <ChipsField label="Kiểu cạnh ghép" options={choicesFor(options, 'EDGE_PROFILE', floor.edgeProfiles)} value={floor.edgeProfiles} onChange={(edgeProfiles) => set({ edgeProfiles })} />
+      <ChipsField label="Lớp phủ sàn phù hợp" options={choicesFor(options, 'SUITABLE_FLOORING', floor.suitableFloorings)} value={floor.suitableFloorings} onChange={(suitableFloorings) => set({ suitableFloorings })} />
       <RepeatList
         label="Khổ tấm sàn"
         itemName="khổ"
@@ -101,9 +93,21 @@ function FloorFields({ floor, onChange }: { floor: FloorSpecInput; onChange: (f:
   );
 }
 
-function DecorativeFields({ decorative, onChange, errors }: { decorative: DecorativeSpecInput; onChange: (d: DecorativeSpecInput) => void; errors: Record<string, string> }) {
+function DecorativeFields({
+  decorative,
+  options,
+  onChange,
+  errors,
+}: {
+  decorative: DecorativeSpecInput;
+  options: SpecOptionCms[];
+  onChange: (d: DecorativeSpecInput) => void;
+  errors: Record<string, string>;
+}) {
   const used = new Set(decorative.options.map((o) => o.finishType));
-  const nextType = DECORATIVE_FINISH_TYPES.find((t) => !used.has(t)) ?? 'HPL';
+  const finishChoices = choicesFor(options, 'DECORATIVE_FINISH', null);
+  // Lớp mới: loại hoàn thiện đầu tiên chưa dùng (mỗi loại chỉ 1 lần)
+  const nextType = finishChoices.find((c) => !used.has(c.value))?.value ?? null;
   return (
     <div className="space-y-4">
       <Switch id="decorative-custom-print" label="Nhận in theo thiết kế riêng" hint="Hiện lời mời gửi file thiết kế trên trang sản phẩm." checked={decorative.customPrintSupported} onChange={(customPrintSupported) => onChange({ ...decorative, customPrintSupported })} />
@@ -112,8 +116,11 @@ function DecorativeFields({ decorative, onChange, errors }: { decorative: Decora
         label="Lớp hoàn thiện"
         itemName="lớp hoàn thiện"
         items={decorative.options}
-        max={DECORATIVE_FINISH_TYPES.length}
-        newItem={() => ({ finishType: nextType, scratchResistance: null, translations: { vi: { name: DECORATIVE_FINISH_TYPE_LABEL[nextType].vi, description: null, patterns: [], suitableAreas: [] } } })}
+        max={nextType ? decorative.options.length + 1 : decorative.options.length}
+        newItem={() => {
+          const finishType = nextType ?? '';
+          return { finishType, scratchResistance: null, translations: { vi: { name: choiceLabel(options, 'DECORATIVE_FINISH', finishType), description: null, patterns: [], suitableAreas: [] } } };
+        }}
         onChange={(options) => onChange({ ...decorative, options })}
         renderItem={(o, setO, i) => {
           const vi = o.translations.vi ?? { name: '', description: null, patterns: [], suitableAreas: [] };
@@ -121,15 +128,23 @@ function DecorativeFields({ decorative, onChange, errors }: { decorative: Decora
           return (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <SelectField<DecorativeFinishType>
+                <SelectField
                   path={`decorative.options.${i}.finishType`}
                   label="Loại hoàn thiện"
                   emptyLabel={null}
                   value={o.finishType}
-                  options={DECORATIVE_FINISH_TYPES.map((t) => ({ value: t, label: DECORATIVE_FINISH_TYPE_LABEL[t].vi }))}
+                  options={choicesFor(options, 'DECORATIVE_FINISH', o.finishType)}
                   onChange={(t) => t && setO({ ...o, finishType: t })}
+                  errors={errors}
                 />
-                <SelectField path={`decorative.options.${i}.scratchResistance`} label="Chống trầy" value={o.scratchResistance} options={keyOptions(SCRATCH_RESISTANCES)} onChange={(scratchResistance) => setO({ ...o, scratchResistance })} />
+                <SelectField
+                  path={`decorative.options.${i}.scratchResistance`}
+                  label="Chống trầy"
+                  value={o.scratchResistance}
+                  options={choicesFor(options, 'SCRATCH_RESISTANCE', o.scratchResistance)}
+                  onChange={(scratchResistance) => setO({ ...o, scratchResistance })}
+                  errors={errors}
+                />
               </div>
               {(['vi', 'en'] as const).map((l) => {
                 const t = l === 'vi' ? vi : en;

@@ -1,12 +1,12 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  EDGE_PROFILE_LABEL,
-  SIP_CORE_MATERIAL_LABEL,
   formatFireRating,
   formatRange,
-  specKeyLabel,
+  optionLabel,
   type ProductSpecView,
+  type SpecOptionGroup,
+  type SpecOptionLabels,
   type ProductVariantPublic,
 } from '@remak/shared/contracts/product';
 import type { Locale } from '@/i18n/routing';
@@ -18,12 +18,26 @@ type Row = [label: string, value: string | null];
  * Bảng thông số kỹ thuật theo 5 nhóm (+ thông số riêng theo loại).
  * Chỉ hiện dòng có số liệu — không có số thì không hiện, không điền mặc định.
  */
-export default function SpecSheet({ spec, variants, name, locale }: { spec: ProductSpecView; variants: ProductVariantPublic[]; name: string; locale: Locale }) {
+export default function SpecSheet({
+  spec,
+  variants,
+  name,
+  labels,
+  locale,
+}: {
+  spec: ProductSpecView;
+  variants: ProductVariantPublic[];
+  name: string;
+  /** Nhãn danh mục thông số theo ngôn ngữ đang xem (API) */
+  labels: SpecOptionLabels;
+  locale: Locale;
+}) {
   const t = useTranslations('Products');
   const s = useTranslations('Products.spec');
   const tg = useTranslations('Products.specGroup');
   const yesNo = (v: boolean | null) => (v === null ? null : v ? t('yes') : t('no'));
-  const key = (k: string | null) => specKeyLabel(k, locale);
+  // Mã danh mục -> nhãn (CMS "Danh Mục Thông Số"); chưa có nhãn thì hiện mã
+  const opt = (group: SpecOptionGroup, code: string | null) => (code ? optionLabel(labels, group, code) : null);
   const n = (v: number | null, unit: string, digits?: number) => (v === null ? null : `${formatNum(v, locale, digits)} ${unit}`);
   const list = (v: readonly string[]) => (v.length ? v.join(', ') : null);
   const size = (w: number, l: number) => `${formatNum(w, locale)} × ${formatNum(l, locale)} mm`;
@@ -37,9 +51,9 @@ export default function SpecSheet({ spec, variants, name, locale }: { spec: Prod
       id: 'physical',
       rows: [
         [s('standardSizes'), list(ph.standardSizes.map((z) => size(z.widthMm, z.lengthMm)))],
-        [s('edgeProfile'), ph.edgeProfile && EDGE_PROFILE_LABEL[ph.edgeProfile][locale]],
-        [s('coreColor'), key(ph.coreColor)],
-        [s('surfaceFinish'), key(ph.surfaceFinish)],
+        [s('edgeProfile'), opt('EDGE_PROFILE', ph.edgeProfile)],
+        [s('coreColor'), opt('CORE_COLOR', ph.coreColor)],
+        [s('surfaceFinish'), opt('SURFACE_FINISH', ph.surfaceFinish)],
       ],
     },
     {
@@ -49,7 +63,7 @@ export default function SpecSheet({ spec, variants, name, locale }: { spec: Prod
         [s('densityReduction'), me.densityReductionPct === null ? null : t('lighterBy', { pct: formatNum(me.densityReductionPct, locale) })],
         [s('flexural'), formatRange(me.flexuralMinMpa, me.flexuralMaxMpa, 'MPa', locale)],
         [s('flexuralCross'), formatRange(me.flexuralCrossMinMpa, null, 'MPa', locale)],
-        [s('screwHolding'), key(me.screwHoldingRating)],
+        [s('screwHolding'), opt('SCREW_HOLDING', me.screwHoldingRating)],
       ],
     },
     {
@@ -74,12 +88,12 @@ export default function SpecSheet({ spec, variants, name, locale }: { spec: Prod
     {
       id: 'chemistrySafety',
       rows: [
-        [s('crystalPhase'), key(cs.crystalPhase)],
+        [s('crystalPhase'), opt('CRYSTAL_PHASE', cs.crystalPhase)],
         [s('mgoContent'), formatRange(cs.mgoContentMinPct, null, '%', locale)],
         [s('chloride'), formatRange(null, cs.chlorideMaxPct, '%', locale)],
         [s('asbestosFree'), yesNo(cs.asbestosFree)],
         [s('formaldehyde'), n(cs.formaldehydeMgL, 'mg/L')],
-        [s('voc'), key(cs.vocLevel)],
+        [s('voc'), opt('VOC_LEVEL', cs.vocLevel)],
         [s('greenCertifications'), list(cs.greenCertifications)],
       ],
     },
@@ -88,16 +102,16 @@ export default function SpecSheet({ spec, variants, name, locale }: { spec: Prod
       rows:
         ext?.type === 'SIP'
           ? [
-              [s('coreMaterials'), list(ext.coreMaterials.map((m) => SIP_CORE_MATERIAL_LABEL[m][locale]))],
+              [s('coreMaterials'), list(ext.coreMaterials.map((m) => optionLabel(labels, 'SIP_CORE_MATERIAL', m)))],
               [s('coreThickness'), formatRange(ext.coreThicknessMinMm, ext.coreThicknessMaxMm, 'mm', locale)],
               [s('facingThicknesses'), ext.facingThicknessesMm.length ? `${ext.facingThicknessesMm.map((v) => formatNum(v, locale)).join(', ')} mm` : null],
               [s('maxSize'), ext.maxWidthMm && ext.maxLengthMm ? size(ext.maxWidthMm, ext.maxLengthMm) : null],
-              [s('loadBearing'), key(ext.loadBearing)],
+              [s('loadBearing'), opt('LOAD_BEARING', ext.loadBearing)],
             ]
           : ext?.type === 'FLOOR'
             ? [
-                [s('edgeProfiles'), list(ext.edgeProfiles.map((e) => EDGE_PROFILE_LABEL[e][locale]))],
-                [s('suitableFloorings'), list(ext.suitableFloorings.map((f) => key(f) ?? f))],
+                [s('edgeProfiles'), list(ext.edgeProfiles.map((e) => optionLabel(labels, 'EDGE_PROFILE', e)))],
+                [s('suitableFloorings'), list(ext.suitableFloorings.map((f) => optionLabel(labels, 'SUITABLE_FLOORING', f)))],
                 [s('floorSizes'), list(ext.floorSizes.map((z) => size(z.widthMm, z.lengthMm)))],
                 [s('moistureResistantFloor'), yesNo(ext.moistureResistantFloor)],
                 [s('sandedSurface'), yesNo(ext.sandedSurface)],

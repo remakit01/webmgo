@@ -2,7 +2,16 @@
 
 // Gọi API Sản phẩm từ CMS (danh sách, form sửa, ảnh đại diện, thứ tự).
 
-import type { ProductCms, ProductInput, ProductListItemCms, ProductTypeCms, ProductTypeInput } from '@remak/shared/contracts/product';
+import type {
+  ProductCms,
+  ProductInput,
+  ProductListItemCms,
+  ProductTypeCms,
+  ProductTypeInput,
+  SpecOptionCms,
+  SpecOptionGroup,
+  SpecOptionInput,
+} from '@remak/shared/contracts/product';
 import { apiFetch, ifMatch } from './api-client';
 
 const json = (body: unknown) => JSON.stringify(body);
@@ -23,6 +32,15 @@ export const productsApi = {
     apiFetch<ProductTypeCms>(`/products/types/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),
   removeType: (id: string) => apiFetch<{ success: boolean }>(`/products/types/${id}`, { method: 'DELETE' }),
   reorderTypes: (ids: string[]) => apiFetch<ProductTypeCms[]>('/products/types/order', { method: 'PUT', body: json({ ids }) }),
+
+  // ── Danh mục thông số ──
+  specOptions: () => apiFetch<SpecOptionCms[]>('/products/spec-options'),
+  createSpecOption: (body: SpecOptionInput) => apiFetch<SpecOptionCms>('/products/spec-options', { method: 'POST', body: json(body) }),
+  updateSpecOption: (id: string, body: Omit<SpecOptionInput, 'group'>, version: string) =>
+    apiFetch<SpecOptionCms>(`/products/spec-options/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),
+  removeSpecOption: (id: string) => apiFetch<{ success: boolean }>(`/products/spec-options/${id}`, { method: 'DELETE' }),
+  reorderSpecOptions: (group: SpecOptionGroup, ids: string[]) =>
+    apiFetch<SpecOptionCms[]>('/products/spec-options/order', { method: 'PUT', body: json({ group, ids }) }),
   updateCover: (id: string, file: File, version: string) => {
     const form = new FormData();
     form.append('image', file);
