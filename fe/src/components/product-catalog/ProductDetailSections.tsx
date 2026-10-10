@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Award, CheckCircle2, ChevronDown, ExternalLink, Star } from 'lucide-react';
+import { Award, CheckCircle2, ChevronDown, ExternalLink, Star, Flame, Droplets, Volume2, ShieldCheck } from 'lucide-react';
 import {
   STOCK_STATUS_LABEL,
   formatFireRating,
@@ -72,16 +72,32 @@ export function VariantTable({ variants, locale }: { variants: ProductVariantPub
   );
 }
 
+function getAdvantageIcon(title: string) {
+  const lower = title.toLowerCase();
+  if (lower.includes('cháy') || lower.includes('nhiệt') || lower.includes('lửa') || lower.includes('fire')) {
+    return <Flame size={18} className="text-[#F26522] shrink-0" />;
+  }
+  if (lower.includes('ẩm') || lower.includes('mốc') || lower.includes('nước') || lower.includes('water')) {
+    return <Droplets size={18} className="text-[#2f80ed] shrink-0" />;
+  }
+  if (lower.includes('âm') || lower.includes('ồn') || lower.includes('acoustic')) {
+    return <Volume2 size={18} className="text-[#7CB305] shrink-0" />;
+  }
+  return <ShieldCheck size={18} className="text-[#4E7202] shrink-0" />;
+}
+
 export function AdvantageGrid({ items }: { items: { title: string; desc: string }[] }) {
   return (
-    <ul className="grid gap-4 sm:grid-cols-2">
+    <ul className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((a, i) => (
-        <li key={i} className="flex gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-          <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-[#5F8A03]" aria-hidden="true" />
-          <div>
-            <h3 className="font-bold text-slate-900">{a.title}</h3>
-            {a.desc && <p className="mt-1 text-sm leading-relaxed text-slate-600">{a.desc}</p>}
+        <li key={i} className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-4 sm:p-5 text-left shadow-2xs hover:border-slate-300 transition-colors">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 border border-slate-100">
+              {getAdvantageIcon(a.title)}
+            </div>
+            <h3 className="font-bold text-slate-900 text-sm sm:text-base line-clamp-1">{a.title}</h3>
           </div>
+          {a.desc && <p className="text-xs sm:text-sm leading-relaxed text-slate-600">{a.desc}</p>}
         </li>
       ))}
     </ul>

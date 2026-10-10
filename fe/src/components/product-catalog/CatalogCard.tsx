@@ -2,10 +2,9 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { ArrowRight, Check, Flame, Layers, Plus, Star } from 'lucide-react';
+import { ArrowRight, Check, Flame, Layers, Plus, Scale, Star } from 'lucide-react';
 import { STOCK_STATUS_LABEL, formatFireRating, type ProductListItemPublic } from '@remak/shared/contracts/product';
 import Link from '@/components/ui/LocaleLink';
-import ResponsivePicture from '@/components/ui/ResponsivePicture';
 import type { Locale } from '@/i18n/routing';
 import { formatMm, formatVnd } from './format';
 
@@ -18,16 +17,65 @@ export const STOCK_TONE: Record<string, string> = {
   DISCONTINUED: 'bg-slate-100 text-slate-700 border-slate-300',
 };
 
-/** Ảnh sản phẩm; chưa có ảnh -> khối nền trung tính (không ảnh giả) */
-export function ProductImage({ url, alt, sizes, priority, className = '' }: { url: string | null; alt: string; sizes: string; priority?: boolean; className?: string }) {
+/** Ảnh sản phẩm: Chưa có ảnh -> Logo Remak chính hãng; Có ảnh -> Hiển thị ảnh sản phẩm */
+export function ProductImage({
+  url,
+  alt,
+  sizes,
+  priority,
+  className = '',
+}: {
+  url: string | null;
+  alt: string;
+  sizes: string;
+  priority?: boolean;
+  className?: string;
+}) {
+  // ── TRƯỜNG HỢP 1: CHƯA CÓ ẢNH (LOGO REMAK CHÍNH HÃNG) ──
   if (!url) {
     return (
-      <div className={`flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 ${className}`} aria-hidden="true">
-        <Layers size={40} className="text-slate-300" />
+      <div
+        className={`relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100 p-6 text-center select-none ${className}`}
+        aria-label={alt ? `${alt} (Hình ảnh đang cập nhật)` : 'Remak® FireOFF'}
+      >
+        {/* Họa tiết lưới kỹ thuật chìm */}
+        <div
+          className="absolute inset-0 opacity-[0.035] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(#4E7202 1px, transparent 1px), radial-gradient(#4E7202 1px, transparent 1px)`,
+            backgroundSize: '16px 16px',
+            backgroundPosition: '0 0, 8px 8px',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* Logo Remak chính hãng (hiệu ứng mờ watermark thanh lịch) */}
+        <img
+          src="/Logo_remak_800.png"
+          alt={alt ? `${alt} — Remak®` : 'Remak® FireOFF'}
+          width={220}
+          height={68}
+          className="h-auto w-36 sm:w-44 max-w-[75%] object-contain opacity-40 transition-all duration-300 group-hover:opacity-65 group-hover:scale-105 motion-reduce:transition-none"
+          loading="lazy"
+        />
       </div>
     );
   }
-  return <ResponsivePicture image={{ imageUrl: url, images: [] }} alt={alt} sizes={sizes} priority={priority} className={`h-full w-full object-cover ${className}`} />;
+
+  // ── TRƯỜNG HỢP 2: CÓ ẢNH ──
+  return (
+    <div className={`relative h-full w-full overflow-hidden bg-slate-100 ${className}`}>
+      <img
+        src={url}
+        alt={alt}
+        sizes={sizes}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding={priority ? 'sync' : 'async'}
+        className="h-full w-full object-cover"
+      />
+    </div>
+  );
 }
 
 /** Giá ở thẻ: "Từ 195.000 đ" hoặc "Liên hệ báo giá" */
@@ -45,6 +93,7 @@ export default function CatalogCard({
   compareDisabled = false,
   onToggleCompare,
   priority,
+  hideFooter,
 }: {
   item: ProductListItemPublic;
   locale: Locale;
@@ -53,6 +102,8 @@ export default function CatalogCard({
   /** Bỏ trống = không có nút so sánh (vd mục "Sản phẩm khác") */
   onToggleCompare?: () => void;
   priority?: boolean;
+  /** Ẩn dòng footer dưới cùng (giá, tình trạng kho, nút Xem chi tiết) */
+  hideFooter?: boolean;
 }) {
   const t = useTranslations('Products');
   const href = `/san-pham/${item.slug}`;
@@ -105,36 +156,50 @@ export default function CatalogCard({
           </div>
         </dl>
 
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
-          <div className="space-y-1 text-sm">
-            <PriceLine item={item} locale={locale} />
-            {/* Chưa có độ dày (hàng theo dự án, liên hệ báo giá) -> không có tình trạng kho để hiện */}
-            {item.thicknessesMm.length > 0 && (
-              <span className={`block w-fit rounded-md border px-2 py-0.5 text-xs font-semibold ${STOCK_TONE[item.stockStatus]}`}>{STOCK_STATUS_LABEL[item.stockStatus][locale]}</span>
-            )}
+        {!hideFooter && (
+          <div className="mt-auto flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+            <div className="space-y-1 text-sm">
+              <PriceLine item={item} locale={locale} />
+              {/* Chưa có độ dày (hàng theo dự án, liên hệ báo giá) -> không có tình trạng kho để hiện */}
+              {item.thicknessesMm.length > 0 && (
+                <span className={`block w-fit rounded-md border px-2 py-0.5 text-xs font-semibold ${STOCK_TONE[item.stockStatus]}`}>{STOCK_STATUS_LABEL[item.stockStatus][locale]}</span>
+              )}
+            </div>
+            <Link
+              href={href}
+              className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white transition-colors hover:bg-[#4E7202] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
+            >
+              {t('viewDetail')} <ArrowRight size={15} aria-hidden="true" />
+            </Link>
           </div>
-          <Link
-            href={href}
-            className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white transition-colors hover:bg-[#4E7202] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5F8A03]"
-          >
-            {t('viewDetail')} <ArrowRight size={15} aria-hidden="true" />
-          </Link>
-        </div>
+        )}
 
         {onToggleCompare && (
-        <button
-          type="button"
-          aria-pressed={compared}
-          disabled={compareDisabled && !compared}
-          onClick={onToggleCompare}
-          aria-label={compared ? t('compareRemove', { name: item.name }) : t('compareAdd', { name: item.name })}
-          title={compareDisabled && !compared ? t('compareLimit', { max: 3 }) : undefined}
-          className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-bold transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-[#5F8A03] ${
-            compared ? 'border-[#4E7202] bg-[#F4F9E8] text-[#3F5E02]' : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-          }`}
-        >
-          {compared ? <Check size={14} aria-hidden="true" /> : <Plus size={14} aria-hidden="true" />} {t('compare')}
-        </button>
+          <button
+            type="button"
+            aria-pressed={compared}
+            disabled={compareDisabled && !compared}
+            onClick={onToggleCompare}
+            aria-label={compared ? t('compareRemove', { name: item.name }) : t('compareAdd', { name: item.name })}
+            title={compareDisabled && !compared ? 'Đã chọn tối đa 3 sản phẩm để so sánh' : undefined}
+            className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 select-none ${
+              compared
+                ? 'border-emerald-300 bg-emerald-50 text-emerald-700 shadow-2xs active:scale-95'
+                : 'border-slate-300/80 bg-white text-slate-700 hover:border-[#F26522] hover:text-[#F26522] hover:bg-orange-50/20 active:scale-95'
+            }`}
+          >
+            {compared ? (
+              <>
+                <Check size={14} className="text-emerald-600" aria-hidden="true" />
+                <span>Đã thêm so sánh</span>
+              </>
+            ) : (
+              <>
+                <Scale size={14} aria-hidden="true" />
+                <span>{t('compare')}</span>
+              </>
+            )}
+          </button>
         )}
       </div>
     </article>

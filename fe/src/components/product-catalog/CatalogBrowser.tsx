@@ -7,11 +7,11 @@ import { STOCK_STATUS_LABEL, formatFireRating, type ProductListItemPublic, type 
 import Link from '@/components/ui/LocaleLink';
 import type { Locale } from '@/i18n/routing';
 import { productTypePath } from '@/lib/product-paths';
+import { useProductCompare } from '@/hooks/use-product-compare';
 import CatalogCard, { PriceLine } from './CatalogCard';
 import { formatMm } from './format';
 
 type Sort = 'default' | 'priceAsc' | 'priceDesc' | 'fire';
-const COMPARE_MAX = 3;
 const select =
   'h-10 rounded-xl border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 cursor-pointer focus:border-[#5F8A03] focus:outline-none focus:ring-1 focus:ring-[#5F8A03]';
 
@@ -26,12 +26,13 @@ const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/
 export default function CatalogBrowser({ items, types: allTypes = [], locale }: { items: ProductListItemPublic[]; types?: ProductTypeRef[]; locale: Locale }) {
   const t = useTranslations('Products');
   const ids = useId();
+  const { addToCompare, removeFromCompare, isInCompare, compareItems, totalSlots } = useProductCompare();
+
   const [type, setType] = useState<string>('all');
   const [thickness, setThickness] = useState<number | null>(null);
   const [minFire, setMinFire] = useState<number | null>(null);
   const [q, setQ] = useState('');
   const [sort, setSort] = useState<Sort>('default');
-  const [compare, setCompare] = useState<string[]>([]);
 
   const types = allTypes.filter((pt) => items.some((i) => i.type.id === pt.id));
   const selectedType = types.find((pt) => pt.id === type);
@@ -67,8 +68,22 @@ export default function CatalogBrowser({ items, types: allTypes = [], locale }: 
     setMinFire(null);
     setQ('');
   };
-  const toggleCompare = (id: string) => setCompare((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length >= COMPARE_MAX ? c : [...c, id]));
-  const compared = compare.map((id) => items.find((i) => i.id === id)).filter((i): i is ProductListItemPublic => !!i);
+  const handleToggleCompare = (item: ProductListItemPublic) => {
+    if (isInCompare(item.id)) {
+      removeFromCompare(item.id);
+    } else {
+      addToCompare({
+        id: item.id,
+        slug: item.slug,
+        name: item.name,
+        coverImageUrl: item.coverImageUrl,
+        priceVnd: item.priceRange?.low ?? null,
+        typeName: item.type?.name,
+        thicknessesMm: item.thicknessesMm,
+        summary: item.summary,
+      });
+    }
+  };
 
   if (!items.length) {
     return <p className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-600">{t('emptyCatalog')}</p>;
@@ -184,9 +199,9 @@ export default function CatalogBrowser({ items, types: allTypes = [], locale }: 
               item={item}
               locale={locale}
               priority={i < 3}
-              compared={compare.includes(item.id)}
-              compareDisabled={compare.length >= COMPARE_MAX}
-              onToggleCompare={() => toggleCompare(item.id)}
+              compared={isInCompare(item.id)}
+              compareDisabled={compareItems.length >= totalSlots && !isInCompare(item.id)}
+              onToggleCompare={() => handleToggleCompare(item)}
             />
           ))}
         </div>
@@ -200,62 +215,6 @@ export default function CatalogBrowser({ items, types: allTypes = [], locale }: 
           </button>
         </div>
       )}
-
-      {/* So sánh */}
-      {compared.length > 0 && (
-        <section aria-labelledby={`${ids}-cmp`} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 id={`${ids}-cmp`} className="text-lg font-extrabold text-slate-900">
-              {t('compareTitle', { count: compared.length })}
-            </h2>
-            <button type="button" onClick={() => setCompare([])} className="rounded-lg px-3 py-1.5 text-sm font-semibold text-slate-600 hover:bg-rose-50 hover:text-rose-700 cursor-pointer">
-              {t('compareClear')}
-            </button>
-          </div>
-          {compared.length < 2 ? (
-            <p className="text-sm text-slate-600">{t('compareHint')}</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] border-collapse text-left text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <td className="w-36" />
-                    {compared.map((i) => (
-                      <th key={i.id} scope="col" className="px-3 py-2 align-top font-extrabold text-slate-900">
-                        <Link href={`/san-pham/${i.slug}`} className="line-clamp-2 hover:text-[#4E7202] hover:underline">
-                          {i.name}
-                        </Link>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  <CompareRow label={t('compareType')} cells={compared.map((i) => i.type.name)} />
-                  <CompareRow label={t('thickness')} cells={compared.map((i) => i.thicknessesMm.map((mm) => formatMm(mm, locale)).join(', ') || '—')} />
-                  <CompareRow label={t('fireRating')} cells={compared.map((i) => (i.fireRating && formatFireRating(i.fireRating.min, i.fireRating.max)) || t('notTested'))} />
-                  <CompareRow label={t('comparePrice')} cells={compared.map((i) => <PriceLine key={i.id} item={i} locale={locale} />)} />
-                  <CompareRow label={t('compareStock')} cells={compared.map((i) => (i.thicknessesMm.length ? STOCK_STATUS_LABEL[i.stockStatus][locale] : '—'))} />
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-      )}
     </div>
-  );
-}
-
-function CompareRow({ label, cells }: { label: string; cells: React.ReactNode[] }) {
-  return (
-    <tr>
-      <th scope="row" className="py-2.5 pr-3 align-top text-xs font-bold uppercase tracking-wide text-slate-600">
-        {label}
-      </th>
-      {cells.map((c, i) => (
-        <td key={i} className="px-3 py-2.5 align-top font-semibold text-slate-800">
-          {c}
-        </td>
-      ))}
-    </tr>
   );
 }

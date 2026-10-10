@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Phone, Send, Clock, Sparkles } from 'lucide-react';
-
+import { Phone } from 'lucide-react';
 interface StickyConversionBarProps {
   onOpenQuoteModal?: () => void;
 }
@@ -55,7 +54,7 @@ export default function StickyConversionBar({ onOpenQuoteModal }: StickyConversi
           {/* Nút gọi Hotline */}
           <a
             href="tel:0902441981"
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs sm:text-sm font-bold transition-all"
+            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs sm:text-sm font-bold transition-all h-[42px]"
           >
             <Phone size={14} className="text-[#F26522]" />
             <span className="whitespace-nowrap">Hotline: 0902.441.981</span>
@@ -65,9 +64,9 @@ export default function StickyConversionBar({ onOpenQuoteModal }: StickyConversi
           <button
             type="button"
             onClick={handleAction}
-            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D95314] text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-orange-600/30 hover:shadow-orange-600/50 hover:-translate-y-0.5 transition-all cursor-pointer whitespace-nowrap"
+            className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#F26522] to-[#EA580C] hover:from-[#EA580C] hover:to-[#D95314] text-white text-xs sm:text-sm font-extrabold shadow-lg shadow-orange-600/30 hover:shadow-orange-600/50 hover:-translate-y-0.5 transition-all cursor-pointer whitespace-nowrap h-[42px]"
           >
-            <span>Nhận Báo Giá </span>
+            <span>Nhận Báo Giá</span>
           </button>
         </div>
 
