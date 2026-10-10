@@ -295,7 +295,8 @@ export function toDetailPublic(p: DetailRow, tr: TranslationRow, locale: Locale,
   };
 }
 
-export function toListItemCms(p: ListRow): ProductListItemCms {
+/** `recentViews`: lượt xem PRODUCT_LIST_VIEW_DAYS ngày gần nhất (đọc riêng từ bảng thống kê ngày) */
+export function toListItemCms(p: ListRow, recentViews = 0): ProductListItemCms {
   return {
     id: p.id,
     type: (({ id, specProfile, name }) => ({ id, specProfile, name }))(typeRefOf(p.type, 'vi')),
@@ -308,6 +309,8 @@ export function toListItemCms(p: ListRow): ProductListItemCms {
     locales: Object.fromEntries(p.translations.map((t) => [t.locale, { name: t.name, slug: t.slug, status: t.status }])),
     updatedAt: p.updatedAt.toISOString(),
     deletedAt: p.deletedAt?.toISOString() ?? null,
+    views: p.viewCount,
+    recentViews,
   };
 }
 

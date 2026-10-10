@@ -9,12 +9,14 @@ import { ProductTypesService } from './product-types.service.js';
 import { ProductsService } from './products.service.js';
 import { SpecOptionsService } from './spec-options.service.js';
 import { ProductsTranslateService } from './products-translate.service.js';
+import { ProductStatsController } from './product-stats.controller.js';
+import { ProductStatsService } from './product-stats.service.js';
 
 @Module({
   imports: [TranslationModule],
-  // Controller có tiền tố tĩnh ("products/public", "products/types", "products/spec-options") đứng trước để không bị "products/:id" che
-  controllers: [ProductsPublicController, ProductTypesController, SpecOptionsController, ProductsController],
-  providers: [ProductsPublicService, ProductTypesService, SpecOptionsService, ProductsService, ProductsTranslateService],
+  // Controller có tiền tố tĩnh ("products/public", "products/types", "products/spec-options", "products/stats") đứng trước để không bị "products/:id" che
+  controllers: [ProductsPublicController, ProductTypesController, SpecOptionsController, ProductStatsController, ProductsController],
+  providers: [ProductsPublicService, ProductTypesService, SpecOptionsService, ProductsService, ProductsTranslateService, ProductStatsService],
   exports: [ProductsService, ProductsTranslateService],
 })
 export class ProductsModule {}

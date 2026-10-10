@@ -126,7 +126,6 @@ export default function CatalogCard({
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-[#4E7202]">{item.type.name}</p>
           <h3 id={titleId} className="mt-1 text-lg font-extrabold leading-snug text-slate-900">
             <Link href={href} className="hover:text-[#4E7202] focus-visible:rounded focus-visible:outline-2 focus-visible:outline-[#5F8A03]">
               {item.name}

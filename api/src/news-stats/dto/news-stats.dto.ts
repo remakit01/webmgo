@@ -1,29 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { LOCALES, type Locale } from '@remak/shared/locale';
 import { NEWS_STATS_DAYS } from '@remak/shared/contracts/news-stats';
+import { TrackViewDto } from '../../common/track-view.dto.js';
+
+export { TrackViewDto };
 
 // Trình duyệt gửi dạng form-urlencoded (không cần preflight CORS, dùng được với sendBeacon) -> mọi giá trị là chuỗi
 const toBool = ({ value }: { value: unknown }) => value === true || value === 'true' || value === '1';
-
-export class TrackViewDto {
-  @ApiProperty({ enum: LOCALES })
-  @IsIn(LOCALES)
-  locale!: Locale;
-
-  @ApiPropertyOptional({ description: 'document.referrer' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(2000)
-  referrer?: string;
-
-  @ApiPropertyOptional({ description: 'utm_source của URL trang' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(100)
-  utm?: string;
-}
 
 export class TrackReadDto extends TrackViewDto {
   @ApiProperty({ description: 'Số giây đọc thật (tab đang mở) — server kẹp ≤ 30 phút' })

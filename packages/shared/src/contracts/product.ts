@@ -639,6 +639,10 @@ export interface ProductListItemCms {
   priceRange: { low: number; high: number; count: number } | null;
   stockStatus: StockStatus;
   locales: Partial<Record<Locale, { name: string; slug: string; status: string }>>;
+  /** Tổng lượt xem trang sản phẩm (mọi ngôn ngữ) */
+  views: number;
+  /** Lượt xem PRODUCT_LIST_VIEW_DAYS ngày gần nhất */
+  recentViews: number;
   updatedAt: string;
   deletedAt?: string | null;
 }

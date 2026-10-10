@@ -69,7 +69,8 @@ const setup = (existing: object | null = null) => {
   const specOptions = {
     codesByGroup: vi.fn(async () => new Map<string, Set<string>>([['CRYSTAL_PHASE', new Set(['PHASE_517'])], ['VOC_LEVEL', new Set(['LOW'])]])),
   };
-  const service = new ProductsService(prisma as never, cache as never, {} as never, slugRedirects as never, specOptions as never);
+  const stats = { recentViews: vi.fn(async () => new Map<string, number>()) };
+  const service = new ProductsService(prisma as never, cache as never, {} as never, slugRedirects as never, specOptions as never, stats as never);
   // Đọc lại sau khi ghi: không kiểm ở đây
   vi.spyOn(service, 'get').mockResolvedValue({} as never);
   return { service, prisma, tx, cache, slugRedirects };

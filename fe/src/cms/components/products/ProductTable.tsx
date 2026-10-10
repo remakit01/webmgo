@@ -3,6 +3,8 @@
 import React from 'react';
 import { ArrowDown, ArrowUp, Boxes, EyeOff, ImageOff, Pencil, Plus, RotateCcw, Star, Trash2 } from 'lucide-react';
 import { STOCK_STATUS_LABEL, type ProductListItemCms } from '@remak/shared/contracts/product';
+import { PRODUCT_LIST_VIEW_DAYS } from '@remak/shared/contracts/product-stats';
+import { formatNumber } from '@remak/shared/date';
 import IconAction from '@/cms/components/shared/IconAction';
 import Skeleton from '@/cms/components/ui/Skeleton';
 import { productPath } from '@/lib/product-paths';
@@ -98,6 +100,9 @@ export default function ProductTable({
             <th scope="col" className="w-24 px-4 py-3 text-right">Độ dày</th>
             <th scope="col" className="px-4 py-3">Giá</th>
             <th scope="col" className="w-36 px-4 py-3">Tình trạng</th>
+            <th scope="col" className="w-28 px-4 py-3 text-right" title={`Lượt xem trang sản phẩm ${PRODUCT_LIST_VIEW_DAYS} ngày gần nhất / tổng từ trước tới nay`}>
+              Lượt xem
+            </th>
             <th scope="col" className="w-28 px-4 py-3 text-right">Thao tác</th>
           </tr>
         </thead>
@@ -118,6 +123,7 @@ export default function ProductTable({
                   <td className="px-4 py-4"><Skeleton className="ml-auto h-5 w-8 rounded" /></td>
                   <td className="px-4 py-4"><Skeleton className="h-5 w-28 rounded" /></td>
                   <td className="px-4 py-4"><Skeleton className="h-6 w-20 rounded" /></td>
+                  <td className="px-4 py-4"><Skeleton className="ml-auto h-5 w-12 rounded" /></td>
                   <td className="px-4 py-4"><Skeleton className="ml-auto h-8 w-20 rounded" /></td>
                 </tr>
               ))
@@ -213,6 +219,10 @@ export default function ProductTable({
                           <EyeOff size={13} aria-hidden="true" /> Chưa có độ dày
                         </span>
                       )}
+                    </td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      <div className="text-base font-bold text-slate-900">{formatNumber(p.recentViews)}</div>
+                      <div className="text-xs text-slate-600">{PRODUCT_LIST_VIEW_DAYS} ngày · tổng {formatNumber(p.views)}</div>
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center justify-end gap-1">

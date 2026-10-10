@@ -11,6 +11,7 @@ import {
   type ProductListItemCms,
   type ProductSpecProfile,
 } from '@remak/shared/contracts/product';
+import { PRODUCT_LIST_VIEW_DAYS } from '@remak/shared/contracts/product-stats';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ContentCacheService } from '../content-cache/content-cache.service.js';
 import { MediaService } from '../storage/media.service.js';
@@ -22,6 +23,7 @@ import type { ProductInputDto } from './dto/product-input.dto.js';
 import { productDetailInclude, productListInclude, toListItemCms, toProductCms } from './products.mapper.js';
 import { PRODUCTS_COVER_PREFIX, PRODUCTS_INVALIDATE, PRODUCT_SLUG_ENTITY } from './products.constants.js';
 import { SpecOptionsService } from './spec-options.service.js';
+import { ProductStatsService } from './product-stats.service.js';
 
 type Tx = Prisma.TransactionClient;
 const LIVE = { deletedAt: null } as const;
@@ -40,6 +42,7 @@ export class ProductsService {
     private readonly media: MediaService,
     private readonly slugRedirects: SlugRedirectService,
     private readonly specOptions: SpecOptionsService,
+    private readonly stats: ProductStatsService,
   ) {}
 
   // ── Đọc ─────────────────────────────────────────────────────────────────
@@ -54,7 +57,11 @@ export class ProductsService {
       orderBy,
       include: productListInclude,
     });
-    return rows.map(toListItemCms);
+    const recent = await this.stats.recentViews(
+      rows.map((r) => r.id),
+      PRODUCT_LIST_VIEW_DAYS,
+    );
+    return rows.map((r) => toListItemCms(r, recent.get(r.id) ?? 0));
   }
 
   async get(id: string): Promise<ProductCms> {

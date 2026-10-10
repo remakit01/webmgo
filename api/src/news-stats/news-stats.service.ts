@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Locale } from '@remak/shared/locale';
@@ -10,29 +9,22 @@ import type {
   NewsViewResult,
   PopularNewsItem,
 } from '@remak/shared/contracts/news-stats';
-import { classifyTraffic, hostOf, isBotUserAgent, TRAFFIC_SOURCES, type TrafficSource } from '@remak/shared/traffic-source';
-import { addDays, toDayKey } from '@remak/shared/date';
+import { classifyTraffic, hostOf, isBotUserAgent, type TrafficSource } from '@remak/shared/traffic-source';
+import { toDayKey } from '@remak/shared/date';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { NEWS_CACHE_PREFIX } from '../news/news.constants.js';
+import { fillDays as fillStatDays, isFirstVisit, isoDay, orderSources, statsDayStart as dayStart, type RequestMeta } from '../common/view-tracking.js';
 import type { TrackReadDto, TrackViewDto } from './dto/news-stats.dto.js';
 
-/** Cùng người đọc (IP + trình duyệt) xem lại một bài trong khoảng này chỉ tính 1 lượt */
-const DEDUPE_SECONDS = 30 * 60;
 /** Kẹp thời gian đọc một lượt (tab bỏ quên không làm lệch trung bình) */
 const MAX_READ_SECONDS = 30 * 60;
 const POPULAR_TTL = 5 * 60;
 
-export interface RequestMeta {
-  ip: string;
-  userAgent: string | undefined;
-}
+export type { RequestMeta };
 
 /** "YYYY-MM-DD" theo giờ Việt Nam (giữ tên cũ cho test / nơi gọi) */
 export const vnDay = (date: Date) => toDayKey(date);
-/** Ngày (Date 00:00 UTC — kiểu @db.Date) cách hôm nay `back` ngày theo giờ Việt Nam */
-const dayStart = (now: Date, back: number) => new Date(`${addDays(toDayKey(now), -back)}T00:00:00.000Z`);
-const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 const totals = (views: number, reads: number, readSeconds: number): NewsStatsTotals => ({
   views,
@@ -91,11 +83,9 @@ export class NewsStatsService {
     if (!found) throw new NotFoundException('Không tìm thấy bài viết');
   }
 
-  /** true: lần đầu trong DEDUPE_SECONDS; Redis lỗi (null) -> coi như lần đầu (vẫn đếm, không làm hỏng request) */
-  private async firstTime(kind: 'seen' | 'read', postId: string, locale: Locale, meta: RequestMeta, now: Date) {
-    // Băm cả ngày vào khoá: không giữ IP thô trong Redis
-    const hash = createHash('sha1').update(`${meta.ip}|${meta.userAgent ?? ''}|${postId}|${locale}|${vnDay(now)}`).digest('hex');
-    return (await this.redis.setIfAbsent(`views:${kind}:${hash}`, DEDUPE_SECONDS)) !== false;
+  /** Chống đếm trùng 30 phút (Redis lỗi -> vẫn đếm) */
+  private firstTime(kind: 'seen' | 'read', postId: string, locale: Locale, meta: RequestMeta, now: Date) {
+    return isFirstVisit(this.redis, kind, postId, locale, meta, now);
   }
 
   /**
@@ -248,15 +238,5 @@ export class NewsStatsService {
 
 /** Đủ `days` ngày liên tục (ngày không có lượt = 0) để vẽ biểu đồ */
 function fillDays(rows: NewsStatsDay[], now: Date, days: number): NewsStatsDay[] {
-  const byDay = new Map(rows.map((r) => [r.day, r]));
-  return Array.from({ length: days }, (_, i) => {
-    const day = isoDay(dayStart(now, days - 1 - i));
-    return byDay.get(day) ?? { day, views: 0, reads: 0 };
-  });
-}
-
-/** Mọi nguồn (kể cả 0), sắp nhiều -> ít */
-function orderSources(rows: { source: TrafficSource; views: number }[]) {
-  const byKey = new Map(rows.map((r) => [r.source, r.views]));
-  return TRAFFIC_SOURCES.map((source) => ({ source, views: byKey.get(source) ?? 0 })).sort((a, b) => b.views - a.views);
+  return fillStatDays(rows, now, days, (day) => ({ day, views: 0, reads: 0 }));
 }
