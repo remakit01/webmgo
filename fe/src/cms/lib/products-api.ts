@@ -14,6 +14,7 @@ import type {
   SpecOptionGroup,
   SpecOptionInput,
 } from '@remak/shared/contracts/product';
+import type { ProductStatsOverview } from '@remak/shared/contracts/product-stats';
 import { apiFetch, apiStreamNdjson, ifMatch } from './api-client';
 
 const json = (body: unknown) => JSON.stringify(body);
@@ -22,6 +23,8 @@ export const productsApi = {
   list: (opts?: { trash?: boolean }) =>
     apiFetch<ProductListItemCms[]>(`/products${opts?.trash ? '?trash=true' : ''}`),
   get: (id: string) => apiFetch<ProductCms>(`/products/${id}`),
+  /** Báo cáo lượt xem trang sản phẩm cho Tổng Quan */
+  overview: (days: number) => apiFetch<ProductStatsOverview>(`/products/stats/overview?days=${days}`),
   create: (body: ProductInput) => apiFetch<ProductCms>('/products', { method: 'POST', body: json(body) }),
   update: (id: string, body: ProductInput, version: string) =>
     apiFetch<ProductCms>(`/products/${id}`, { method: 'PUT', body: json(body), headers: ifMatch(version) }),

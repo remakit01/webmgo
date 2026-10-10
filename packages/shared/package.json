@@ -50,6 +50,10 @@
       "types": "./dist/contracts/news.d.ts",
       "default": "./dist/contracts/news.js"
     },
+    "./contracts/product-stats": {
+      "types": "./dist/contracts/product-stats.d.ts",
+      "default": "./dist/contracts/product-stats.js"
+    },
     "./rich-translate": {
       "types": "./dist/rich-translate.d.ts",
       "default": "./dist/rich-translate.js"

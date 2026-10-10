@@ -105,6 +105,7 @@ function product(over: Record<string, unknown> = {}) {
     gallery: [],
     isFeatured: true,
     sortOrder: 0,
+    viewCount: 120,
     createdAt: NOW,
     updatedAt: new Date('2026-10-02T00:00:00Z'),
     deletedAt: null,
@@ -214,8 +215,9 @@ describe('products.mapper — chi tiết public', () => {
 
 describe('products.mapper — CMS', () => {
   it('trạng thái từng ngôn ngữ + số quy cách', () => {
-    const c = toListItemCms(product());
+    const c = toListItemCms(product(), 15);
     expect(c.variantCount).toBe(2);
+    expect({ views: c.views, recentViews: c.recentViews }).toEqual({ views: 120, recentViews: 15 });
     expect(c.type).toEqual({ id: 'pt_standard', name: 'Loại pt_standard', specProfile: 'NONE' });
     expect(c.locales).toEqual({ vi: { name: 'Tấm chống cháy', slug: 'tam-chong-chay', status: 'PUBLISHED' }, en: { name: 'Fire board', slug: 'fire-board', status: 'DRAFT' } });
   });

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { AdminPage, AdminPageBody } from '@/cms/components/layout/AdminPage';
 import NewsTrafficOverview from '@/cms/components/dashboard/NewsTrafficOverview';
+import ProductTrafficOverview from '@/cms/components/dashboard/ProductTrafficOverview';
 import { 
   INITIAL_PRODUCTS, 
   INITIAL_APPLICATIONS, 
@@ -75,6 +76,9 @@ export default function AdminDashboardPage() {
       <AdminPageBody>
         {/* Tin tức: số liệu thật (lượt xem, đọc hết, nguồn truy cập) */}
         <NewsTrafficOverview />
+
+        {/* Sản phẩm: lượt xem trang sản phẩm, nguồn truy cập, sản phẩm xem nhiều nhất */}
+        <ProductTrafficOverview />
         
         {/* KPI Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

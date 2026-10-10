@@ -13,6 +13,7 @@ import ProductDetailTabs from '@/components/product-catalog/ProductDetailTabs';
 import ProductHeroGallery from '@/components/product-catalog/ProductHeroGallery';
 import ProductCompareAction from '@/components/product-catalog/ProductCompareAction';
 import ProductRelatedSwiper from '@/components/product-catalog/ProductRelatedSwiper';
+import ProductViewTracker from '@/components/product-catalog/ProductViewTracker';
 import SpecSheet from '@/components/product-catalog/SpecSheet';
 import VariantPicker from '@/components/product-catalog/VariantPicker';
 import { FALLBACK_MGO_VARIANTS } from '@/components/product-catalog/fallback-variants';
@@ -169,6 +170,7 @@ export default async function ProductDetailPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800">
       <SetLocaleAlternates paths={{ vi: paths.vi ?? productsIndexPath('vi'), en: paths.en ?? productsIndexPath('en') }} />
+      <ProductViewTracker productId={p.id} locale={locale} />
 
       <div className="border-b border-slate-200 bg-white">
         <nav aria-label="Breadcrumb" className="mx-auto max-w-[1440px] px-4 py-3 text-xs font-semibold text-slate-600 lg:px-8">
