@@ -13,7 +13,6 @@ import {
   Building2,
   Newspaper,
   Mail,
-  Flame,
   Wind,
   Layers,
   DoorClosed,
@@ -32,12 +31,6 @@ const HOTLINE = '0902.441.981';
 
 type MenuItem<K extends string> = { key: K; href: string; icon: LucideIcon };
 
-const PRODUCT_ITEMS: MenuItem<Exclude<keyof HeaderMessages['productsMenu'], 'heading' | 'all'>>[] = [
-  { key: 'duct', href: '/san-pham/tam-mgo-boc-ong-gio-pccc', icon: Wind },
-  { key: 'standard', href: '/san-pham/tam-mgo-tieu-chuan-chong-chay', icon: Flame },
-  { key: 'floor', href: '/san-pham/tam-mgo-lot-san-chiu-luc', icon: Layers },
-  { key: 'acoustic', href: '/san-pham/tam-mgo-trang-tri-tieu-am', icon: Music },
-];
 
 const APPLICATION_ITEMS: MenuItem<Exclude<keyof HeaderMessages['applicationsMenu'], 'heading'>>[] = [
   { key: 'duct', href: '/giai-phap-ung-dung/boc-ong-gio-chong-chay-pccc', icon: Wind },
@@ -99,12 +92,6 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<string | null>(null);
 
-  const products = PRODUCT_ITEMS.map((i) => ({
-    ...i,
-    name: t(`productsMenu.${i.key}.name`),
-    desc: t(`productsMenu.${i.key}.desc`),
-    tag: t(`productsMenu.${i.key}.tag`),
-  }));
   const applications = APPLICATION_ITEMS.map((i) => ({
     ...i,
     name: t(`applicationsMenu.${i.key}.name`),
@@ -234,25 +221,21 @@ export default function Header() {
               )}
             </div>
 
-            {/* 2. Sản phẩm (Dropdown Mega-Menu Đã Kiểm Chứng) */}
-            <div className="group relative h-full flex items-center flex-shrink-0">
+            {/* 2. Sản phẩm (Liên kết trực tiếp không menu con) */}
+            <div className="relative h-full flex items-center flex-shrink-0">
               <Link
                 href="/san-pham"
-                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center gap-1.5 transition-colors whitespace-nowrap flex-shrink-0 ${
+                className={`px-3.5 py-2 text-[14.5px] font-semibold rounded-lg flex items-center transition-colors whitespace-nowrap flex-shrink-0 ${
                   isProductsActive
                     ? 'text-[#5F8A03] font-bold bg-[#F4F9E8]'
-                    : 'text-slate-800 group-hover:text-[#5F8A03] group-hover:bg-[#F4F9E8]'
+                    : 'text-slate-800 hover:text-[#5F8A03] hover:bg-[#F4F9E8]'
                 }`}
               >
                 <span>{t('nav.products')}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 flex-shrink-0 group-hover:rotate-180 ${
-                  isProductsActive ? 'text-[#5F8A03]' : 'text-slate-400'
-                }`} />
               </Link>
               {isProductsActive && (
                 <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-[#7CB305] rounded-t-full shadow-sm shadow-[#7CB305]/40" />
               )}
-              <DropdownList items={products} />
             </div>
 
             {/* 3. Ứng dụng (Dropdown) */}
@@ -422,30 +405,18 @@ export default function Header() {
                   {t('nav.home')}
                 </Link>
 
-                {/* Submenu Sản phẩm */}
-                <div>
-                  <button
-                    onClick={() => toggleSubmenu('products')}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
-                      isProductsActive
-                        ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]'
-                        : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
-                    }`}
-                  >
-                    <span>{t('nav.products')}</span>
-                    <ChevronDown size={16} className={`transition-transform ${activeMobileSubmenu === 'products' ? 'rotate-180 text-[#5F8A03]' : ''}`} />
-                  </button>
-                  {activeMobileSubmenu === 'products' && (
-                    <div className="pl-4 py-1 flex flex-col gap-1 text-sm text-slate-600">
-                      <Link href="/san-pham" onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-[#F4F9E8] font-bold text-[#5F8A03]">{t('productsMenu.all')}</Link>
-                      {products.map(({ key, href, name, tag }) => (
-                        <Link key={key} href={href} onClick={() => setMobileOpen(false)} className="py-1.5 px-3 rounded hover:bg-slate-100">
-                          • {name} ({tag})
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                {/* Sản phẩm (Liên kết trực tiếp không menu con) */}
+                <Link
+                  href="/san-pham"
+                  onClick={() => setMobileOpen(false)}
+                  className={`px-3 py-2.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB305] ${
+                    isProductsActive
+                      ? 'bg-[#F4F9E8] text-[#5F8A03] font-bold border-l-4 border-[#7CB305]'
+                      : 'font-semibold text-slate-800 hover:bg-[#F4F9E8]'
+                  }`}
+                >
+                  {t('nav.products')}
+                </Link>
 
                 {/* Submenu Ứng dụng */}
                 <div>
