@@ -100,3 +100,9 @@ api/src/generated/
 # Claude Code — cấu hình cá nhân (settings.json dùng chung thì commit)
 .claude/settings.local.json
 CLAUDE.local.md
+
+# Graphify Knowledge Graph
+graphify-out/
+
+# AI Agent Workspaces & Rules
+.agents/

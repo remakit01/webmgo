@@ -37,6 +37,7 @@ export const routing = defineRouting({
     '/news/[slug]': { vi: '/tin-tuc/[slug]', en: '/news/[slug]' },
     // Chuyên mục: slug chuyên mục cũng theo ngôn ngữ (vd /tin-tuc/chuyen-muc/ky-thuat ⇄ /en/news/category/engineering)
     '/news/category/[slug]': { vi: '/tin-tuc/chuyen-muc/[slug]', en: '/news/category/[slug]' },
+    '/compare': { vi: '/so-sanh', en: '/compare' },
     '/faq': '/faq',
   },
 });
